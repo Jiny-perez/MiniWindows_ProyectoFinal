@@ -24,7 +24,6 @@ public class VentanaPrincipal extends JFrame {
     private Usuario usuarioActual;
     private MiniWindowsClass sistema;
     private JPanel panelEscritorio;
-    private JMenuBar barraMenu;
 
     public VentanaPrincipal(Usuario usuario, MiniWindowsClass sistema) {
         this.usuarioActual = usuario;
@@ -44,91 +43,253 @@ public class VentanaPrincipal extends JFrame {
             }
         });
 
-        crearBarraMenu();
-        panelEscritorio = new JPanel();
+        panelEscritorio = new JPanel() {
+            private Image imagenFondo;
+            
+            {
+                try {
+                    imagenFondo = new ImageIcon(getClass().getResource("/Background/BgPrincipal.png")).getImage();
+                } catch (Exception e) {
+                    imagenFondo = null;
+                }
+            }
+            
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (imagenFondo != null) {
+                    g.drawImage(imagenFondo, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    g.setColor(new Color(0, 120, 215));
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
         panelEscritorio.setLayout(new BorderLayout());
-        panelEscritorio.setBackground(new Color(0, 120, 215));
-        JPanel panelBienvenida = new JPanel();
-        panelBienvenida.setLayout(new BoxLayout(panelBienvenida, BoxLayout.Y_AXIS));
-        panelBienvenida.setOpaque(false);
-        JLabel lblBienvenida = new JLabel("Bienvenido a Mini-Windows");
-        lblBienvenida.setFont(new Font("Segoe UI Light", Font.BOLD, 42));
-        lblBienvenida.setForeground(Color.WHITE);
-        lblBienvenida.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel lblUsuario = new JLabel(usuarioActual.getNombreCompleto());
-        lblUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 24));
-        lblUsuario.setForeground(Color.WHITE);
-        lblUsuario.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel lblRol = new JLabel(usuarioActual.esAdmin() ? "(Administrador)" : "(Usuario)");
-        lblRol.setFont(new Font("Segoe UI", Font.ITALIC, 18));
-        lblRol.setForeground(new Color(220, 220, 220));
-        lblRol.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelBienvenida.add(Box.createVerticalGlue());
-        panelBienvenida.add(lblBienvenida);
-        panelBienvenida.add(Box.createRigidArea(new Dimension(0, 20)));
-        panelBienvenida.add(lblUsuario);
-        panelBienvenida.add(Box.createRigidArea(new Dimension(0, 10)));
-        panelBienvenida.add(lblRol);
-        panelBienvenida.add(Box.createVerticalGlue());
-        panelEscritorio.add(panelBienvenida, BorderLayout.CENTER);
+        
+        JPanel barraTareas = crearBarraTareas();
+        panelEscritorio.add(barraTareas, BorderLayout.SOUTH);
+        
         add(panelEscritorio);
     }
-
-    private void crearBarraMenu() {
-        barraMenu = new JMenuBar();
-        barraMenu.setBackground(Color.WHITE);
-        JMenu menuArchivo = new JMenu("Archivo");
-        menuArchivo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        JMenuItem itemNavegador = new JMenuItem("Navegador de Archivos");
-        itemNavegador.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemNavegador.addActionListener(e -> abrirNavegador());
+    
+    private JPanel crearBarraTareas() {
+        JPanel barra = new JPanel();
+        barra.setLayout(new BorderLayout());
+        barra.setBackground(Color.WHITE);
+        barra.setPreferredSize(new Dimension(0, 60));
+        barra.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(200, 200, 200)));
+        
+        JPanel panelIzquierda = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 8));
+        panelIzquierda.setOpaque(false);
+        
+        JButton btnInicio = crearBotonInicio();
+        panelIzquierda.add(btnInicio);
+        
+        if (usuarioActual.esAdmin()) {
+            panelIzquierda.add(crearSeparador());
+            JButton btnGestorUsuarios = crearBotonIcono("/Icons/icon_gestor_de_usuarios.png", "Gestor de Usuarios", false);
+            btnGestorUsuarios.addActionListener(e -> gestionarUsuarios());
+            panelIzquierda.add(btnGestorUsuarios);
+        }
+        
+        JPanel panelCentro = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 8));
+        panelCentro.setOpaque(false);
+        
+        JButton btnNavegador = crearBotonIcono("/Icons/icon_navegador_de_archivos.png", "Navegador de Archivos", true);
+        btnNavegador.addActionListener(e -> abrirNavegador());
+        
+        JButton btnEditor = crearBotonIcono("/Icons/icon_editor_de_texto.png", "Editor de Texto", true);
+        btnEditor.addActionListener(e -> abrirEditor());
+        
+        JButton btnVisor = crearBotonIcono("/Icons/icon_visor_de_imagenes.png", "Visor de Imágenes", true);
+        btnVisor.addActionListener(e -> abrirVisorImagenes());
+        
+        JButton btnCMD = crearBotonIcono("/Icons/icon_cmd.png", "CMD", true);
+        btnCMD.addActionListener(e -> abrirCMD());
+        
+        JButton btnReproductor = crearBotonIcono("/Icons/icon_reproductor_de_musica.png", "Reproductor de Música", true);
+        btnReproductor.addActionListener(e -> abrirReproductor());
+        
+        JButton btnInsta = crearBotonIcono("/Icons/icon_instagram.png", "Instagram (Próximamente)", false);
+        
+        panelCentro.add(btnNavegador);
+        panelCentro.add(btnEditor);
+        panelCentro.add(btnVisor);
+        panelCentro.add(btnCMD);
+        panelCentro.add(btnReproductor);
+        panelCentro.add(btnInsta);
+        
+        JPanel panelDerecha = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        panelDerecha.setOpaque(false);
+        
+        panelDerecha.add(crearIconoSistema("/Icons/icon_actualizar.png", "Actualizar"));
+        panelDerecha.add(crearIconoSistema("/Icons/icon_espaniol.png", "Idioma: Español"));
+        panelDerecha.add(crearIconoSistema("/Icons/icon_wifi.png", "WiFi"));
+        panelDerecha.add(crearIconoSistema("/Icons/icon_volumen.png", "Volumen"));
+        panelDerecha.add(crearIconoSistema("/Icons/icon_bateria.png", "Batería"));
+        
+        JLabel lblFechaHora = crearReloj();
+        panelDerecha.add(lblFechaHora);
+        
+        barra.add(panelIzquierda, BorderLayout.WEST);
+        barra.add(panelCentro, BorderLayout.CENTER);
+        barra.add(panelDerecha, BorderLayout.EAST);
+        
+        return barra;
+    }
+    
+    private JButton crearBotonInicio() {
+        JButton boton = new JButton();
+        try {
+            ImageIcon icono = new ImageIcon(getClass().getResource("/Background/BgLogIn.jpg"));
+            Image img = icono.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
+            boton.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            boton.setText("≡");
+            boton.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        }
+        
+        boton.setPreferredSize(new Dimension(44, 44));
+        boton.setBackground(new Color(0, 120, 215));
+        boton.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        boton.setFocusPainted(false);
+        boton.setToolTipText("Inicio");
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        boton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                boton.setBackground(new Color(0, 100, 180));
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                boton.setBackground(new Color(0, 120, 215));
+            }
+        });
+        
+        boton.addActionListener(e -> mostrarMenuInicio(boton));
+        
+        return boton;
+    }
+    
+    private void mostrarMenuInicio(JButton boton) {
+        JPopupMenu menu = new JPopupMenu();
+        menu.setBackground(Color.WHITE);
+        menu.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        
         JMenuItem itemCerrarSesion = new JMenuItem("Cerrar Sesión");
         itemCerrarSesion.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         itemCerrarSesion.addActionListener(e -> cerrarSesion());
-        JMenuItem itemSalir = new JMenuItem("Salir");
+        
+        JMenuItem itemSalir = new JMenuItem("Apagar");
         itemSalir.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         itemSalir.addActionListener(e -> salir());
-        menuArchivo.add(itemNavegador);
-        menuArchivo.addSeparator();
-        menuArchivo.add(itemCerrarSesion);
-        menuArchivo.add(itemSalir);
-        JMenu menuAplicaciones = new JMenu("Aplicaciones");
-        menuAplicaciones.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        JMenuItem itemCMD = new JMenuItem("Consola CMD");
-        itemCMD.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemCMD.addActionListener(e -> abrirCMD());
-        JMenuItem itemEditor = new JMenuItem("Editor de Texto");
-        itemEditor.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemEditor.addActionListener(e -> abrirEditor());
-        JMenuItem itemVisorImagenes = new JMenuItem("Visor de Imágenes");
-        itemVisorImagenes.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemVisorImagenes.addActionListener(e -> abrirVisorImagenes());
-        JMenuItem itemReproductor = new JMenuItem("Reproductor de Música");
-        itemReproductor.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemReproductor.addActionListener(e -> abrirReproductor());
-        menuAplicaciones.add(itemCMD);
-        menuAplicaciones.add(itemEditor);
-        menuAplicaciones.add(itemVisorImagenes);
-        menuAplicaciones.add(itemReproductor);
-        if (usuarioActual.esAdmin()) {
-            JMenu menuSistema = new JMenu("Sistema");
-            menuSistema.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-            JMenuItem itemGestionUsuarios = new JMenuItem("Gestión de Usuarios");
-            itemGestionUsuarios.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-            itemGestionUsuarios.addActionListener(e -> gestionarUsuarios());
-            menuSistema.add(itemGestionUsuarios);
-            barraMenu.add(menuSistema);
+        
+        menu.add(itemCerrarSesion);
+        menu.addSeparator();
+        menu.add(itemSalir);
+        
+        menu.show(boton, 0, -menu.getPreferredSize().height);
+    }
+    
+    private JLabel crearReloj() {
+        JLabel lblReloj = new JLabel();
+        lblReloj.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblReloj.setForeground(new Color(50, 50, 50));
+        
+        Timer timer = new Timer(1000, e -> {
+            java.text.SimpleDateFormat formatoHora = new java.text.SimpleDateFormat("HH:mm:ss");
+            java.text.SimpleDateFormat formatoFecha = new java.text.SimpleDateFormat("dd/MM/yyyy");
+            java.util.Date ahora = new java.util.Date();
+            lblReloj.setText("<html><center>" + formatoHora.format(ahora) + "<br>" + formatoFecha.format(ahora) + "</center></html>");
+        });
+        timer.start();
+        timer.setInitialDelay(0);
+        
+        return lblReloj;
+    }
+    
+    private JButton crearIconoSistema(String rutaIcono, String tooltip) {
+        JButton boton = new JButton();
+        try {
+            ImageIcon icono = new ImageIcon(getClass().getResource(rutaIcono));
+            Image img = icono.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+            boton.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            boton.setText("•");
         }
-        JMenu menuAyuda = new JMenu("Ayuda");
-        menuAyuda.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        JMenuItem itemAcerca = new JMenuItem("Acerca de");
-        itemAcerca.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        itemAcerca.addActionListener(e -> mostrarAcercaDe());
-        menuAyuda.add(itemAcerca);
-        barraMenu.add(menuArchivo);
-        barraMenu.add(menuAplicaciones);
-        barraMenu.add(menuAyuda);
-        setJMenuBar(barraMenu);
+        
+        boton.setPreferredSize(new Dimension(24, 24));
+        boton.setBackground(Color.WHITE);
+        boton.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setToolTipText(tooltip);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        boton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                boton.setContentAreaFilled(true);
+                boton.setBackground(new Color(230, 230, 230));
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                boton.setContentAreaFilled(false);
+            }
+        });
+        
+        return boton;
+    }
+    
+    private JPanel crearSeparador() {
+        JPanel separador = new JPanel();
+        separador.setPreferredSize(new Dimension(1, 30));
+        separador.setBackground(new Color(220, 220, 220));
+        return separador;
+    }
+    
+    private JButton crearBotonIcono(String rutaIcono, String tooltip, boolean conIndicador) {
+        JButton boton = new JButton();
+        
+        try {
+            ImageIcon icono = new ImageIcon(getClass().getResource(rutaIcono));
+            Image img = icono.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+            boton.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            boton.setText("?");
+        }
+        
+        boton.setPreferredSize(new Dimension(50, 50));
+        boton.setBackground(Color.WHITE);
+        boton.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        boton.setFocusPainted(false);
+        boton.setContentAreaFilled(false);
+        boton.setToolTipText(tooltip);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        boton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                boton.setContentAreaFilled(true);
+                boton.setBackground(new Color(240, 240, 240));
+                boton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(3, 3, 3, 3)
+                ));
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                boton.setContentAreaFilled(false);
+                boton.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+            }
+        });
+        
+        return boton;
     }
 
     private void abrirEditor() {
@@ -229,17 +390,6 @@ public class VentanaPrincipal extends JFrame {
         JOptionPane.showMessageDialog(this,
                 "Gestión de Usuarios\n(Por implementar)",
                 "Próximamente",
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void mostrarAcercaDe() {
-        JOptionPane.showMessageDialog(this,
-                "Mini-Windows v1.0\n\n"
-                + "Sistema Operativo Virtual\n"
-                + "Proyecto II - Programación II\n\n"
-                + "Desarrollado por: Jiny Pérez y Najmah Zablah\n"
-                + "UNITEC 2025",
-                "Acerca de Mini-Windows",
                 JOptionPane.INFORMATION_MESSAGE);
     }
 
