@@ -9,6 +9,8 @@ import Instagram.Logica.GestorINSTA.EstadisticasUsuario;
 import Instagram.Logica.GestorUsuariosLocal;
 import Instagram.Modelo.Publicacion;
 import java.awt.*;
+import java.awt.geom.Ellipse2D;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.util.ArrayList;
@@ -26,11 +28,12 @@ public class PanelPerfil extends JPanel {
     
     private JPanel panelEstadisticas;
     private JPanel panelPublicaciones;
+    private JPanel panelHeader;
+    private JPanel panelPrincipal;
     private JButton btnSeguir;
     private JScrollPane scrollPane;
     
-    // Theme Rosa de Instagram
-    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245); // Rosa pastel
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
     private static final Color CARD_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
@@ -50,11 +53,12 @@ public class PanelPerfil extends JPanel {
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
         
-        JPanel panelPrincipal = new JPanel();
+        panelPrincipal = new JPanel();
         panelPrincipal.setLayout(new BoxLayout(panelPrincipal, BoxLayout.Y_AXIS));
         panelPrincipal.setBackground(BACKGROUND_COLOR);
         
-        panelPrincipal.add(crearHeader());
+        panelHeader = crearHeader();
+        panelPrincipal.add(panelHeader);
         panelPrincipal.add(Box.createVerticalStrut(20));
         
         JSeparator separador = new JSeparator();
@@ -89,28 +93,33 @@ public class PanelPerfil extends JPanel {
         panelSuperior.setBackground(CARD_COLOR);
         panelSuperior.setMaximumSize(new Dimension(800, 160));
         
+
         JLabel fotoPerfil = new JLabel();
         try {
             Instagram.Modelo.Usuario usuario = gestorUsuarios.obtenerUsuario(usernameVisualizando);
-            String iconoPath = "/Instagram/icons/icon_perfil.png";
             
-            if (usuario != null) {
+            if (usuario != null && usuario.tieneFotoPersonalizada()) {
+                ImageIcon avatarIcon = new ImageIcon(usuario.getRutaFotoPerfil());
+                Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                fotoPerfil.setIcon(crearImagenCircular(img, 150));
+            } else if (usuario != null) {
+                String iconoPath = "/Instagram/icons/icon_perfil.png"; // Default
+                
                 if (usuario.getGenero() == 'F') {
                     iconoPath = "/Instagram/icons/icon_usuario_mujer.png";
                 } else if (usuario.getGenero() == 'M') {
                     iconoPath = "/Instagram/icons/icon_usuario_hombre.png";
                 }
+                
+                ImageIcon avatarIcon = new ImageIcon(getClass().getResource(iconoPath));
+                Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                fotoPerfil.setIcon(crearImagenCircular(img, 150));
             }
-            
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource(iconoPath));
-            Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-            fotoPerfil.setIcon(new ImageIcon(img));
         } catch (Exception e) {
-            // Fallback: usar icono genérico
             try {
                 ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
                 Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-                fotoPerfil.setIcon(new ImageIcon(img));
+                fotoPerfil.setIcon(crearImagenCircular(img, 150));
             } catch (Exception e2) {
                 fotoPerfil.setText("👤");
                 fotoPerfil.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 100));
@@ -131,11 +140,39 @@ public class PanelPerfil extends JPanel {
         panelInfo.add(lblUsername);
         panelInfo.add(Box.createVerticalStrut(10));
         
-        JLabel lblNombre = new JLabel("Usuario de Instagram");
-        lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        lblNombre.setForeground(TEXT_SECONDARY);
-        lblNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panelInfo.add(lblNombre);
+        Instagram.Modelo.Usuario usuarioInfo = gestorUsuarios.obtenerUsuario(usernameVisualizando);
+        Instagram.Modelo.PerfilUsuario perfilInfo = Instagram.Logica.GestorPerfiles.cargarPerfil(usernameVisualizando);
+        
+        if (usuarioInfo != null) {
+            JLabel lblNombre = new JLabel(usuarioInfo.getNombreCompleto());
+            lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+            lblNombre.setForeground(TEXT_SECONDARY);
+            lblNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panelInfo.add(lblNombre);
+        }
+        
+        if (perfilInfo != null && perfilInfo.getBiografia() != null && !perfilInfo.getBiografia().trim().isEmpty()) {
+            panelInfo.add(Box.createVerticalStrut(8));
+            
+            JTextArea txtBiografia = new JTextArea(perfilInfo.getBiografia());
+            txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            txtBiografia.setForeground(TEXT_PRIMARY);
+            txtBiografia.setBackground(CARD_COLOR);
+            txtBiografia.setLineWrap(true);
+            txtBiografia.setWrapStyleWord(true);
+            txtBiografia.setEditable(false);
+            
+            txtBiografia.setSize(new Dimension(400, Short.MAX_VALUE));
+            
+            int alturaPreferida = txtBiografia.getPreferredSize().height;
+            int alturaNecesaria = Math.min(alturaPreferida + 10, 300);
+            
+            txtBiografia.setPreferredSize(new Dimension(400, alturaNecesaria));
+            txtBiografia.setMaximumSize(new Dimension(400, alturaNecesaria));
+            txtBiografia.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panelInfo.add(txtBiografia);
+        }
+        
         panelInfo.add(Box.createVerticalStrut(20));
         
         if (usernameVisualizando.equals(gestorINSTA.getUsernameActual())) {
@@ -151,12 +188,32 @@ public class PanelPerfil extends JPanel {
             btnEditarPerfil.setFocusPainted(false);
             btnEditarPerfil.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnEditarPerfil.addActionListener(e -> {
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Funcionalidad de editar perfil en desarrollo",
-                    "Editar Perfil",
-                    JOptionPane.INFORMATION_MESSAGE
+                Instagram.Modelo.Usuario usuarioActual = gestorUsuarios.obtenerUsuario(usernameVisualizando);
+                DialogEditarPerfil dialog = new DialogEditarPerfil(
+                    (Frame) SwingUtilities.getWindowAncestor(this),
+                    usuarioActual,
+                    gestorUsuarios
                 );
+                dialog.setVisible(true);
+                
+                if (dialog.isCambiosGuardados()) {
+                    actualizarContenido();
+                    
+                    if (!usuarioActual.isActivo()) {
+                        JOptionPane.showMessageDialog(
+                            this,
+                            "Tu cuenta ha sido desactivada. Se cerrará la sesión.",
+                            "Cuenta Desactivada",
+                            JOptionPane.INFORMATION_MESSAGE
+                        );
+                        ventanaPrincipal.dispose();
+                        
+                        SwingUtilities.invokeLater(() -> {
+                            VentanaLogin ventanaLogin = new VentanaLogin();
+                            ventanaLogin.setVisible(true);
+                        });
+                    }
+                }
             });
             
             panelInfo.add(btnEditarPerfil);
@@ -270,6 +327,11 @@ public class PanelPerfil extends JPanel {
     }
     
     public void actualizarContenido() {
+        int headerIndex = 0;
+        panelPrincipal.remove(headerIndex);
+        panelHeader = crearHeader();
+        panelPrincipal.add(panelHeader, headerIndex);
+        
         panelPublicaciones.removeAll();
         
         ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameVisualizando);
@@ -280,7 +342,7 @@ public class PanelPerfil extends JPanel {
             JLabel lblTitulo = new JLabel("Publicaciones");
             lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
             lblTitulo.setForeground(INSTAGRAM_PINK);
-            lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+            lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
             lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 16, 0));
             
             panelPublicaciones.add(lblTitulo);
@@ -294,6 +356,8 @@ public class PanelPerfil extends JPanel {
         
         actualizarEstadisticas();
         
+        panelPrincipal.revalidate();
+        panelPrincipal.repaint();
         panelPublicaciones.revalidate();
         panelPublicaciones.repaint();
         
@@ -318,12 +382,12 @@ public class PanelPerfil extends JPanel {
         }
         lblIconoFotos.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblTitulo = new JLabel("Compartir Fotos");
+        JLabel lblTitulo = new JLabel("Fotos Compartidas");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(TEXT_PRIMARY);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblMensaje = new JLabel("Cuando compartes fotos, aparecerán en tu perfil.");
+        JLabel lblMensaje = new JLabel("Cuando compartas fotos, aparecerán en tu perfil");
         lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblMensaje.setForeground(TEXT_SECONDARY);
         lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -335,5 +399,20 @@ public class PanelPerfil extends JPanel {
         panelVacio.add(lblMensaje);
         
         panelPublicaciones.add(panelVacio);
+    }
+    
+    private ImageIcon crearImagenCircular(Image img, int diametro) {
+        BufferedImage buffered = new BufferedImage(diametro, diametro, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = buffered.createGraphics();
+        
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        Ellipse2D.Double circle = new Ellipse2D.Double(0, 0, diametro, diametro);
+        g2.setClip(circle);
+        
+        g2.drawImage(img, 0, 0, diametro, diametro, null);
+        g2.dispose();
+        
+        return new ImageIcon(buffered);
     }
 }

@@ -12,7 +12,7 @@ import java.util.UUID;
  *
  * @author najma
  */
-public class Mensaje {
+public class Mensaje implements Serializable {
     
     private static final long serialVersionUID = 1L;
     
