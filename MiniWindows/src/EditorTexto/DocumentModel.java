@@ -96,6 +96,174 @@ public class DocumentModel {
         formato.clear();
     }
 
+    public void aplicarFormato(int inicio, int fin, String newFontFamily, Integer newFontSize, Integer newFontStyle, String newColor) {
+        if (texto == null) {
+            texto = "";
+        }
+        if (inicio < 0) {
+            inicio = 0;
+        }
+        if (fin > texto.length()) {
+            fin = texto.length();
+        }
+        if (inicio >= fin) {
+            return;
+        }
+
+        Collections.sort(formato, Comparator.comparingInt(a -> a.inicio));
+        List<FormatoTexto> nuevos = new ArrayList<>();
+
+        for (FormatoTexto f : formato) {
+            if (f.fin <= inicio || f.inicio >= fin) {
+                nuevos.add(new FormatoTexto(f.inicio, f.fin, f.fontFamily, f.fontSize, f.fontStyle, f.color));
+            } else {
+                if (f.inicio < inicio) {
+                    nuevos.add(new FormatoTexto(f.inicio, inicio, f.fontFamily, f.fontSize, f.fontStyle, f.color));
+                }
+                if (f.fin > fin) {
+                    nuevos.add(new FormatoTexto(fin, f.fin, f.fontFamily, f.fontSize, f.fontStyle, f.color));
+                }
+            }
+        }
+
+        int cursor = inicio;
+        int indice = 0;
+        while (indice < formato.size() && formato.get(indice).fin <= inicio) {
+            indice++;
+        }
+
+        while (cursor < fin) {
+            FormatoTexto f = (indice < formato.size()) ? formato.get(indice) : null;
+
+            if (f == null || f.inicio >= fin) {
+                String font;
+                if (newFontFamily != null && !newFontFamily.isEmpty()) {
+                    font = newFontFamily;
+                } else {
+                    font = this.defaultFont;
+                }
+
+                int fsize;
+                if (newFontSize != null && newFontSize > 0) {
+                    fsize = newFontSize;
+                } else {
+                    fsize = this.defaultSize;
+                }
+
+                int fstyle;
+                if (newFontStyle != null && newFontStyle >= 0) {
+                    fstyle = newFontStyle;
+                } else {
+                    fstyle = this.defaultStyle;
+                }
+
+                String fcolor;
+                if (newColor != null && !newColor.isEmpty()) {
+                    fcolor = newColor;
+                } else {
+                    fcolor = this.defaultColor;
+                }
+
+                nuevos.add(new FormatoTexto(cursor, fin, font, fsize, fstyle, fcolor));
+                cursor = fin;
+                continue;
+            }
+
+
+            if (f.fin <= cursor) {
+                indice++;
+                continue;
+            }
+
+
+            if (f.inicio > cursor) {
+                int gapEnd = Math.min(f.inicio, fin);
+
+                String font;
+                if (newFontFamily != null && !newFontFamily.isEmpty()) {
+                    font = newFontFamily;
+                } else {
+                    font = this.defaultFont;
+                }
+
+                int fsize;
+                if (newFontSize != null && newFontSize > 0) {
+                    fsize = newFontSize;
+                } else {
+                    fsize = this.defaultSize;
+                }
+
+                int fstyle;
+                if (newFontStyle != null && newFontStyle >= 0) {
+                    fstyle = newFontStyle;
+                } else {
+                    fstyle = this.defaultStyle;
+                }
+
+                String fcolor;
+                if (newColor != null && !newColor.isEmpty()) {
+                    fcolor = newColor;
+                } else {
+                    fcolor = this.defaultColor;
+                }
+
+                nuevos.add(new FormatoTexto(cursor, gapEnd, font, fsize, fstyle, fcolor));
+                cursor = gapEnd;
+                continue;
+            }
+
+
+            int inicioSegmento = cursor;
+            int finSegmento = Math.min(f.fin, fin);
+
+            String font;
+            if (newFontFamily != null && !newFontFamily.isEmpty()) {
+                font = newFontFamily;
+            } else if (f.fontFamily != null && !f.fontFamily.isEmpty()) {
+                font = f.fontFamily;
+            } else {
+                font = this.defaultFont;
+            }
+
+            int fsize;
+            if (newFontSize != null && newFontSize > 0) {
+                fsize = newFontSize;
+            } else if (f.fontSize > 0) {
+                fsize = f.fontSize;
+            } else {
+                fsize = this.defaultSize;
+            }
+
+            int fstyle;
+            if (newFontStyle != null && newFontStyle >= 0) {
+                fstyle = newFontStyle;
+            } else if (f.fontStyle >= 0) {
+                fstyle = f.fontStyle;
+            } else {
+                fstyle = this.defaultStyle;
+            }
+
+            String fcolor;
+            if (newColor != null && !newColor.isEmpty()) {
+                fcolor = newColor;
+            } else if (f.color != null && !f.color.isEmpty()) {
+                fcolor = f.color;
+            } else {
+                fcolor = this.defaultColor;
+            }
+
+            nuevos.add(new FormatoTexto(inicioSegmento, finSegmento, font, fsize, fstyle, fcolor));
+            cursor = finSegmento;
+            if (f.fin <= cursor) {
+                indice++;
+            }
+        }
+
+        formato.clear();
+        formato.addAll(nuevos);
+        normalizeFormato();
+    }
+
     public void normalizeFormato() {
         Collections.sort(formato, Comparator.comparingInt(a -> a.inicio));
 

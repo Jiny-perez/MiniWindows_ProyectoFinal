@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 public class FormatoTexto {
 
-    public int inicio;
+     public int inicio;
     public int fin;
 
     public String fontFamily;
@@ -56,7 +56,6 @@ public class FormatoTexto {
         if (c == null) {
             return "#000000";
         }
-        
         return String.format("#%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue());
     }
 
@@ -64,26 +63,26 @@ public class FormatoTexto {
         if (hex == null) {
             return Color.BLACK;
         }
-        
         try {
             return Color.decode(hex);
         } catch (Exception e) {
             return Color.BLACK;
         }
-        
     }
-    
+
+    @Override
+    public String toString() {
+        return inicio + ";" + fin + ";" + escape(fontFamily) + ";" + fontSize + ";" + fontStyle + ";" + color;
+    }
+
     public static FormatoTexto fromString(String line) {
-        
         if (line == null) {
             return null;
         }
-        
         String[] parts = line.split(";", 6);
         if (parts.length < 6) {
             return null;
         }
-        
         try {
             int inicio = Integer.parseInt(parts[0]);
             int fin = Integer.parseInt(parts[1]);
@@ -95,17 +94,15 @@ public class FormatoTexto {
             FormatoTexto f = new FormatoTexto(inicio, fin, font, size, style, color);
             f.normalize();
             return f;
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return null;
         }
-        
     }
 
     private static String escape(String s) {
         if (s == null) {
             return "";
         }
-        
         return s.replace("\\", "\\\\").replace(";", "\\;");
     }
 
@@ -113,7 +110,6 @@ public class FormatoTexto {
         if (s == null) {
             return "";
         }
-        
         return s.replace("\\;", ";").replace("\\\\", "\\");
     }
 }

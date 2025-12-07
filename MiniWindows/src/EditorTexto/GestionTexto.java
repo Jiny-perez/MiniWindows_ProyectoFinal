@@ -17,8 +17,10 @@ public class GestionTexto {
 
         String texto = readAll(file);
         DocumentModel dm = new DocumentModel(texto);
-
-        File html = new File(file.getAbsolutePath() + ".html");
+        
+        String nombre = file.getName();
+        String base = nombre.endsWith(".txt") ? nombre.substring(0, nombre.length() - 4) : nombre;
+        File html = new File(file.getParentFile(), base + ".html");
         if (!html.exists()) {
             return dm;
         }
@@ -27,17 +29,16 @@ public class GestionTexto {
             String first = br.readLine();
             if (first != null && first.startsWith("DEFAULT;")) {
                 String[] ds = first.split(";", -1);
-                
                 if (ds.length >= 5) {
                     dm.setDefaultFont(ds[1]);
                     try {
                         dm.setDefaultSize(Integer.parseInt(ds[2]));
-                    } catch (Exception e) { }
-                    
+                    } catch (Exception ex) {
+                    }
                     try {
                         dm.setDefaultStyle(Integer.parseInt(ds[3]));
-                    } catch (Exception e) { }
-                    
+                    } catch (Exception ex) {
+                    }
                     dm.setDefaultColor(ds[4]);
                 }
             }
@@ -54,45 +55,44 @@ public class GestionTexto {
                 }
             }
         }
-        
         dm.normalizeFormato();
         return dm;
     }
 
-    public static void guardarTxt(File File, DocumentModel txt) throws IOException {
-        if (File == null || txt == null) {
+    public static void guardarTxt(File archivo, DocumentModel txt) throws IOException {
+        if (archivo == null || txt == null) {
             throw new IllegalArgumentException();
         }
-       
-        try (Writer w = new OutputStreamWriter(new FileOutputStream(File), StandardCharsets.UTF_8)) {
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(archivo), StandardCharsets.UTF_8)) {
             w.write(txt.getTexto());
         }
 
-        File meta = new File(File.getAbsolutePath() + ".html");
-        try (Writer w = new OutputStreamWriter(new FileOutputStream(meta), StandardCharsets.UTF_8)) {
+        String nombre = archivo.getName();
+        String base = nombre.endsWith(".txt") ? nombre.substring(0, nombre.length() - 4) : nombre;
+        File html = new File(archivo.getParentFile(), base + ".html");
+  
+        try (Writer w = new OutputStreamWriter(new FileOutputStream(html), StandardCharsets.UTF_8)) {
             w.write("DEFAULT;" + guardarTxt(txt.getDefaultFont()) + ";" + txt.getDefaultSize() + ";" + txt.getDefaultStyle() + ";" + txt.getDefaultColor() + "\n");
-            List<FormatoTexto> rs = txt.getFormato();        
+            List<FormatoTexto> rs = txt.getFormato();
             for (FormatoTexto r : rs) {
                 w.write(r.toString() + "\n");
-            }          
+            }
         }
     }
 
-    private static String readAll(File file) throws IOException {
+    private static String readAll(File archivo) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
-           
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(archivo), StandardCharsets.UTF_8))) {
             String linea;
             boolean first = true;
-            while ((linea = br.readLine()) != null) {       
+            while ((linea = br.readLine()) != null) {
                 if (!first) {
                     sb.append(System.lineSeparator());
-                }               
+                }
                 sb.append(linea);
                 first = false;
             }
         }
-        
         return sb.toString();
     }
 
@@ -103,5 +103,4 @@ public class GestionTexto {
             return s;
         }
     }
-    
 }

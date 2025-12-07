@@ -8,29 +8,27 @@ import Excepciones.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
 public class SistemaArchivos implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-    private final String RUTA_BASE;
-    private String rutaActual;
+   private static final long serialVersionUID = 1L;
+    private final String BASE_FISICO;
+    private String rutaActualRelativa;
     private Usuario usuarioActual;
     private final String ARCHIVO_SISTEMA = "sistema_archivos.sop";
 
     public SistemaArchivos() {
-        this.RUTA_BASE = System.getProperty("user.dir") + File.separator + "Z";
-        this.rutaActual = "";
-        File base = new File(RUTA_BASE);
+        this.BASE_FISICO = System.getProperty("user.dir") + File.separator + "Z";
+        this.rutaActualRelativa = "";
+        File base = new File(BASE_FISICO);
         if (!base.exists()) {
             base.mkdirs();
         }
     }
 
-    private File rutaFisica(String ruta) {
-        if (ruta == null || ruta.trim().isEmpty()) {
-            return new File(RUTA_BASE);
+    private File fileFromRel(String rutaRel) {
+        if (rutaRel == null || rutaRel.trim().isEmpty()) {
+            return new File(BASE_FISICO);
         }
-
-        String r = ruta.replace("/", File.separator).replace("\\", File.separator);
-        return new File(RUTA_BASE + File.separator + r);
+        String r = rutaRel.replace("/", File.separator).replace("\\", File.separator);
+        return new File(BASE_FISICO + File.separator + r);
     }
 
     private String normalizeRel(String rutaRel) {
@@ -42,63 +40,59 @@ public class SistemaArchivos implements Serializable {
         return r;
     }
 
-    private String rutaVirtual(File f) {
+    private String buildRelativePath(File f) {
         String abs = f.getAbsolutePath();
-        String base = new File(RUTA_BASE).getAbsolutePath();
+        String base = new File(BASE_FISICO).getAbsolutePath();
         if (abs.startsWith(base)) {
             String rel = abs.substring(base.length());
             if (rel.startsWith(File.separator)) {
                 rel = rel.substring(1);
             }
-
             return rel.replace(File.separatorChar, '/');
         } else {
             return f.getAbsolutePath();
         }
     }
 
-    private Calendar ultimaModificacion(File f) {
+    private Calendar fileTimeToCalendar(File f) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(f.lastModified());
         return cal;
     }
 
     public String getRutaActual() {
-        if (rutaActual == null || rutaActual.isEmpty()) {
+        if (rutaActualRelativa == null || rutaActualRelativa.isEmpty()) {
             return "Z:\\";
         }
-
-        return "Z:\\" + rutaActual.replace("/", "\\") + "\\";
+        return "Z:\\" + rutaActualRelativa.replace("/", "\\") + "\\";
     }
 
-    public File getDirectorioActual() {
-        return rutaFisica(rutaActual);
+    public File getDirectorioActualFisico() {
+        return fileFromRel(rutaActualRelativa);
     }
 
     public Archivo getRaiz() {
-        File base = rutaFisica("");
+        File base = fileFromRel("");
         return new Archivo("Z:", true, 0L, Calendar.getInstance(), "", base.getAbsolutePath());
     }
 
     public ArrayList<Archivo> listarContenido() {
-        return listarContenidoEnRuta(rutaActual);
+        return listarContenidoEnRuta(rutaActualRelativa);
     }
 
     public ArrayList<Archivo> listarContenidoEnRuta(String rutaRelativa) {
         String rnorm = normalizeRel(rutaRelativa);
-        File dir = rutaFisica(rnorm);
+        File dir = fileFromRel(rnorm);
         ArrayList<Archivo> lista = new ArrayList<>();
         File[] hijos = dir.listFiles();
         if (hijos == null) {
             return lista;
         }
-
         for (File f : hijos) {
-            Calendar cal = ultimaModificacion(f);
-            String rel = rutaVirtual(f);
+            Calendar cal = fileTimeToCalendar(f);
+            String rel = buildRelativePath(f);
             lista.add(new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, cal, rel, f.getAbsolutePath()));
         }
-
         return lista;
     }
 
@@ -107,42 +101,38 @@ public class SistemaArchivos implements Serializable {
             return null;
         }
         String rnorm = normalizeRel(rutaRelativa);
-        File padre = rutaFisica(rnorm);
+        File padre = fileFromRel(rnorm);
         File f = new File(padre, nombre);
         if (!f.exists()) {
             return null;
         }
-        return new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, ultimaModificacion(f), rutaVirtual(f), f.getAbsolutePath());
+        return new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, fileTimeToCalendar(f), buildRelativePath(f), f.getAbsolutePath());
     }
 
     public Archivo obtenerArchivoEnRuta(String nombre) {
-        return obtenerArchivoEnRuta(nombre, rutaActual);
+        return obtenerArchivoEnRuta(nombre, rutaActualRelativa);
     }
 
     public boolean crearCarpeta(String nombre) throws ArchivoNoValidoException {
-        return crearCarpetaEnRuta(nombre, rutaActual);
+        return crearCarpetaEnRuta(nombre, rutaActualRelativa);
     }
 
     public boolean crearCarpetaEnRuta(String nombre, String rutaVirtualPadre) throws ArchivoNoValidoException {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("El nombre de la carpeta no puede estar vacío");
         }
-
         if (nombre.contains("/") || nombre.contains("\\")) {
             throw new ArchivoNoValidoException("El nombre de carpeta no puede contener separadores");
         }
-
         String padreRel = normalizeRel(rutaVirtualPadre);
-        File padre = rutaFisica(padreRel);
+        File padre = fileFromRel(padreRel);
         if (!padre.exists() || !padre.isDirectory()) {
             throw new ArchivoNoValidoException(rutaVirtualPadre, "la ruta padre no existe");
         }
-
         File nueva = new File(padre, nombre);
         if (nueva.exists()) {
             throw new ArchivoNoValidoException(nombre, "ya existe una carpeta o archivo con ese nombre");
         }
-
         try {
             if (!nueva.mkdirs()) {
                 throw new ArchivoNoValidoException("No se pudo crear la carpeta física: " + nueva.getAbsolutePath());
@@ -154,29 +144,25 @@ public class SistemaArchivos implements Serializable {
     }
 
     public boolean crearArchivo(String nombre, String tipo, String contenido) throws ArchivoNoValidoException {
-        return crearArchivoEnRuta(nombre, tipo, contenido, rutaActual);
+        return crearArchivoEnRuta(nombre, tipo, contenido, rutaActualRelativa);
     }
 
     public boolean crearArchivoEnRuta(String nombre, String tipo, String contenido, String rutaVirtualPadre) throws ArchivoNoValidoException {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("El nombre del archivo no puede estar vacío");
         }
-
         if (nombre.contains("/") || nombre.contains("\\")) {
             throw new ArchivoNoValidoException("Nombre de archivo inválido");
         }
-
         String padreRel = normalizeRel(rutaVirtualPadre);
-        File padre = rutaFisica(padreRel);
+        File padre = fileFromRel(padreRel);
         if (!padre.exists() || !padre.isDirectory()) {
             throw new ArchivoNoValidoException(rutaVirtualPadre, "la ruta padre no existe");
         }
-
         File archivo = new File(padre, nombre);
         if (archivo.exists()) {
             throw new ArchivoNoValidoException(nombre, "ya existe");
         }
-
         try {
             File parent = archivo.getParentFile();
             if (parent != null && !parent.exists()) {
@@ -193,7 +179,6 @@ public class SistemaArchivos implements Serializable {
             }
             throw new ArchivoNoValidoException("No se pudo crear el archivo físico: " + e.getMessage());
         }
-
         return true;
     }
 
@@ -201,18 +186,15 @@ public class SistemaArchivos implements Serializable {
         if (nombreActual == null || nombreNuevo == null || nombreNuevo.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Nombre inválido");
         }
-
-        File padre = rutaFisica(rutaActual);
+        File padre = fileFromRel(rutaActualRelativa);
         File a = new File(padre, nombreActual);
         if (!a.exists()) {
             throw new ArchivoNoValidoException(nombreActual, "no existe");
         }
-
         File b = new File(padre, nombreNuevo);
         if (b.exists()) {
             throw new ArchivoNoValidoException(nombreNuevo, "ya existe un archivo o carpeta con ese nombre");
         }
-
         boolean ok = a.renameTo(b);
         if (!ok) {
             if (a.isFile()) {
@@ -229,21 +211,15 @@ public class SistemaArchivos implements Serializable {
         return true;
     }
 
-    public boolean eliminar(String nombre) throws ArchivoNoValidoException {
-        return eliminar(nombre, false);
-    }
-
     public boolean eliminar(String nombre, boolean force) throws ArchivoNoValidoException {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Debe especificar un nombre");
         }
-
-        File padre = rutaFisica(rutaActual);
+        File padre = fileFromRel(rutaActualRelativa);
         File objetivo = new File(padre, nombre);
         if (!objetivo.exists()) {
             throw new ArchivoNoValidoException(nombre, "no existe");
         }
-
         try {
             if (objetivo.isFile()) {
                 Files.deleteIfExists(objetivo.toPath());
@@ -257,37 +233,36 @@ public class SistemaArchivos implements Serializable {
         } catch (IOException | SecurityException e) {
             throw new ArchivoNoValidoException("No se pudo eliminar físicamente: " + e.getMessage());
         }
-
         return true;
+    }
+
+    public boolean eliminar(String nombre) throws ArchivoNoValidoException {
+        return eliminar(nombre, false);
     }
 
     public boolean cambiarDirectorio(String nombre) throws ArchivoNoValidoException {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Debe especificar un nombre de carpeta");
         }
-
-        String nuevaRel = (rutaActual == null || rutaActual.isEmpty()) ? nombre : rutaActual + "/" + nombre;
-        File f = rutaFisica(nuevaRel);
+        String nuevaRel = (rutaActualRelativa == null || rutaActualRelativa.isEmpty()) ? nombre : rutaActualRelativa + "/" + nombre;
+        File f = fileFromRel(nuevaRel);
         if (!f.exists() || !f.isDirectory()) {
             throw new ArchivoNoValidoException(nombre, "no existe o no es una carpeta");
         }
-
-        rutaActual = normalizeRel(nuevaRel);
+        rutaActualRelativa = normalizeRel(nuevaRel);
         return true;
     }
 
     public boolean regresarCarpeta() {
-        if (rutaActual == null || rutaActual.isEmpty()) {
+        if (rutaActualRelativa == null || rutaActualRelativa.isEmpty()) {
             return false;
         }
-
-        int last = rutaActual.lastIndexOf('/');
+        int last = rutaActualRelativa.lastIndexOf('/');
         if (last <= 0) {
-            rutaActual = "";
+            rutaActualRelativa = "";
         } else {
-            rutaActual = rutaActual.substring(0, last);
+            rutaActualRelativa = rutaActualRelativa.substring(0, last);
         }
-
         return true;
     }
 
@@ -295,15 +270,13 @@ public class SistemaArchivos implements Serializable {
         if (ruta == null) {
             return false;
         }
-
         String r = ruta.replaceFirst("(?i)^Z:[:\\\\/]*", "");
         r = normalizeRel(r);
-        File f = rutaFisica(r);
+        File f = fileFromRel(r);
         if (!f.exists() || !f.isDirectory()) {
             throw new ArchivoNoValidoException("Ruta no existe: " + ruta);
         }
-
-        rutaActual = r;
+        rutaActualRelativa = r;
         return true;
     }
 
@@ -330,7 +303,6 @@ public class SistemaArchivos implements Serializable {
 
     public ArrayList<Archivo> listarOrdenadoPorTipo(boolean ascendente) {
         ArrayList<Archivo> lista = listarContenido();
-       
         lista.sort((a, b) -> {
             if (a.isEsCarpeta() && !b.isEsCarpeta()) {
                 return -1;
@@ -343,7 +315,6 @@ public class SistemaArchivos implements Serializable {
             int comp = ta.compareToIgnoreCase(tb);
             return ascendente ? comp : -comp;
         });
-        
         return lista;
     }
 
@@ -359,46 +330,40 @@ public class SistemaArchivos implements Serializable {
         if (username == null || username.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Usuario inválido");
         }
-        
-        String anterior = rutaActual;
+        String anterior = rutaActualRelativa;
         try {
-            rutaActual = "";
-            if (!rutaFisica(username).exists()) {
+            rutaActualRelativa = "";
+            if (!fileFromRel(username).exists()) {
                 crearCarpetaEnRuta(username, "");
             }
-            
             cambiarDirectorio(username);
-            if (!rutaFisica("Mis Documentos").exists()) {
+            if (!fileFromRel("Mis Documentos").exists()) {
                 crearCarpeta("Mis Documentos");
             }
-            
-            if (!rutaFisica("Musica").exists()) {
+            if (!fileFromRel("Musica").exists()) {
                 crearCarpeta("Musica");
             }
-            
-            if (!rutaFisica("Mis Imagenes").exists()) {
+            if (!fileFromRel("Mis Imagenes").exists()) {
                 crearCarpeta("Mis Imagenes");
             }
-            
         } finally {
-            rutaActual = anterior;
+            rutaActualRelativa = anterior;
         }
     }
 
     public void establecerUsuario(Usuario usuario) throws ArchivoNoValidoException, PermisosDenegadosException {
         if (usuario == null) {
             this.usuarioActual = null;
-            this.rutaActual = "";
+            this.rutaActualRelativa = "";
             return;
         }
-        
         this.usuarioActual = usuario;
         if (usuario.esAdmin()) {
-            this.rutaActual = "";
+            this.rutaActualRelativa = "";
         } else {
-            File carpetaUsuario = rutaFisica(usuario.getUsername());
+            File carpetaUsuario = fileFromRel(usuario.getUsername());
             if (carpetaUsuario.exists() && carpetaUsuario.isDirectory()) {
-                this.rutaActual = usuario.getUsername();
+                this.rutaActualRelativa = usuario.getUsername();
             } else {
                 throw new PermisosDenegadosException("No se encontró la carpeta del usuario");
             }
@@ -407,8 +372,10 @@ public class SistemaArchivos implements Serializable {
 
     public void guardar() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_SISTEMA))) {
-            oos.writeObject(this.rutaActual);
-        } catch (IOException e) {}
+            oos.writeObject(this.rutaActualRelativa);
+        } catch (IOException e) {
+            System.err.println("Warning: no se pudo guardar archivo de sistema: " + e.getMessage());
+        }
     }
 
     public boolean cargar() {
@@ -419,21 +386,22 @@ public class SistemaArchivos implements Serializable {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ARCHIVO_SISTEMA))) {
             Object o = ois.readObject();
             if (o instanceof String) {
-                this.rutaActual = (String) o;
+                this.rutaActualRelativa = (String) o;
             }
             return true;
         } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Warning: no se pudo cargar archivo de sistema: " + e.getMessage());
             return false;
         }
     }
 
-    private void borrarFisicoRecursivo(File archivo) throws IOException {
-        if (archivo == null || !archivo.exists()) {
+    private void borrarFisicoRecursivo(File fichero) throws IOException {
+        if (fichero == null || !fichero.exists()) {
             return;
         }
-        
-        Path ruta = archivo.toPath();
-        Files.walkFileTree(ruta, new SimpleFileVisitor<Path>() {
+        final Path root = fichero.toPath();
+        Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+            @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 try {
                     Files.deleteIfExists(file);
@@ -449,6 +417,7 @@ public class SistemaArchivos implements Serializable {
                 return FileVisitResult.CONTINUE;
             }
 
+            @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 if (exc != null) {
                     throw exc;
@@ -478,7 +447,6 @@ public class SistemaArchivos implements Serializable {
     private String ejecutarRmdirWindows(String ruta) {
         ProcessBuilder pb = new ProcessBuilder("cmd", "/c", "rmdir", "/s", "/q", ruta);
         pb.redirectErrorStream(true);
-        
         try {
             Process p = pb.start();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -492,7 +460,6 @@ public class SistemaArchivos implements Serializable {
             int code = p.waitFor();
             String output = baos.toString("UTF-8");
             return "exit=" + code + " output=" + output;
-            
         } catch (IOException | InterruptedException ie) {
             Thread.currentThread().interrupt();
             return "Exception al ejecutar rmdir: " + ie.getMessage();
