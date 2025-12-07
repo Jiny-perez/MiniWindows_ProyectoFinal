@@ -34,9 +34,8 @@ public class VentanaINSTA extends JFrame {
     private PanelMensajes panelMensajes;
     private PanelNotificaciones panelNotificaciones;
     
-    // Theme Rosa de Instagram
-    private static final Color INSTAGRAM_PINK = new Color(242, 80, 129); // #F25081
-    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245); // Rosa pastel
+    private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
     private static final Color SIDEBAR_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
@@ -66,7 +65,7 @@ public class VentanaINSTA extends JFrame {
         panelTimeline = new PanelTimeline(gestorINSTA, this);
         panelExplorar = new PanelExplorar(gestorINSTA, gestorUsuarios, this);
         panelPerfil = new PanelPerfil(gestorINSTA, gestorUsuarios, usuarioActual.getUsername(), this);
-        panelMensajes = new PanelMensajes(gestorINSTA);
+        panelMensajes = new PanelMensajes(gestorINSTA, gestorUsuarios, this);
         panelNotificaciones = new PanelNotificaciones(gestorINSTA, gestorNotificaciones, this);
         
         panelContenido.add(panelTimeline, "TIMELINE");
@@ -78,7 +77,7 @@ public class VentanaINSTA extends JFrame {
         add(panelLateral, BorderLayout.WEST);
         add(panelContenido, BorderLayout.CENTER);
         
-        mostrarTimeline();
+        SwingUtilities.invokeLater(() -> mostrarTimeline());
     }
     
     private void crearPanelLateral() {
@@ -88,7 +87,6 @@ public class VentanaINSTA extends JFrame {
         panelLateral.setBorder(new MatteBorder(0, 0, 0, 1, BORDER_COLOR));
         panelLateral.setPreferredSize(new Dimension(245, 600));
         
-        // Logo
         JLabel lblLogo = new JLabel();
         try {
             ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram.icons/icon_insta.png"));
@@ -185,6 +183,7 @@ public class VentanaINSTA extends JFrame {
     
     public void mostrarMensajes() {
         cardLayout.show(panelContenido, "MENSAJES");
+        panelMensajes.actualizarContenido();
     }
     
     public void mostrarNotificaciones() {

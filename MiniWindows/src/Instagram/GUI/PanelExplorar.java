@@ -204,13 +204,12 @@ public class PanelExplorar extends JPanel {
             new LineBorder(BORDER_COLOR, 2),
             BorderFactory.createEmptyBorder(16, 16, 16, 16)
         ));
-        tarjeta.setMaximumSize(new Dimension(600, 80));
+        tarjeta.setMaximumSize(new Dimension(700, 90));
         tarjeta.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        // Avatar
         JLabel lblAvatar = new JLabel();
         try {
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Icons/icon_profile.png"));
+            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
             Image img = avatarIcon.getImage().getScaledInstance(48, 48, Image.SCALE_SMOOTH);
             lblAvatar.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -243,6 +242,7 @@ public class PanelExplorar extends JPanel {
         lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblNombre.setForeground(TEXT_SECONDARY);
         lblNombre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblNombre.setMaximumSize(new Dimension(450, 25));
         
         panelInfo.add(btnUsername);
         panelInfo.add(lblNombre);

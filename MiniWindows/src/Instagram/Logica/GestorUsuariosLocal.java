@@ -101,6 +101,22 @@ public class GestorUsuariosLocal {
         return true;
     }
     
+    public boolean validarCredenciales(String username, String password) {
+        Usuario usuario = usuarios.get(username);
+        
+        if (usuario == null) {
+            System.out.println("Usuario no encontrado: " + username);
+            return false;
+        }
+        
+        if (!usuario.getPassword().equals(password)) {
+            System.out.println("Contraseña incorrecta para: " + username);
+            return false;
+        }
+        
+        return true;
+    }
+    
     public boolean actualizarUsuario(Usuario usuario) {
         if (usuario == null || !existeUsuario(usuario.getUsername())) {
             return false;

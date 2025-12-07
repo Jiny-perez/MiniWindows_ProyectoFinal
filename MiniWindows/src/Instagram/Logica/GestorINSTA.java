@@ -280,7 +280,19 @@ public class GestorINSTA {
     
     public ArrayList<Publicacion> obtenerTimeline() {
         ArrayList<String> siguiendo = gestorSeguidores.obtenerSiguiendo(usuarioActual.getUsername());
-        return gestorPublicaciones.obtenerTimeline(usuarioActual.getUsername(), siguiendo);
+        ArrayList<Publicacion> timeline = gestorPublicaciones.obtenerTimeline(usuarioActual.getUsername(), siguiendo);
+        
+        ArrayList<Publicacion> timelineFiltrado = new ArrayList<>();
+        GestorUsuariosLocal gestorUsuarios = new GestorUsuariosLocal();
+        
+        for (Publicacion pub : timeline) {
+            Usuario usuario = gestorUsuarios.obtenerUsuario(pub.getUsername());
+            if (usuario != null && usuario.isActivo()) {
+                timelineFiltrado.add(pub);
+            }
+        }
+        
+        return timelineFiltrado;
     }
     
     public ArrayList<Publicacion> obtenerPublicacionesDeUsuario(String username) {
