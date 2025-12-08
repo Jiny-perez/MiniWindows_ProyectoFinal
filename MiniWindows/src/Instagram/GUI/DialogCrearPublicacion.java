@@ -212,8 +212,8 @@ public class DialogCrearPublicacion extends JDialog {
     }
     
     private void seleccionarImagen() {
-    // Usar el selector de imágenes del navegador en lugar de JFileChooser
-    DialogSelectorImagenes selector = new DialogSelectorImagenes(
+
+        DialogSelectorImagenes selector = new DialogSelectorImagenes(
         (Frame) SwingUtilities.getWindowAncestor(this)
     );
     selector.setVisible(true);
@@ -261,7 +261,6 @@ public class DialogCrearPublicacion extends JDialog {
     private void publicar() {
         String contenido = txtContenido.getText().trim();
         
-        // VALIDACIÓN CRÍTICA: 140 CARACTERES
         if (contenido.length() > Publicacion.MAX_CARACTERES) {
             JOptionPane.showMessageDialog(
                 this,

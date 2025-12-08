@@ -33,10 +33,7 @@ public class GestorPublicaciones {
         publicaciones.add(post);
         return post;
     }
-    
-    /**
-     * Eliminar publicación (solo el autor puede eliminar)
-     */
+
     public boolean eliminarPublicacion(String postId, String username) {
         Publicacion post = buscarPorId(postId);
         

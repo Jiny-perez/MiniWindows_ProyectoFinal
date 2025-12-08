@@ -52,11 +52,11 @@ public class GestorFollowingINSTA {
     
     public boolean seguir(String usuarioSeguido) {
         if (usuarioSeguido.equals(username)) {
-            return false; // No puedo seguirme a mí mismo
+            return false;
         }
         
         if (siguiendo.contains(usuarioSeguido)) {
-            return false; // Ya lo sigo
+            return false;
         }
         
         siguiendo.add(usuarioSeguido);

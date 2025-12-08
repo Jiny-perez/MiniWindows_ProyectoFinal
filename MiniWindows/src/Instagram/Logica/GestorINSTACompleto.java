@@ -38,9 +38,7 @@ public class GestorINSTACompleto {
         this.gestorInsta = new GestorInstaINSTA(usuario.getUsername());
         cacheInsta.put(usuario.getUsername(), gestorInsta);
     }
-    
-    // ================== PUBLICACIONES ==================
-    
+        
     public Publicacion crearPublicacion(String contenido) throws IllegalArgumentException {
         Publicacion publicacion = new Publicacion(usuarioActual.getUsername(), contenido);
         gestorInsta.agregarPublicacion(publicacion);
@@ -79,11 +77,7 @@ public class GestorINSTACompleto {
         
         return true;
     }
-    
-    /**
-     * Timeline que ve el usuario actual.
-     * Aquí filtramos las publicaciones de cuentas DESACTIVADAS.
-     */
+
     public ArrayList<Publicacion> obtenerTimeline() {
         ArrayList<Publicacion> base = gestorInsta.obtenerTimeline();
         ArrayList<Publicacion> filtrado = new ArrayList<>();
@@ -107,20 +101,14 @@ public class GestorINSTACompleto {
         return gestor.obtenerPublicacionesPropias();
     }
 
-    /**
-     * Actualiza una publicación (likes, comentarios, etc.)
-     * en el autor y en todos los timelines de sus seguidores.
-     */
     public void actualizarPublicacion(Publicacion publicacionActualizada) {
         if (publicacionActualizada == null) return;
 
         String autor = publicacionActualizada.getUsername();
 
-        // 1) Actualizar en el autor
         GestorInstaINSTA gestorAutor = obtenerGestorInsta(autor);
         gestorAutor.actualizarPublicacion(publicacionActualizada);
 
-        // 2) Actualizar en todos los seguidores del autor
         GestorFollowersINSTA gestorFollowersAutor = new GestorFollowersINSTA(autor);
         ArrayList<String> seguidoresAutor = gestorFollowersAutor.obtenerSeguidores();
         for (String seguidor : seguidoresAutor) {
@@ -128,9 +116,7 @@ public class GestorINSTACompleto {
             gestorSeguidor.actualizarPublicacion(publicacionActualizada);
         }
     }
-    
-    // ================== SEGUIR / DEJAR DE SEGUIR ==================
-    
+        
     public boolean seguir(String username) {
         if (username.equals(usuarioActual.getUsername())) {
             return false;
@@ -179,15 +165,11 @@ public class GestorINSTACompleto {
             gestorInsta.agregarPublicacion(pub);
         }
     }
-    
-    // ================== BÚSQUEDA ==================
-    
+        
     public ArrayList<Publicacion> buscarPorHashtag(String hashtag) {
         return gestorInsta.buscarPorHashtag(hashtag);
     }
-    
-    // ================== ESTADÍSTICAS ==================
-    
+        
     public EstadisticasUsuario obtenerEstadisticas(String username) {
         EstadisticasUsuario stats = new EstadisticasUsuario();
         stats.username = username;
@@ -206,9 +188,7 @@ public class GestorINSTACompleto {
     public EstadisticasUsuario obtenerMisEstadisticas() {
         return obtenerEstadisticas(usuarioActual.getUsername());
     }
-    
-    // ================== SEGUIDORES / SIGUIENDO ==================
-    
+        
     public ArrayList<String> obtenerSeguidores(String username) {
         GestorFollowersINSTA gestor = new GestorFollowersINSTA(username);
         return gestor.obtenerSeguidores();
@@ -218,9 +198,7 @@ public class GestorINSTACompleto {
         GestorFollowingINSTA gestor = new GestorFollowingINSTA(username);
         return gestor.obtenerSiguiendo();
     }
-    
-    // ================== AUXILIARES ==================
-    
+        
     private GestorInstaINSTA obtenerGestorInsta(String username) {
         if (!cacheInsta.containsKey(username)) {
             cacheInsta.put(username, new GestorInstaINSTA(username));
@@ -241,9 +219,7 @@ public class GestorINSTACompleto {
         if (gestorFollowers != null) gestorFollowers.guardarFollowers();
         if (gestorInsta != null) gestorInsta.guardarPublicaciones();
     }
-    
-    // ================== CLASE ESTADÍSTICAS ==================
-    
+        
     public static class EstadisticasUsuario {
         public String username;
         public int publicaciones;

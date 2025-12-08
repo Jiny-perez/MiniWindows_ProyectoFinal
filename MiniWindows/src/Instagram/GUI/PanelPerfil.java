@@ -112,7 +112,6 @@ public class PanelPerfil extends JPanel {
         panelDatos.setLayout(new BoxLayout(panelDatos, BoxLayout.Y_AXIS));
         panelDatos.setBackground(CARD_COLOR);
         
-        // ---------- FILA: USERNAME + BOTÓN A LA DERECHA ----------
         lblUsername = new JLabel();
         lblUsername.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblUsername.setForeground(TEXT_PRIMARY);
@@ -134,7 +133,6 @@ public class PanelPerfil extends JPanel {
         panelUsuario.add(Box.createHorizontalStrut(15));
         panelUsuario.add(Box.createHorizontalGlue());
         panelUsuario.add(btnAccion);
-        // ---------------------------------------------------------
         
         lblNombreCompleto = new JLabel();
         lblNombreCompleto.setFont(new Font("Segoe UI", Font.PLAIN, 16));
@@ -159,7 +157,7 @@ public class PanelPerfil extends JPanel {
         lblBiografia.setForeground(TEXT_PRIMARY);
         lblBiografia.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        panelDatos.add(panelUsuario);               // fila con nombre + botón
+        panelDatos.add(panelUsuario);
         panelDatos.add(Box.createVerticalStrut(5));
         panelDatos.add(lblNombreCompleto);
         panelDatos.add(Box.createVerticalStrut(15));
@@ -193,7 +191,6 @@ public class PanelPerfil extends JPanel {
         lblUsername.setText("@" + usuario.getUsername());
         lblNombreCompleto.setText(usuario.getNombreCompleto());
         
-        // Cargar biografía desde GestorPerfiles (más actualizada)
         String biografia = gestorPerfiles.obtenerBiografia(usernameDelPerfil);
         if (biografia == null || biografia.trim().isEmpty()) {
             biografia = usuario.getBiografia();
@@ -205,7 +202,6 @@ public class PanelPerfil extends JPanel {
             lblBiografia.setText("");
         }
         
-        // Cargar imagen de perfil desde GestorPerfiles
         cargarImagenPerfil();
         
         EstadisticasUsuario stats = gestorINSTA.obtenerEstadisticas(usernameDelPerfil);

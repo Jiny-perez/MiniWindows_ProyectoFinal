@@ -20,10 +20,8 @@ public class GestorArchivosUsuarioINSTA {
     private static final String DIR_DATOS = "datos";
     private static final String DIR_USUARIOS = DIR_DATOS + "/usuarios";
     
-    // Archivo global de usuarios
     public static final String ARCHIVO_USERS = DIR_DATOS + "/users.ins";
     
-    // Archivos por usuario
     private static final String ARCHIVO_FOLLOWING = "following.ins";
     private static final String ARCHIVO_FOLLOWERS = "followers.ins";
     private static final String ARCHIVO_INSTA = "insta.ins";
@@ -48,7 +46,6 @@ public class GestorArchivosUsuarioINSTA {
             Files.createDirectories(dirUsuario);
             Files.createDirectories(dirImagenes);
             
-            // Crear archivos .ins vacíos
             crearArchivoVacioSiNoExiste(getArchivoFollowing(username));
             crearArchivoVacioSiNoExiste(getArchivoFollowers(username));
             crearArchivoVacioSiNoExiste(getArchivoInsta(username));

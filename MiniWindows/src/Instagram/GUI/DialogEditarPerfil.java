@@ -131,7 +131,6 @@ public class DialogEditarPerfil extends JDialog {
         panelForm.add(scrollBio);
         panelForm.add(Box.createVerticalStrut(20));
         
-        // SECCIÓN DE ESTADO DE CUENTA
         JPanel panelEstadoCuenta = new JPanel();
         panelEstadoCuenta.setLayout(new BoxLayout(panelEstadoCuenta, BoxLayout.Y_AXIS));
         panelEstadoCuenta.setBackground(new Color(255, 250, 250));
@@ -233,7 +232,6 @@ public class DialogEditarPerfil extends JDialog {
         txtNombreCompleto.setText(usuario.getNombreCompleto());
         txtEmail.setText(usuario.getEmail());
         
-        // Cargar biografía desde GestorPerfiles (más actualizada)
         String biografia = gestorPerfiles.obtenerBiografia(usuario.getUsername());
         if (biografia == null || biografia.isEmpty()) {
             biografia = usuario.getBiografia();
@@ -251,7 +249,6 @@ public class DialogEditarPerfil extends JDialog {
     }
     
     private void cargarImagenPerfilGuardada() {
-        // Usar el método correcto: obtenerImagenPerfil (no obtenerRutaImagenPerfil)
         String rutaImagen = gestorPerfiles.obtenerImagenPerfil(usuario.getUsername());
         
         if (rutaImagen != null && !rutaImagen.isEmpty()) {
@@ -320,7 +317,6 @@ public class DialogEditarPerfil extends JDialog {
             return;
         }
         
-        // Confirmación si va a desactivar la cuenta
         if (!cuentaActiva && usuario.isActivo()) {
             int respuesta = JOptionPane.showConfirmDialog(this,
                 "¿Estás seguro de que deseas desactivar tu cuenta?\n" +
@@ -334,16 +330,13 @@ public class DialogEditarPerfil extends JDialog {
             }
         }
         
-        // ACTUALIZAR USUARIO
         usuario.setNombreCompleto(nuevoNombre);
         usuario.setEmail(nuevoEmail);
         usuario.setBiografia(nuevaBiografia);
         usuario.setActivo(cuentaActiva);
         
-        // GUARDAR EN GESTOR DE USUARIOS
         gestorUsuarios.actualizarUsuario(usuario);
         
-        // ACTUALIZAR IMAGEN DE PERFIL
         if (imagenSeleccionada != null) {
             gestorPerfiles.actualizarImagenPerfil(
                 usuario.getUsername(), 
@@ -351,7 +344,6 @@ public class DialogEditarPerfil extends JDialog {
             );
         }
         
-        // ACTUALIZAR BIOGRAFÍA EN PERFIL
         gestorPerfiles.actualizarBiografia(usuario.getUsername(), nuevaBiografia);
         
         String mensaje = cuentaActiva ? 

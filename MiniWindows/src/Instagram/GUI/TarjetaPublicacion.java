@@ -44,8 +44,6 @@ public class TarjetaPublicacion extends JPanel {
         initComponents();
     }
 
-    // ================== INICIALIZACIÓN DE LA TARJETA ==================
-
     private void initComponents() {
         setLayout(new BorderLayout(0, 12));
         setBackground(CARD_COLOR);
@@ -65,8 +63,6 @@ public class TarjetaPublicacion extends JPanel {
         JPanel panelInferior = crearPanelInferior();
         add(panelInferior, BorderLayout.SOUTH);
     }
-
-    // ================== PANEL SUPERIOR (USUARIO, FECHA, ELIMINAR) ==================
 
     private JPanel crearPanelSuperior() {
         JPanel panel = new JPanel(new BorderLayout(10, 0));
@@ -142,8 +138,6 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
-    // ================== PANEL CONTENIDO (IMAGEN + TEXTO) ==================
-
     private JPanel crearPanelContenido() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -210,8 +204,6 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
-    // ================== PANEL INFERIOR (LIKE, COMENTARIOS, INPUT) ==================
-
     private JPanel crearPanelInferior() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -271,7 +263,6 @@ public class TarjetaPublicacion extends JPanel {
         panel.add(panelAcciones);
         panel.add(Box.createVerticalStrut(8));
 
-        // Texto de likes
         lblLikes = new JLabel(obtenerTextoLikes());
         lblLikes.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblLikes.setForeground(TEXT_PRIMARY);
@@ -279,7 +270,6 @@ public class TarjetaPublicacion extends JPanel {
         panel.add(lblLikes);
         panel.add(Box.createVerticalStrut(12));
 
-        // Comentarios
         panelComentarios = new JPanel();
         panelComentarios.setLayout(new BoxLayout(panelComentarios, BoxLayout.Y_AXIS));
         panelComentarios.setBackground(CARD_COLOR);
@@ -289,7 +279,6 @@ public class TarjetaPublicacion extends JPanel {
         panel.add(panelComentarios);
         panel.add(Box.createVerticalStrut(8));
 
-        // Nuevo comentario
         JPanel panelNuevoComentario = new JPanel(new BorderLayout(8, 0));
         panelNuevoComentario.setBackground(CARD_COLOR);
         panelNuevoComentario.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -322,36 +311,31 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
-    // ================== LIKE ==================
-
     private void toggleLike() {
         String usernameActual = gestorINSTA.getUsernameActual();
 
         if (publicacion.tieneLikeDe(usernameActual)) {
             publicacion.quitarLike(usernameActual);
 
-            // Notificación: eliminar like
             try {
                 String owner = publicacion.getUsername();
                 if (!usernameActual.equals(owner)) {
                     ventanaPrincipal.getGestorNotificaciones()
                             .eliminarNotificacionLike(usernameActual, owner, publicacion.getId());
                 }
-            } catch (Exception ex) { /* ignore */ }
+            } catch (Exception ex) { /* ignorar */ }
         } else {
             publicacion.darLike(usernameActual);
 
-            // Notificación: agregar like
             try {
                 String owner = publicacion.getUsername();
                 if (!usernameActual.equals(owner)) {
                     ventanaPrincipal.getGestorNotificaciones()
                             .agregarNotificacionLike(usernameActual, owner, publicacion.getId());
                 }
-            } catch (Exception ex) { /* ignore */ }
+            } catch (Exception ex) { /* ignorar */ }
         }
 
-        // 👉 Guardar la publicación actualizada (likes)
         guardarPublicacionActualizada();
 
         boolean tieneLikeAhora = publicacion.tieneLikeDe(usernameActual);
@@ -370,7 +354,6 @@ public class TarjetaPublicacion extends JPanel {
 
         lblLikes.setText(obtenerTextoLikes());
 
-        // Actualizar panel de notificaciones y badge
         try {
             PanelNotificaciones pn = ventanaPrincipal.getPanelNotificaciones();
             if (pn != null) pn.actualizarContenido();
@@ -394,8 +377,6 @@ public class TarjetaPublicacion extends JPanel {
         }
     }
 
-    // ================== COMENTARIOS ==================
-
     private void agregarComentario() {
         String contenido = txtComentario.getText().trim();
         if (contenido.isEmpty()) {
@@ -409,13 +390,11 @@ public class TarjetaPublicacion extends JPanel {
         );
         publicacion.agregarComentario(nuevoComentario);
 
-        // 👉 Guardar la publicación actualizada (comentarios)
         guardarPublicacionActualizada();
 
         txtComentario.setText("");
         actualizarComentarios();
 
-        // Notificación de comentario
         try {
             String owner = publicacion.getUsername();
             String usernameActual = gestorINSTA.getUsernameActual();
@@ -426,7 +405,6 @@ public class TarjetaPublicacion extends JPanel {
             }
         } catch (Exception ex) { }
 
-        // Actualizar panel de notificaciones y badge
         try {
             PanelNotificaciones pn = ventanaPrincipal.getPanelNotificaciones();
             if (pn != null) pn.actualizarContenido();
@@ -473,8 +451,6 @@ public class TarjetaPublicacion extends JPanel {
         panelComentarios.repaint();
     }
 
-    // ================== ELIMINAR PUBLICACIÓN ==================
-
     private void eliminarPublicacion() {
         int opcion = JOptionPane.showConfirmDialog(
                 this,
@@ -487,7 +463,6 @@ public class TarjetaPublicacion extends JPanel {
         if (opcion == JOptionPane.YES_OPTION) {
             gestorINSTA.eliminarPublicacion(publicacion.getId());
 
-            // Eliminar notificaciones relacionadas con esta publicación
             try {
                 ventanaPrincipal.getGestorNotificaciones()
                         .eliminarNotificacionesDePublicacion(publicacion.getId());
@@ -510,8 +485,6 @@ public class TarjetaPublicacion extends JPanel {
             } catch (Exception ex) { }
         }
     }
-
-    // ================== GUARDAR PUBLICACIÓN ACTUALIZADA ==================
 
     private void guardarPublicacionActualizada() {
         try {

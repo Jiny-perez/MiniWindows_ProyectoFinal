@@ -359,9 +359,6 @@ public class VentanaLogin extends JFrame {
         return campo;
     }
     
-    /**
-     * LOGIN con manejo de cuenta desactivada + opción de reactivar.
-     */
     private void iniciarSesion() {
         String username = txtUsername.getText().trim();
         String password = new String(txtPassword.getPassword());
@@ -372,18 +369,14 @@ public class VentanaLogin extends JFrame {
             return;
         }
         
-        // 1) Intento normal (usuario activo)
         Usuario usuario = gestorUsuarios.validarLogin(username, password);
         
         if (usuario != null) {
-            // Usuario activo → entra normal
             gestorINSTA.setUsuarioActual(usuario);
             abrirInstagram(usuario);
             return;
         }
         
-        // 2) Verificar si el usuario existe, la contraseña es correcta
-        //    pero la cuenta está DESACTIVADA
         Usuario usuarioGuardado = gestorUsuarios.obtenerUsuario(username);
         if (usuarioGuardado != null 
                 && usuarioGuardado.getPassword().equals(password)
@@ -411,7 +404,6 @@ public class VentanaLogin extends JFrame {
             return;
         }
         
-        // 3) Si no cae en ninguno de los casos anteriores → credenciales malas
         JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", 
             "Error", JOptionPane.ERROR_MESSAGE);
         txtPassword.setText("");

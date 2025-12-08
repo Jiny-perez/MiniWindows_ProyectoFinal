@@ -139,7 +139,6 @@ public class PanelNotificaciones extends JPanel {
         tarjeta.setPreferredSize(new Dimension(900, 110));
         tarjeta.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Icono: intentamos cargar imagen desde recursos; si falla, usamos emoji
         JLabel lblIcono = new JLabel();
         lblIcono.setHorizontalAlignment(SwingConstants.CENTER);
         lblIcono.setVerticalAlignment(SwingConstants.CENTER);
@@ -171,12 +170,10 @@ public class PanelNotificaciones extends JPanel {
 
         lblIcono.setPreferredSize(new Dimension(56, 56));
 
-        // Contenido: usamos HTML con ancho fijo para que el texto haga wrap correctamente
         JPanel panelContenido = new JPanel();
         panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
         panelContenido.setBackground(tarjeta.getBackground());
 
-        // Limitar ancho del texto para wrap consistente (ajusta 560px si quieres más/menos)
         String mensajeHtml = String.format("<html><div style='width:%dpx'><b>@%s</b> %s</div></html>",
                 560, escapeHtml(notificacion.getUsuarioOrigen()), escapeHtml(notificacion.getMensaje()));
 
@@ -229,7 +226,6 @@ public class PanelNotificaciones extends JPanel {
     }
 
     private ImageIcon cargarIconoTipo(Notificacion notificacion) {
-        // Rutas esperadas dentro de resources: /Instagram/icons/...
         String ruta = null;
         switch (notificacion.getTipo()) {
             case LIKE:
@@ -253,7 +249,6 @@ public class PanelNotificaciones extends JPanel {
                 return new ImageIcon(res);
             }
         } catch (Exception e) {
-            // ignore - fallback to emoji
         }
         return null;
     }

@@ -39,7 +39,6 @@ public class DialogSelectorImagenes extends JDialog {
     public DialogSelectorImagenes(Frame parent) {
         super(parent, "Seleccionar Imagen - Mis Imágenes", true);
         
-        // Obtener sistema de archivos
         MiniWindowsClass sistema = MiniWindowsClass.getInstance();
         this.sistemaArchivos = sistema.getSistemaArchivos();
         
@@ -52,7 +51,6 @@ public class DialogSelectorImagenes extends JDialog {
         setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
         
-        // Panel superior con título
         JPanel panelSuperior = new JPanel(new BorderLayout());
         panelSuperior.setBackground(CARD_COLOR);
         panelSuperior.setBorder(new CompoundBorder(
@@ -82,7 +80,6 @@ public class DialogSelectorImagenes extends JDialog {
         panelSuperior.add(panelTextos, BorderLayout.CENTER);
         add(panelSuperior, BorderLayout.NORTH);
         
-        // Panel central con grid de imágenes
         panelImagenes = new JPanel(new GridLayout(0, 3, 15, 15));
         panelImagenes.setBackground(BACKGROUND_COLOR);
         panelImagenes.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -94,7 +91,6 @@ public class DialogSelectorImagenes extends JDialog {
         
         add(scrollPane, BorderLayout.CENTER);
         
-        // Panel inferior con botones
         JPanel panelInferior = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
         panelInferior.setBackground(CARD_COLOR);
         panelInferior.setBorder(new CompoundBorder(
@@ -123,23 +119,18 @@ public class DialogSelectorImagenes extends JDialog {
         panelImagenes.removeAll();
         
         try {
-            // Navegar a la carpeta "Mis Imagenes" del usuario actual
             String rutaOriginal = sistemaArchivos.getRutaActual();
             
-            // Intentar navegar a Mis Imagenes
             try {
-                // Obtener usuario actual del sistema
                 String usuarioActual = obtenerUsuarioActual();
                 String rutaMisImagenes = "Z:\\" + usuarioActual + "\\Mis Imagenes";
                 
                 sistemaArchivos.navegarARuta(rutaMisImagenes);
             } catch (Exception e) {
-                // Si no existe, mostrar mensaje
                 mostrarMensajeVacio();
                 return;
             }
             
-            // Listar contenido
             ArrayList<Archivo> archivos = sistemaArchivos.listarContenido();
             
             if (archivos == null || archivos.isEmpty()) {
@@ -147,7 +138,6 @@ public class DialogSelectorImagenes extends JDialog {
                 return;
             }
             
-            // Filtrar solo imágenes
             ArrayList<File> imagenes = new ArrayList<>();
             for (Archivo archivo : archivos) {
                 if (!archivo.isEsCarpeta() && esImagen(archivo.getNombre())) {
@@ -163,17 +153,14 @@ public class DialogSelectorImagenes extends JDialog {
                 return;
             }
             
-            // Crear tarjetas para cada imagen
             for (File imagen : imagenes) {
                 JPanel tarjeta = crearTarjetaImagen(imagen);
                 panelImagenes.add(tarjeta);
             }
             
-            // Restaurar ruta original
             try {
                 sistemaArchivos.navegarARuta(rutaOriginal);
             } catch (Exception e) {
-                // Ignorar error al restaurar
             }
             
         } catch (Exception e) {
@@ -195,7 +182,6 @@ public class DialogSelectorImagenes extends JDialog {
         tarjeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
         tarjeta.setPreferredSize(new Dimension(200, 220));
         
-        // Cargar y mostrar miniatura
         JLabel lblImagen = new JLabel();
         lblImagen.setHorizontalAlignment(SwingConstants.CENTER);
         lblImagen.setVerticalAlignment(SwingConstants.CENTER);
@@ -206,7 +192,6 @@ public class DialogSelectorImagenes extends JDialog {
         try {
             BufferedImage img = ImageIO.read(archivo);
             if (img != null) {
-                // Escalar imagen manteniendo aspecto
                 int anchoMax = 180;
                 int altoMax = 180;
                 
@@ -227,7 +212,6 @@ public class DialogSelectorImagenes extends JDialog {
             lblImagen.setForeground(TEXT_SECONDARY);
         }
         
-        // Nombre del archivo
         JLabel lblNombre = new JLabel(archivo.getName());
         lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblNombre.setForeground(TEXT_PRIMARY);
@@ -236,7 +220,6 @@ public class DialogSelectorImagenes extends JDialog {
         tarjeta.add(lblImagen, BorderLayout.CENTER);
         tarjeta.add(lblNombre, BorderLayout.SOUTH);
         
-        // Efectos hover
         tarjeta.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
