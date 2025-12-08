@@ -28,8 +28,8 @@ public class DialogEditarPerfil extends JDialog {
     private JTextArea txtBiografia;
     private JLabel lblImagenPerfil;
     private File imagenSeleccionada;
+    private JCheckBox chkCuentaActiva;
 
-    // Para indicar si se guardaron cambios
     private boolean actualizado = false;
     
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
@@ -38,6 +38,7 @@ public class DialogEditarPerfil extends JDialog {
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
+    private static final Color WARNING_RED = new Color(237, 73, 86);
     
     public DialogEditarPerfil(Frame parent, Usuario usuario, GestorUsuariosLocalINSTA gestorUsuarios) {
         super(parent, "Editar Perfil", true);
@@ -78,15 +79,6 @@ public class DialogEditarPerfil extends JDialog {
         lblImagenPerfil = new JLabel();
         lblImagenPerfil.setPreferredSize(new Dimension(100, 100));
         lblImagenPerfil.setAlignmentX(Component.CENTER_ALIGNMENT);
-        try {
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
-            Image img = avatarIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
-            lblImagenPerfil.setIcon(new ImageIcon(img));
-        } catch (Exception e) {
-            lblImagenPerfil.setText("👤");
-            lblImagenPerfil.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 80));
-            lblImagenPerfil.setForeground(INSTAGRAM_PINK);
-        }
         
         JButton btnCambiarFoto = new JButton("Cambiar foto de perfil");
         btnCambiarFoto.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -110,7 +102,7 @@ public class DialogEditarPerfil extends JDialog {
         panelForm.setLayout(new BoxLayout(panelForm, BoxLayout.Y_AXIS));
         panelForm.setBackground(CARD_COLOR);
         panelForm.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelForm.setMaximumSize(new Dimension(400, 500));
+        panelForm.setMaximumSize(new Dimension(400, 600));
         
         txtNombreCompleto = crearCampoTexto("Nombre completo", panelForm);
         txtEmail = crearCampoTexto("Correo electrónico", panelForm);
@@ -137,7 +129,43 @@ public class DialogEditarPerfil extends JDialog {
         panelForm.add(lblBiografia);
         panelForm.add(Box.createVerticalStrut(6));
         panelForm.add(scrollBio);
-        panelForm.add(Box.createVerticalStrut(30));
+        panelForm.add(Box.createVerticalStrut(20));
+        
+        // SECCIÓN DE ESTADO DE CUENTA
+        JPanel panelEstadoCuenta = new JPanel();
+        panelEstadoCuenta.setLayout(new BoxLayout(panelEstadoCuenta, BoxLayout.Y_AXIS));
+        panelEstadoCuenta.setBackground(new Color(255, 250, 250));
+        panelEstadoCuenta.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(WARNING_RED, 1, true),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+        panelEstadoCuenta.setMaximumSize(new Dimension(400, 120));
+        panelEstadoCuenta.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel lblEstadoCuenta = new JLabel("Estado de la cuenta");
+        lblEstadoCuenta.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblEstadoCuenta.setForeground(WARNING_RED);
+        lblEstadoCuenta.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        chkCuentaActiva = new JCheckBox("Cuenta activa");
+        chkCuentaActiva.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        chkCuentaActiva.setBackground(new Color(255, 250, 250));
+        chkCuentaActiva.setForeground(TEXT_PRIMARY);
+        chkCuentaActiva.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JLabel lblInfo = new JLabel("<html><i>Si desactivas tu cuenta, tus publicaciones no aparecerán en el timeline</i></html>");
+        lblInfo.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblInfo.setForeground(TEXT_SECONDARY);
+        lblInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        panelEstadoCuenta.add(lblEstadoCuenta);
+        panelEstadoCuenta.add(Box.createVerticalStrut(8));
+        panelEstadoCuenta.add(chkCuentaActiva);
+        panelEstadoCuenta.add(Box.createVerticalStrut(5));
+        panelEstadoCuenta.add(lblInfo);
+        
+        panelForm.add(panelEstadoCuenta);
+        panelForm.add(Box.createVerticalStrut(25));
         
         panelPrincipal.add(panelForm);
         
@@ -205,11 +233,53 @@ public class DialogEditarPerfil extends JDialog {
         txtNombreCompleto.setText(usuario.getNombreCompleto());
         txtEmail.setText(usuario.getEmail());
         
-        String biografia = usuario.getBiografia();
+        // Cargar biografía desde GestorPerfiles (más actualizada)
+        String biografia = gestorPerfiles.obtenerBiografia(usuario.getUsername());
+        if (biografia == null || biografia.isEmpty()) {
+            biografia = usuario.getBiografia();
+        }
+        
         if (biografia != null && !biografia.isEmpty()) {
             txtBiografia.setText(biografia);
         }
-        // Si quieres, aquí puedes cargar también la foto guardada en disco usando GestorPerfiles
+        
+        // Cargar estado de cuenta
+        chkCuentaActiva.setSelected(usuario.isActivo());
+        
+        // Cargar imagen de perfil guardada
+        cargarImagenPerfilGuardada();
+    }
+    
+    private void cargarImagenPerfilGuardada() {
+        // Usar el método correcto: obtenerImagenPerfil (no obtenerRutaImagenPerfil)
+        String rutaImagen = gestorPerfiles.obtenerImagenPerfil(usuario.getUsername());
+        
+        if (rutaImagen != null && !rutaImagen.isEmpty()) {
+            File archivoImagen = new File(rutaImagen);
+            if (archivoImagen.exists()) {
+                try {
+                    ImageIcon icon = new ImageIcon(rutaImagen);
+                    Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+                    lblImagenPerfil.setIcon(new ImageIcon(img));
+                    lblImagenPerfil.setText("");
+                    return;
+                } catch (Exception e) {
+                    System.err.println("Error al cargar imagen guardada: " + e.getMessage());
+                }
+            }
+        }
+        
+        // Imagen por defecto
+        try {
+            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
+            Image img = avatarIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            lblImagenPerfil.setIcon(new ImageIcon(img));
+            lblImagenPerfil.setText("");
+        } catch (Exception e) {
+            lblImagenPerfil.setText("👤");
+            lblImagenPerfil.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 80));
+            lblImagenPerfil.setForeground(INSTAGRAM_PINK);
+        }
     }
     
     private void cambiarFotoPerfil() {
@@ -240,6 +310,7 @@ public class DialogEditarPerfil extends JDialog {
         String nuevoNombre = txtNombreCompleto.getText().trim();
         String nuevoEmail = txtEmail.getText().trim();
         String nuevaBiografia = txtBiografia.getText().trim();
+        boolean cuentaActiva = chkCuentaActiva.isSelected();
         
         if (nuevoNombre.isEmpty()) {
             JOptionPane.showMessageDialog(this, 
@@ -249,10 +320,25 @@ public class DialogEditarPerfil extends JDialog {
             return;
         }
         
+        // Confirmación si va a desactivar la cuenta
+        if (!cuentaActiva && usuario.isActivo()) {
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                "¿Estás seguro de que deseas desactivar tu cuenta?\n" +
+                "Tus publicaciones no aparecerán en el timeline.",
+                "Confirmar desactivación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (respuesta != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+        
         // ACTUALIZAR USUARIO
         usuario.setNombreCompleto(nuevoNombre);
         usuario.setEmail(nuevoEmail);
         usuario.setBiografia(nuevaBiografia);
+        usuario.setActivo(cuentaActiva);
         
         // GUARDAR EN GESTOR DE USUARIOS
         gestorUsuarios.actualizarUsuario(usuario);
@@ -266,34 +352,33 @@ public class DialogEditarPerfil extends JDialog {
         }
         
         // ACTUALIZAR BIOGRAFÍA EN PERFIL
-        if (!nuevaBiografia.isEmpty()) {
-            gestorPerfiles.actualizarBiografia(usuario.getUsername(), nuevaBiografia);
-        }
+        gestorPerfiles.actualizarBiografia(usuario.getUsername(), nuevaBiografia);
+        
+        String mensaje = cuentaActiva ? 
+            "Perfil actualizado correctamente" : 
+            "Cuenta desactivada. Tus publicaciones no aparecerán en el timeline";
         
         JOptionPane.showMessageDialog(this, 
-            "Perfil actualizado correctamente", 
+            mensaje, 
             "Éxito", 
             JOptionPane.INFORMATION_MESSAGE);
         
         actualizado = true;
         
-        setVisible(false);
         dispose();
     }
     
     private void configurarDialog() {
-        setSize(500, 780);
-        setMinimumSize(new Dimension(450, 700));
+        setSize(500, 850);
+        setMinimumSize(new Dimension(450, 800));
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     }
     
-    // Indica al panel padre si se guardaron cambios
     public boolean fueActualizado() {
         return actualizado;
     }
 
-    // Devuelve el icono actual de la foto (para que el PanelPerfil lo use)
     public ImageIcon getIconoPerfil() {
         Icon icon = lblImagenPerfil.getIcon();
         if (icon instanceof ImageIcon) {
