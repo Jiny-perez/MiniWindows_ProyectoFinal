@@ -11,7 +11,7 @@ import java.io.File;
  * @author najma
  */
 public class GUIVisorImagenes extends JFrame {
-   
+
     private final VisorImagenes visor;
 
     private JLabel lblImagenPrincipal;
@@ -24,13 +24,6 @@ public class GUIVisorImagenes extends JFrame {
     private JButton btnSiguiente;
 
     private boolean ajusteAutomatico = true;
-    
-    private static final Color ROSA_PRINCIPAL = new Color(242, 80, 129);
-    private static final Color ROSA_HOVER = new Color(220, 60, 110);
-    private static final Color ROSA_CLARO = new Color(255, 240, 245);
-    private static final Color FONDO_OSCURO = new Color(40, 40, 40);
-    private static final Color FONDO_PANEL = new Color(50, 50, 50);
-    private static final Color BORDE = new Color(80, 80, 80);
 
     public GUIVisorImagenes(File archivoInicial) {
         super("Visor de Imágenes");
@@ -48,7 +41,7 @@ public class GUIVisorImagenes extends JFrame {
 
     private void inicializarComponentes() {
         setLayout(new BorderLayout());
-        getContentPane().setBackground(FONDO_OSCURO);
+        getContentPane().setBackground(new Color(40, 40, 40));
 
         JPanel panelSuperior = crearPanelSuperior();
         add(panelSuperior, BorderLayout.NORTH);
@@ -62,8 +55,8 @@ public class GUIVisorImagenes extends JFrame {
 
     private JPanel crearPanelSuperior() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(FONDO_PANEL);
-        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, ROSA_PRINCIPAL));
+        panel.setBackground(new Color(50, 50, 50));
+        panel.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(242, 80, 129)));
         panel.setPreferredSize(new Dimension(0, 60));
 
         lblNombreArchivo = new JLabel("Subprograma", SwingConstants.CENTER);
@@ -78,103 +71,119 @@ public class GUIVisorImagenes extends JFrame {
 
     private JPanel crearPanelCentral() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(FONDO_OSCURO);
+        panel.setBackground(new Color(40, 40, 40));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         lblImagenPrincipal = new JLabel();
         lblImagenPrincipal.setHorizontalAlignment(SwingConstants.CENTER);
         lblImagenPrincipal.setVerticalAlignment(SwingConstants.CENTER);
-        lblImagenPrincipal.setBackground(FONDO_OSCURO);
+        lblImagenPrincipal.setBackground(new Color(40, 40, 40));
         lblImagenPrincipal.setOpaque(true);
 
-        scrollPaneImagen = new JScrollPane(lblImagenPrincipal);
-        scrollPaneImagen.setBackground(FONDO_OSCURO);
-        scrollPaneImagen.getViewport().setBackground(FONDO_OSCURO);
-        scrollPaneImagen.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+        scrollPaneImagen = new JScrollPane(lblImagenPrincipal,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPaneImagen.setBackground(new Color(40, 40, 40));
+        scrollPaneImagen.getViewport().setBackground(new Color(40, 40, 40));
+        scrollPaneImagen.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
+
+        scrollPaneImagen.getViewport().addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                if (ajusteAutomatico) {
+                    SwingUtilities.invokeLater(() -> ajustarPantalla());
+                } else {
+                    SwingUtilities.invokeLater(() -> actualizarImagen());
+                }
+            }
+        });
 
         panel.add(scrollPaneImagen, BorderLayout.CENTER);
-
         return panel;
     }
 
     private JPanel crearPanelInferior() {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(FONDO_PANEL);
-        panel.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, BORDE));
+        panel.setBackground(new Color(50, 50, 50));
+        panel.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, new Color(242, 80, 129)));
         panel.setPreferredSize(new Dimension(0, 160));
 
-        JLabel lblEstado = new JLabel("Subprograma iniciado.", SwingConstants.CENTER);
+        JLabel lblEstado = new JLabel("", SwingConstants.CENTER);
         lblEstado.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblEstado.setForeground(new Color(180, 180, 180));
         lblEstado.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         panel.add(lblEstado, BorderLayout.NORTH);
 
         JPanel contenedorMiniaturas = new JPanel(new BorderLayout());
-        contenedorMiniaturas.setBackground(FONDO_PANEL);
+        contenedorMiniaturas.setBackground(new Color(50, 50, 50));
 
-        panelMiniaturas = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        panelMiniaturas.setBackground(FONDO_PANEL);
+        panelMiniaturas = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        panelMiniaturas.setBackground(new Color(50, 50, 50));
 
         scrollMiniaturas = new JScrollPane(panelMiniaturas);
-        scrollMiniaturas.setBackground(FONDO_PANEL);
-        scrollMiniaturas.getViewport().setBackground(FONDO_PANEL);
+        scrollMiniaturas.setBackground(new Color(50, 50, 50));
+        scrollMiniaturas.getViewport().setBackground(new Color(50, 50, 50));
         scrollMiniaturas.setBorder(BorderFactory.createEmptyBorder());
         scrollMiniaturas.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollMiniaturas.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scrollMiniaturas.setPreferredSize(new Dimension(0, 120));
-
+        scrollMiniaturas.setPreferredSize(new Dimension(0, 160));
         contenedorMiniaturas.add(scrollMiniaturas, BorderLayout.CENTER);
 
-        JPanel panelNavegacion = new JPanel(new BorderLayout());
-        panelNavegacion.setBackground(FONDO_PANEL);
-        panelNavegacion.setPreferredSize(new Dimension(100, 0));
-
-        btnAnterior = crearBotonFlecha("◄");
-        btnAnterior.addActionListener(e -> imagenAnterior());
-
-        btnSiguiente = crearBotonFlecha("►");
-        btnSiguiente.addActionListener(e -> imagenSiguiente());
-
         JPanel panelIzq = new JPanel(new BorderLayout());
-        panelIzq.setBackground(FONDO_PANEL);
+        panelIzq.setBackground(new Color(50, 50, 50));
         panelIzq.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-        panelIzq.add(btnAnterior, BorderLayout.CENTER);
 
         JPanel panelDer = new JPanel(new BorderLayout());
-        panelDer.setBackground(FONDO_PANEL);
+        panelDer.setBackground(new Color(50, 50, 50));
         panelDer.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
-        panelDer.add(btnSiguiente, BorderLayout.CENTER);
+
+        btnAnterior = crearBotonFlecha("◄", new Dimension(90, 120), 30);
+        btnAnterior.addActionListener(e -> imagenAnterior());
+
+        btnSiguiente = crearBotonFlecha("►", new Dimension(90, 120), 30);
+        btnSiguiente.addActionListener(e -> imagenSiguiente());
+
+        JPanel contAnterior = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        contAnterior.setBackground(new Color(50, 50, 50));
+        contAnterior.add(btnAnterior);
+
+        JPanel contSiguiente = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        contSiguiente.setBackground(new Color(50, 50, 50));
+        contSiguiente.add(btnSiguiente);
+
+        panelIzq.add(contAnterior, BorderLayout.CENTER);
+        panelDer.add(contSiguiente, BorderLayout.CENTER);
 
         panel.add(panelIzq, BorderLayout.WEST);
         panel.add(contenedorMiniaturas, BorderLayout.CENTER);
         panel.add(panelDer, BorderLayout.EAST);
 
         return panel;
+
     }
 
-    private JButton crearBotonFlecha(String texto) {
+    private JButton crearBotonFlecha(String texto, Dimension prefSize, int fontSize) {
         JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, fontSize));
         btn.setForeground(Color.WHITE);
-        btn.setBackground(ROSA_PRINCIPAL);
+        btn.setBackground(new Color(242, 80, 129));
         btn.setFocusPainted(false);
         btn.setBorderPainted(false);
         btn.setContentAreaFilled(true);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(60, 100));
-
+        btn.setPreferredSize(prefSize);
+        btn.setMinimumSize(prefSize);
+        btn.setMaximumSize(prefSize);
         btn.addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseEntered(MouseEvent e) {
-                if (btn.isEnabled()) btn.setBackground(ROSA_HOVER);
+                if (btn.isEnabled()) {
+                    btn.setBackground(new Color(220, 60, 110));
+                }
             }
 
-            @Override
             public void mouseExited(MouseEvent e) {
-                btn.setBackground(ROSA_PRINCIPAL);
+                btn.setBackground(new Color(242, 80, 129));
             }
         });
-
         return btn;
     }
 
@@ -186,23 +195,23 @@ public class GUIVisorImagenes extends JFrame {
 
         for (int i = 0; i < total; i++) {
             final int indice = i;
-            
+
             JPanel tarjetaMiniatura = new JPanel(new BorderLayout());
-            tarjetaMiniatura.setPreferredSize(new Dimension(80, 80));
-            tarjetaMiniatura.setBackground(FONDO_OSCURO);
+            tarjetaMiniatura.setPreferredSize(new Dimension(110, 100));
+            tarjetaMiniatura.setBackground(new Color(40, 40, 40));
             tarjetaMiniatura.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
             if (i == actual) {
-                tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(ROSA_PRINCIPAL, 3));
+                tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(new Color(242, 80, 129), 3));
             } else {
-                tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+                tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
             }
 
             JLabel lblMiniatura = new JLabel();
             lblMiniatura.setHorizontalAlignment(SwingConstants.CENTER);
             lblMiniatura.setVerticalAlignment(SwingConstants.CENTER);
             lblMiniatura.setOpaque(true);
-            lblMiniatura.setBackground(FONDO_OSCURO);
+            lblMiniatura.setBackground(new Color(40, 40, 40));
 
             SwingUtilities.invokeLater(() -> {
                 try {
@@ -210,7 +219,7 @@ public class GUIVisorImagenes extends JFrame {
                     if (archivo != null && archivo.exists()) {
                         BufferedImage imgOriginal = javax.imageio.ImageIO.read(archivo);
                         if (imgOriginal != null) {
-                            Image imgEscalada = imgOriginal.getScaledInstance(74, 74, Image.SCALE_SMOOTH);
+                            Image imgEscalada = imgOriginal.getScaledInstance(105, 105, Image.SCALE_SMOOTH);
                             lblMiniatura.setIcon(new ImageIcon(imgEscalada));
                         }
                     }
@@ -222,7 +231,6 @@ public class GUIVisorImagenes extends JFrame {
 
             tarjetaMiniatura.add(lblMiniatura, BorderLayout.CENTER);
 
-            // Click para cambiar imagen
             tarjetaMiniatura.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -233,17 +241,15 @@ public class GUIVisorImagenes extends JFrame {
                     }
                 }
 
-                @Override
                 public void mouseEntered(MouseEvent e) {
                     if (indice != visor.getIndiceActual()) {
-                        tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(ROSA_CLARO, 2));
+                        tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(new Color(255, 240, 245), 2));
                     }
                 }
 
-                @Override
                 public void mouseExited(MouseEvent e) {
                     if (indice != visor.getIndiceActual()) {
-                        tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(BORDE, 1));
+                        tarjetaMiniatura.setBorder(BorderFactory.createLineBorder(new Color(80, 80, 80), 1));
                     }
                 }
             });
@@ -263,18 +269,18 @@ public class GUIVisorImagenes extends JFrame {
             }
         });
     }
-    
+
     private File obtenerArchivoPorIndice(int indice) {
         File archivoActual = visor.getArchivoActual();
         if (archivoActual == null) {
             return null;
         }
-        
+
         File carpeta = archivoActual.getParentFile();
         if (carpeta == null || !carpeta.exists() || !carpeta.isDirectory()) {
             return null;
         }
-        
+
         java.util.ArrayList<File> imagenes = new java.util.ArrayList<>();
         File[] archivos = carpeta.listFiles();
         if (archivos != null) {
@@ -284,14 +290,14 @@ public class GUIVisorImagenes extends JFrame {
                 }
             }
         }
-        
+
         if (indice >= 0 && indice < imagenes.size()) {
             return imagenes.get(indice);
         }
-        
+
         return null;
     }
-    
+
     private boolean esImagen(File archivo) {
         if (archivo == null || !archivo.isFile()) {
             return false;
@@ -317,7 +323,6 @@ public class GUIVisorImagenes extends JFrame {
         });
 
         addKeyListener(new KeyAdapter() {
-            @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_LEFT:
@@ -377,6 +382,10 @@ public class GUIVisorImagenes extends JFrame {
         int altoVentana = Math.max(1, scrollPaneImagen.getViewport().getHeight() - 20);
 
         visor.ajustarPantalla(anchoVentana, altoVentana);
+
+        lblImagenPrincipal.setPreferredSize(new Dimension(anchoVentana, altoVentana));
+        lblImagenPrincipal.revalidate();
+
         actualizarImagen();
     }
 
@@ -389,7 +398,25 @@ public class GUIVisorImagenes extends JFrame {
 
     private void actualizarImagen() {
         if (visor.getImagenTransformada() != null) {
-            lblImagenPrincipal.setIcon(new ImageIcon(visor.getImagenTransformada()));
+            Image img = visor.getImagenTransformada();
+
+            int vw = Math.max(1, scrollPaneImagen.getViewport().getWidth() - 20);
+            int vh = Math.max(1, scrollPaneImagen.getViewport().getHeight() - 20);
+            int iw = img.getWidth(null);
+            int ih = img.getHeight(null);
+
+            if (iw > vw || ih > vh) {
+                double scale = Math.min((double) vw / iw, (double) vh / ih);
+                int nw = Math.max(1, (int) Math.round(iw * scale));
+                int nh = Math.max(1, (int) Math.round(ih * scale));
+                Image scaled = img.getScaledInstance(nw, nh, Image.SCALE_SMOOTH);
+                lblImagenPrincipal.setIcon(new ImageIcon(scaled));
+                lblImagenPrincipal.setPreferredSize(new Dimension(vw, vh));
+            } else {
+                lblImagenPrincipal.setIcon(new ImageIcon(img));
+                lblImagenPrincipal.setPreferredSize(new Dimension(vw, vh));
+            }
+
             lblImagenPrincipal.revalidate();
             lblImagenPrincipal.repaint();
         } else {
