@@ -5,7 +5,7 @@
 package Instagram.GUI;
 
 import Instagram.Logica.GestorMensajes;
-import Instagram.Logica.GestorUsuariosLocal;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Modelo.Mensaje;
 import Instagram.Modelo.Usuario;
 import java.awt.*;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class DialogConversacion extends JDialog {
     
     private GestorMensajes gestorMensajes;
-    private GestorUsuariosLocal gestorUsuarios;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     private String usuarioActual;
     private String otroUsuario;
     
@@ -35,7 +35,7 @@ public class DialogConversacion extends JDialog {
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     
-    public DialogConversacion(Frame parent, GestorMensajes gestor, GestorUsuariosLocal gestorUsuariosLocal,
+    public DialogConversacion(Frame parent, GestorMensajes gestor, GestorUsuariosLocalINSTA gestorUsuariosLocal,
                              String usuarioActual, String otroUsuario) {
         super(parent, "@" + otroUsuario, false);
         this.gestorMensajes = gestor;

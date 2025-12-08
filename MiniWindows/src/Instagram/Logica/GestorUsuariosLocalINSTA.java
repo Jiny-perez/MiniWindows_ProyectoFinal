@@ -13,38 +13,38 @@ import java.util.ArrayList;
  *
  * @author najma
  */
-public class GestorUsuariosLocal {
-    
-    private static final String ARCHIVO_USUARIOS = "usuarios_insta.dat";
+public class GestorUsuariosLocalINSTA {
+   
     private HashMap<String, Usuario> usuarios;
     
-    public GestorUsuariosLocal() {
+    public GestorUsuariosLocalINSTA() {
         cargarUsuarios();
     }
     
     private void cargarUsuarios() {
-        File archivo = new File(ARCHIVO_USUARIOS);
+        File archivo = new File(GestorArchivosUsuarioINSTA.ARCHIVO_USERS);
         
         if (archivo.exists()) {
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
                 usuarios = (HashMap<String, Usuario>) ois.readObject();
-                System.out.println("Usuarios cargados: " + usuarios.size());
+                System.out.println("✓ Usuarios cargados desde users.ins: " + usuarios.size());
             } catch (Exception e) {
-                System.err.println("Error al cargar usuarios: " + e.getMessage());
+                System.err.println("Error al cargar users.ins: " + e.getMessage());
                 usuarios = new HashMap<>();
             }
         } else {
             usuarios = new HashMap<>();
-            System.out.println("Iniciando con nuevo archivo de usuarios");
+            System.out.println("○ Iniciando con nuevo archivo users.ins");
         }
     }
     
     private void guardarUsuarios() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_USUARIOS))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(GestorArchivosUsuarioINSTA.ARCHIVO_USERS))) {
             oos.writeObject(usuarios);
-            System.out.println("Usuarios guardados correctamente");
+            System.out.println("✓ Usuarios guardados en users.ins");
         } catch (Exception e) {
-            System.err.println("Error al guardar usuarios: " + e.getMessage());
+            System.err.println("Error al guardar users.ins: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -57,7 +57,8 @@ public class GestorUsuariosLocal {
         return usuarios.get(username);
     }
     
-    public boolean registrarUsuario(String username, String nombreCompleto, char genero, int edad, String password) {
+    public boolean registrarUsuario(String username, String nombreCompleto, char genero, 
+                                   int edad, String password) {
         if (existeUsuario(username)) {
             System.out.println("El usuario ya existe: " + username);
             return false;
@@ -67,11 +68,12 @@ public class GestorUsuariosLocal {
             Usuario nuevoUsuario = new Usuario(username, nombreCompleto, genero, edad, password, true);
             usuarios.put(username, nuevoUsuario);
             
-            GestorArchivosUsuario.crearDirectorioUsuario(username);
+            // Crear directorio del usuario con archivos .ins
+            GestorArchivosUsuarioINSTA.crearDirectorioUsuario(username);
             
             guardarUsuarios();
             
-            System.out.println("Usuario registrado exitosamente: " + username);
+            System.out.println("✓ Usuario registrado exitosamente: " + username);
             return true;
         } catch (Exception e) {
             System.err.println("Error al registrar usuario: " + e.getMessage());
@@ -84,37 +86,24 @@ public class GestorUsuariosLocal {
         Usuario usuario = usuarios.get(username);
         
         if (usuario == null) {
-            System.out.println("Usuario no encontrado: " + username);
             return false;
         }
         
         if (!usuario.isActivo()) {
-            System.out.println("Usuario inactivo: " + username);
             return false;
         }
         
-        if (!usuario.getPassword().equals(password)) {
-            System.out.println("Contraseña incorrecta para: " + username);
-            return false;
-        }
-        
-        return true;
+        return usuario.getPassword().equals(password);
     }
     
     public boolean validarCredenciales(String username, String password) {
         Usuario usuario = usuarios.get(username);
         
         if (usuario == null) {
-            System.out.println("Usuario no encontrado: " + username);
             return false;
         }
         
-        if (!usuario.getPassword().equals(password)) {
-            System.out.println("Contraseña incorrecta para: " + username);
-            return false;
-        }
-        
-        return true;
+        return usuario.getPassword().equals(password);
     }
     
     public boolean actualizarUsuario(Usuario usuario) {

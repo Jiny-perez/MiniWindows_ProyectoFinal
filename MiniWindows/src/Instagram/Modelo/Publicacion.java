@@ -16,90 +16,34 @@ import java.util.UUID;
 public class Publicacion implements Serializable {
     
     private static final long serialVersionUID = 1L;
+    public static final int MAX_CARACTERES = 140;
     
     private String id;
     private String username;
     private String contenido;
     private String rutaImagen;
-    private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaPublicacion;
     
-    private ArrayList<String> likes;
-    private ArrayList<Comentario> comentarios;
-    private ArrayList<String> hashtags;
-    
-    public Publicacion(String username, String contenido) {
+    public Publicacion(String username, String contenido) throws IllegalArgumentException {
+        if (contenido != null && contenido.length() > MAX_CARACTERES) {
+            throw new IllegalArgumentException("El contenido no puede exceder " + MAX_CARACTERES + " caracteres");
+        }
+        
         this.id = UUID.randomUUID().toString();
         this.username = username;
-        this.contenido = contenido;
-        this.fechaCreacion = LocalDateTime.now();
+        this.contenido = contenido != null ? contenido : "";
+        this.fechaPublicacion = LocalDateTime.now();
         this.rutaImagen = null;
-        
-        this.likes = new ArrayList<>();
-        this.comentarios = new ArrayList<>();
-        this.hashtags = new ArrayList<>();
-        
-        extraerHashtags();
     }
     
-    public Publicacion(String username, String contenido, String rutaImagen) {
+    public Publicacion(String username, String contenido, String rutaImagen) throws IllegalArgumentException {
         this(username, contenido);
         this.rutaImagen = rutaImagen;
     }
     
-    public boolean darLike(String username) {
-        if (!likes.contains(username)) {
-            likes.add(username);
-            return true;
-        }
-        return false;
-    }
-    
-    public boolean quitarLike(String username) {
-        return likes.remove(username);
-    }
-    
-    public boolean tieneLikeDe(String username) {
-        return likes.contains(username);
-    }
-    
-    public int getCantidadLikes() {
-        return likes.size();
-    }
-    
-    public void agregarComentario(Comentario comentario) {
-        comentarios.add(comentario);
-    }
-    
-    public boolean eliminarComentario(String comentarioId) {
-        return comentarios.removeIf(c -> c.getId().equals(comentarioId));
-    }
-    
-    public int getCantidadComentarios() {
-        return comentarios.size();
-    }
-    
-    private void extraerHashtags() {
-        hashtags.clear();
-        String[] palabras = contenido.split("\\s+");
-        
-        for (String palabra : palabras) {
-            if (palabra.startsWith("#") && palabra.length() > 1) {
-                String hashtag = palabra.substring(1).toLowerCase();
-                hashtag = hashtag.replaceAll("[^a-záéíóúñ0-9_]$", "");
-                if (!hashtag.isEmpty() && !hashtags.contains(hashtag)) {
-                    hashtags.add(hashtag);
-                }
-            }
-        }
-    }
-    
-    public boolean tieneHashtag(String hashtag) {
-        return hashtags.contains(hashtag.toLowerCase());
-    }
-    
     public String getTiempoTranscurrido() {
         LocalDateTime ahora = LocalDateTime.now();
-        long minutos = java.time.Duration.between(fechaCreacion, ahora).toMinutes();
+        long minutos = java.time.Duration.between(fechaPublicacion, ahora).toMinutes();
         
         if (minutos < 1) {
             return "ahora";
@@ -114,55 +58,71 @@ public class Publicacion implements Serializable {
         }
     }
     
-    public String getId() {
-        return id;
+    public ArrayList<String> extraerHashtags() {
+        ArrayList<String> hashtags = new ArrayList<>();
+        String[] palabras = contenido.split("\\s+");
+        
+        for (String palabra : palabras) {
+            if (palabra.startsWith("#") && palabra.length() > 1) {
+                String hashtag = palabra.substring(1).toLowerCase();
+                hashtag = hashtag.replaceAll("[^a-záéíóúñ0-9_]$", "");
+                if (!hashtag.isEmpty() && !hashtags.contains(hashtag)) {
+                    hashtags.add(hashtag);
+                }
+            }
+        }
+        
+        return hashtags;
     }
     
-    public String getUsername() {
-        return username;
+    public ArrayList<String> extraerMenciones() {
+        ArrayList<String> menciones = new ArrayList<>();
+        String[] palabras = contenido.split("\\s+");
+        
+        for (String palabra : palabras) {
+            if (palabra.startsWith("@") && palabra.length() > 1) {
+                String mencion = palabra.substring(1);
+                mencion = mencion.replaceAll("[^a-zA-Z0-9_]$", "");
+                if (!mencion.isEmpty() && !menciones.contains(mencion)) {
+                    menciones.add(mencion);
+                }
+            }
+        }
+        
+        return menciones;
     }
     
-    public String getContenido() {
-        return contenido;
+    public boolean tieneHashtag(String hashtag) {
+        return extraerHashtags().contains(hashtag.toLowerCase());
     }
     
-    public void setContenido(String contenido) {
-        this.contenido = contenido;
-        extraerHashtags();
-    }
-    
-    public String getRutaImagen() {
-        return rutaImagen;
-    }
-    
-    public void setRutaImagen(String rutaImagen) {
-        this.rutaImagen = rutaImagen;
-    }
+    // Getters
+    public String getId() { return id; }
+    public String getUsername() { return username; }
+    public String getContenido() { return contenido; }
+    public String getRutaImagen() { return rutaImagen; }
+    public LocalDateTime getFechaPublicacion() { return fechaPublicacion; }
     
     public boolean tieneImagen() {
         return rutaImagen != null && !rutaImagen.isEmpty();
     }
     
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-    
-    public ArrayList<String> getLikes() {
-        return new ArrayList<>(likes);
-    }
-    
-    public ArrayList<Comentario> getComentarios() {
-        return new ArrayList<>(comentarios);
-    }
-    
-    public ArrayList<String> getHashtags() {
-        return new ArrayList<>(hashtags);
-    }
-    
     @Override
     public String toString() {
         return "@" + username + " · " + getTiempoTranscurrido() + 
-               "\n" + contenido +
-               "\n❤️ " + getCantidadLikes() + "  💬 " + getCantidadComentarios();
+               "\n" + contenido;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Publicacion other = (Publicacion) obj;
+        return id.equals(other.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

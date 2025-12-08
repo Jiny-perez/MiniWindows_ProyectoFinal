@@ -6,7 +6,7 @@ package Instagram.GUI;
 
 import Instagram.Logica.GestorINSTA;
 import Instagram.Logica.GestorINSTA.EstadisticasUsuario;
-import Instagram.Logica.GestorUsuariosLocal;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Modelo.Publicacion;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 public class PanelPerfil extends JPanel {
    
     private GestorINSTA gestorINSTA;
-    private GestorUsuariosLocal gestorUsuarios;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     private String usernameVisualizando;
     private VentanaINSTA ventanaPrincipal;
     

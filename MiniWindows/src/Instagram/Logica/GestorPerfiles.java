@@ -14,7 +14,7 @@ import java.io.*;
 public class GestorPerfiles {
 
     public static PerfilUsuario cargarPerfil(String username) {
-        String rutaArchivo = GestorArchivosUsuario.getArchivoPerfil(username);
+        String rutaArchivo = GestorArchivosUsuarioINSTA.getArchivoPerfil(username);
         File archivo = new File(rutaArchivo);
         
         if (archivo.exists()) {

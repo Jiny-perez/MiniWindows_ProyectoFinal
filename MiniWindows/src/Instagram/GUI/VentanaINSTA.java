@@ -6,7 +6,7 @@ package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
 import Instagram.Logica.GestorINSTA;
-import Instagram.Logica.GestorUsuariosLocal;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Logica.GestorNotificaciones;
 import java.awt.*;
 import java.awt.event.*;
@@ -20,7 +20,7 @@ import javax.swing.border.*;
 public class VentanaINSTA extends JFrame {
     
     private GestorINSTA gestorINSTA;
-    private GestorUsuariosLocal gestorUsuarios;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     private GestorNotificaciones gestorNotificaciones;
     private Usuario usuarioActual;
     

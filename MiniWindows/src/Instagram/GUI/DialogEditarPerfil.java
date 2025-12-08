@@ -5,7 +5,7 @@
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
-import Instagram.Logica.GestorUsuariosLocal;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Logica.GestorPerfiles;
 import Instagram.Modelo.PerfilUsuario;
 import java.awt.*;
@@ -22,7 +22,7 @@ import java.io.File;
 public class DialogEditarPerfil extends JDialog {
    
     private Usuario usuario;
-    private GestorUsuariosLocal gestorUsuarios;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     private boolean cambiosGuardados = false;
     
     private JTextArea txtBiografia;
@@ -39,7 +39,7 @@ public class DialogEditarPerfil extends JDialog {
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     
-    public DialogEditarPerfil(Frame parent, Usuario usuario, GestorUsuariosLocal gestorUsuarios) {
+    public DialogEditarPerfil(Frame parent, Usuario usuario, GestorUsuariosLocalINSTA gestorUsuarios) {
         super(parent, "Editar Perfil", true);
         this.usuario = usuario;
         this.gestorUsuarios = gestorUsuarios;

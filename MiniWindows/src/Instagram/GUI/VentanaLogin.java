@@ -6,8 +6,8 @@ package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
 import Instagram.Logica.GestorINSTA;
-import Instagram.Logica.GestorUsuariosLocal;
-import Instagram.Logica.GestorArchivosUsuario;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
+import Instagram.Logica.GestorArchivosUsuarioINSTA;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -19,7 +19,7 @@ import java.awt.event.*;
  */
 public class VentanaLogin extends JFrame {
    
-    private GestorUsuariosLocal gestorUsuarios;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     
     private JPanel panelPrincipal;
     private JPanel panelLogin;
@@ -48,8 +48,8 @@ public class VentanaLogin extends JFrame {
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     
     public VentanaLogin() {
-        GestorArchivosUsuario.inicializarEstructura();
-        gestorUsuarios = new GestorUsuariosLocal();
+        GestorArchivosUsuarioINSTA.inicializarEstructura();
+        gestorUsuarios = new GestorUsuariosLocalINSTA();
         initComponents();
         configurarVentana();
     }
@@ -88,7 +88,7 @@ public class VentanaLogin extends JFrame {
         
         JLabel lblLogo = new JLabel();
         try {
-            ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram.icons/icon_insta.png"));
+            ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_insta.png"));
             Image img = logoIcon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
             lblLogo.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -525,7 +525,7 @@ public class VentanaLogin extends JFrame {
         }
     }
     
-    private void abrirInstagram(Usuario usuario) {
+    private void abrirInstagram(String usuario) {
         SwingUtilities.invokeLater(() -> {
             try {
                 System.out.println("═══════════════════════════════════════");

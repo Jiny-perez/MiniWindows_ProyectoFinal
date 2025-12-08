@@ -15,21 +15,26 @@ import java.nio.file.StandardCopyOption;
  *
  * @author najma
  */
-public class GestorArchivosUsuario {
-    
+public class GestorArchivosUsuarioINSTA {
+     
     private static final String DIR_DATOS = "datos";
     private static final String DIR_USUARIOS = DIR_DATOS + "/usuarios";
     
-    private static final String ARCHIVO_PUBLICACIONES = "publicaciones.dat";
-    private static final String ARCHIVO_SEGUIDORES = "seguidores.dat";
-    private static final String ARCHIVO_PERFIL = "perfil.dat";
+    // Archivo global de usuarios
+    public static final String ARCHIVO_USERS = DIR_DATOS + "/users.ins";
+    
+    // Archivos por usuario
+    private static final String ARCHIVO_FOLLOWING = "following.ins";
+    private static final String ARCHIVO_FOLLOWERS = "followers.ins";
+    private static final String ARCHIVO_INSTA = "insta.ins";
+    private static final String ARCHIVO_MENSAJES = "mensajes.ins";
     private static final String DIR_IMAGENES = "imagenes";
 
     public static void inicializarEstructura() {
         try {
             Files.createDirectories(Paths.get(DIR_DATOS));
             Files.createDirectories(Paths.get(DIR_USUARIOS));
-            System.out.println("Estructura de directorios inicializada");
+            System.out.println("✓ Estructura de directorios inicializada");
         } catch (IOException e) {
             System.err.println("Error al crear estructura de directorios: " + e.getMessage());
         }
@@ -43,11 +48,24 @@ public class GestorArchivosUsuario {
             Files.createDirectories(dirUsuario);
             Files.createDirectories(dirImagenes);
             
-            System.out.println("Directorio creado para usuario: " + username);
+            // Crear archivos .ins vacíos
+            crearArchivoVacioSiNoExiste(getArchivoFollowing(username));
+            crearArchivoVacioSiNoExiste(getArchivoFollowers(username));
+            crearArchivoVacioSiNoExiste(getArchivoInsta(username));
+            crearArchivoVacioSiNoExiste(getArchivoMensajes(username));
+            
+            System.out.println("✓ Directorio y archivos .ins creados para: " + username);
             return true;
         } catch (IOException e) {
             System.err.println("Error al crear directorio para " + username + ": " + e.getMessage());
             return false;
+        }
+    }
+    
+    private static void crearArchivoVacioSiNoExiste(String rutaArchivo) throws IOException {
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) {
+            archivo.createNewFile();
         }
     }
 
@@ -60,16 +78,20 @@ public class GestorArchivosUsuario {
         return DIR_USUARIOS + "/" + username;
     }
 
-    public static String getArchivoPublicaciones(String username) {
-        return getDirUsuario(username) + "/" + ARCHIVO_PUBLICACIONES;
+    public static String getArchivoFollowing(String username) {
+        return getDirUsuario(username) + "/" + ARCHIVO_FOLLOWING;
     }
 
-    public static String getArchivoSeguidores(String username) {
-        return getDirUsuario(username) + "/" + ARCHIVO_SEGUIDORES;
+    public static String getArchivoFollowers(String username) {
+        return getDirUsuario(username) + "/" + ARCHIVO_FOLLOWERS;
     }
 
-    public static String getArchivoPerfil(String username) {
-        return getDirUsuario(username) + "/" + ARCHIVO_PERFIL;
+    public static String getArchivoInsta(String username) {
+        return getDirUsuario(username) + "/" + ARCHIVO_INSTA;
+    }
+    
+    public static String getArchivoMensajes(String username) {
+        return getDirUsuario(username) + "/" + ARCHIVO_MENSAJES;
     }
 
     public static String getDirImagenesUsuario(String username) {
@@ -93,7 +115,7 @@ public class GestorArchivosUsuario {
             
             Files.copy(origen, destino, StandardCopyOption.REPLACE_EXISTING);
             
-            System.out.println("Imagen copiada: " + nombreArchivo);
+            System.out.println("✓ Imagen copiada: " + nombreArchivo);
             return rutaDestino;
         } catch (IOException e) {
             System.err.println("Error al copiar imagen: " + e.getMessage());
@@ -126,7 +148,7 @@ public class GestorArchivosUsuario {
             return rutaArchivo.substring(lastDot);
         }
         
-        return ".jpg"; // Extensión por defecto
+        return ".jpg";
     }
     
     public static boolean eliminarImagen(String rutaImagen) {
@@ -134,7 +156,7 @@ public class GestorArchivosUsuario {
             Path path = Paths.get(rutaImagen);
             if (Files.exists(path)) {
                 Files.delete(path);
-                System.out.println("Imagen eliminada: " + rutaImagen);
+                System.out.println("✓ Imagen eliminada: " + rutaImagen);
                 return true;
             }
             return false;
@@ -148,7 +170,6 @@ public class GestorArchivosUsuario {
         try {
             Path dirUsuario = Paths.get(getDirUsuario(username));
             if (Files.exists(dirUsuario)) {
-                // Eliminar recursivamente
                 Files.walk(dirUsuario)
                     .sorted((a, b) -> b.compareTo(a))
                     .forEach(path -> {
@@ -166,40 +187,6 @@ public class GestorArchivosUsuario {
         } catch (IOException e) {
             System.err.println("Error al eliminar directorio de usuario: " + e.getMessage());
             return false;
-        }
-    }
-
-    public static void mostrarInfoUsuario(String username) {
-        try {
-            Path dirUsuario = Paths.get(getDirUsuario(username));
-            if (!Files.exists(dirUsuario)) {
-                System.out.println("Usuario no tiene directorio: " + username);
-                return;
-            }
-            
-            final long[] totalSize = {0};
-            final int[] fileCount = {0};
-            
-            Files.walk(dirUsuario)
-                .filter(Files::isRegularFile)
-                .forEach(path -> {
-                    try {
-                        totalSize[0] += Files.size(path);
-                        fileCount[0]++;
-                    } catch (IOException e) {
-                        // Ignorar
-                    }
-                });
-            
-            double sizeKB = totalSize[0] / 1024.0;
-            double sizeMB = sizeKB / 1024.0;
-            
-            System.out.println("=== Info de usuario: " + username + " ===");
-            System.out.println("Archivos: " + fileCount[0]);
-            System.out.println("Espacio: " + String.format("%.2f KB (%.2f MB)", sizeKB, sizeMB));
-            
-        } catch (IOException e) {
-            System.err.println("Error al obtener info de usuario: " + e.getMessage());
         }
     }
 }
