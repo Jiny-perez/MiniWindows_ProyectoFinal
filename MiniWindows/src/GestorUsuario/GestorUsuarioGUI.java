@@ -107,13 +107,11 @@ public class GestorUsuarioGUI extends JDialog {
         btnCancelar.addActionListener(e -> dispose());
         add(btnCancelar);
 
-        // ACTION: Crear cuenta
         btnCrear.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String usuario = txtUsuarioNuevo.getText().trim();
             String pass = new String(txtPasswordNueva.getPassword());
 
-            // Validaciones frontales
             if (nombre.isEmpty() || usuario.isEmpty() || pass.isEmpty()) {
                 JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
                         "Por favor complete todos los campos",

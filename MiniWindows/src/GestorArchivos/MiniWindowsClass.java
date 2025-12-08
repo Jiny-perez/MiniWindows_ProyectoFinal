@@ -55,9 +55,7 @@ public class MiniWindowsClass {
         }
 
         Usuario nuevoUsuario = gestorUsuarios.crearUsuario(nombreCompleto, username, password);
-
         sistemaArchivos.crearCarpetaUsuario(username);
-
         guardarSistema();
 
         return nuevoUsuario;

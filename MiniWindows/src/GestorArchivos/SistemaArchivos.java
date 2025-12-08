@@ -509,32 +509,10 @@ public class SistemaArchivos implements Serializable {
     public void guardar() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_SISTEMA))) {
             oos.writeObject(this.rutaActualRelativa);
-            oos.writeObject(listadoRelativoCompleto());
         } catch (IOException e) {
         }
     }
-
-    private ArrayList<String> listadoRelativoCompleto() {
-        ArrayList<String> lista = new ArrayList<>();
-        File base = new File(BASE_FISICO);
-        if (!base.exists()) {
-            return lista;
-        }
-        try {
-            Files.walk(base.toPath())
-                    .forEach(p -> {
-                        String full = p.toFile().getAbsolutePath();
-                        String rel = full.substring(base.getAbsolutePath().length());
-                        if (rel.startsWith(File.separator)) {
-                            rel = rel.substring(1);
-                        }
-                        lista.add(rel.replace(File.separatorChar, '/'));
-                    });
-        } catch (IOException ignored) {
-        }
-        return lista;
-    }
-
+    
     public boolean cargar() {
         File archivo = new File(ARCHIVO_SISTEMA);
         if (!archivo.exists()) {
