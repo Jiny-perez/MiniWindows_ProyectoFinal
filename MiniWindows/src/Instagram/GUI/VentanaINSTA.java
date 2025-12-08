@@ -48,6 +48,7 @@ public class VentanaINSTA extends JFrame {
         this.gestorUsuarios = gestorUsuariosLocal;
         this.gestorNotificaciones = new GestorNotificaciones();
         
+        panelNotificaciones = new PanelNotificaciones(gestorINSTA, gestorNotificaciones, this);
         initComponents();
         configurarVentana();
     }

@@ -142,6 +142,8 @@ public class DialogConversacion extends JDialog {
         btnEnviar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnEnviar.setForeground(Color.WHITE);
         btnEnviar.setBackground(INSTAGRAM_PINK);
+        btnEnviar.setOpaque(true);
+        btnEnviar.setBorderPainted(false);
         btnEnviar.setBorder(BorderFactory.createEmptyBorder(10, 24, 10, 24));
         btnEnviar.setFocusPainted(false);
         btnEnviar.setCursor(new Cursor(Cursor.HAND_CURSOR));
