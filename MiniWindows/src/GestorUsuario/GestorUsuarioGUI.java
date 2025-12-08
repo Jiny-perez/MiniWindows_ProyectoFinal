@@ -5,6 +5,8 @@ import java.awt.*;
 import GestorUsuario.GestorUsuarios;
 import Excepciones.*;
 import GestorArchivos.MiniWindowsClass;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 /**
  *
@@ -12,17 +14,23 @@ import GestorArchivos.MiniWindowsClass;
  */
 public class GestorUsuarioGUI extends JDialog {
 
-    private final GestorUsuarios gestor;
+    private final GestorUsuarios gestorUsuario;
 
     public GestorUsuarioGUI(Window owner, GestorUsuarios gestor) {
         super(owner, "Crear Nueva Cuenta", ModalityType.APPLICATION_MODAL);
-        this.gestor = gestor;
-
+        this.gestorUsuario = gestor;
         initComponents();
-
         setSize(400, 350);
         setLocationRelativeTo(owner);
         setResizable(false);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
         setVisible(true);
     }
 
@@ -80,7 +88,7 @@ public class GestorUsuarioGUI extends JDialog {
 
         JButton btnCrear = new JButton("Crear Cuenta");
         btnCrear.setBounds(30, 245, 165, 40);
-        btnCrear.setBackground(new Color(255, 182, 193)); // ROSADO
+        btnCrear.setBackground(new Color(255, 182, 193));
         btnCrear.setForeground(Color.WHITE);
         btnCrear.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnCrear.setFocusPainted(false);
@@ -90,7 +98,7 @@ public class GestorUsuarioGUI extends JDialog {
 
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setBounds(205, 245, 165, 40);
-        btnCancelar.setBackground(new Color(255, 182, 193)); // ROSADO
+        btnCancelar.setBackground(new Color(255, 182, 193));
         btnCancelar.setForeground(Color.WHITE);
         btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnCancelar.setFocusPainted(false);
@@ -99,11 +107,13 @@ public class GestorUsuarioGUI extends JDialog {
         btnCancelar.addActionListener(e -> dispose());
         add(btnCancelar);
 
+        // ACTION: Crear cuenta
         btnCrear.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             String usuario = txtUsuarioNuevo.getText().trim();
             String pass = new String(txtPasswordNueva.getPassword());
 
+            // Validaciones frontales
             if (nombre.isEmpty() || usuario.isEmpty() || pass.isEmpty()) {
                 JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
                         "Por favor complete todos los campos",
@@ -119,27 +129,47 @@ public class GestorUsuarioGUI extends JDialog {
                 return;
             }
 
-            try {
-                Usuario nuevo = gestor.crearUsuario(nombre, usuario, pass);
+            String user = usuario.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
+            if (!user.equals(usuario)) {
+                int opt = JOptionPane.showConfirmDialog(GestorUsuarioGUI.this,
+                        "El nombre de usuario contiene caracteres inválidos y se convertirá a: '" + user + "'. ¿Deseas continuar?",
+                        "Nombre de usuario modificado",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                if (opt != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
 
-                MiniWindowsClass windows = MiniWindowsClass.getInstance();
-                if (windows != null && windows.getSistemaArchivos() != null) {
-                    windows.getSistemaArchivos().crearCarpetaUsuario(usuario);
-                    windows.guardarSistema();
+   
+            MiniWindowsClass windows = MiniWindowsClass.getInstance();
+            if (windows == null) {
+                JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
+                        "No se pudo obtener la instancia del sistema (MiniWindowsClass).",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                Usuario nuevo = windows.crearUsuario(nombre, user, pass);
+                if (nuevo == null) {
+                    JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
+                            "No se pudo crear el usuario.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
 
                 JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
                         "Cuenta creada exitosamente!\nYa puede iniciar sesión.",
                         "Éxito", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
-
             } catch (ArchivoNoValidoException ex) {
+                ex.printStackTrace(System.err);
                 JOptionPane.showMessageDialog(GestorUsuarioGUI.this,
                         ex.getMessage(),
-                        "Error",
+                        "Error al crear usuario",
                         JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                ex.printStackTrace(System.err);
             }
         });
     }
