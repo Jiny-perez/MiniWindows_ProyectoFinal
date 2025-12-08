@@ -39,6 +39,8 @@ public class GestorINSTACompleto {
         cacheInsta.put(usuario.getUsername(), gestorInsta);
     }
     
+    // ================== PUBLICACIONES ==================
+    
     public Publicacion crearPublicacion(String contenido) throws IllegalArgumentException {
         Publicacion publicacion = new Publicacion(usuarioActual.getUsername(), contenido);
         gestorInsta.agregarPublicacion(publicacion);
@@ -90,6 +92,30 @@ public class GestorINSTACompleto {
         GestorInstaINSTA gestor = obtenerGestorInsta(username);
         return gestor.obtenerPublicacionesPropias();
     }
+
+    /**
+     * NUEVO: Actualiza una publicación (likes, comentarios, etc.)
+     * en el autor y en todos los timelines de sus seguidores.
+     */
+    public void actualizarPublicacion(Publicacion publicacionActualizada) {
+        if (publicacionActualizada == null) return;
+
+        String autor = publicacionActualizada.getUsername();
+
+        // 1) Actualizar en el autor
+        GestorInstaINSTA gestorAutor = obtenerGestorInsta(autor);
+        gestorAutor.actualizarPublicacion(publicacionActualizada);
+
+        // 2) Actualizar en todos los seguidores del autor
+        GestorFollowersINSTA gestorFollowersAutor = new GestorFollowersINSTA(autor);
+        ArrayList<String> seguidoresAutor = gestorFollowersAutor.obtenerSeguidores();
+        for (String seguidor : seguidoresAutor) {
+            GestorInstaINSTA gestorSeguidor = obtenerGestorInsta(seguidor);
+            gestorSeguidor.actualizarPublicacion(publicacionActualizada);
+        }
+    }
+    
+    // ================== SEGUIR / DEJAR DE SEGUIR ==================
     
     public boolean seguir(String username) {
         if (username.equals(usuarioActual.getUsername())) {
@@ -140,9 +166,13 @@ public class GestorINSTACompleto {
         }
     }
     
+    // ================== BÚSQUEDA (IMPORTANTE PARA PanelExplorar) ==================
+    
     public ArrayList<Publicacion> buscarPorHashtag(String hashtag) {
         return gestorInsta.buscarPorHashtag(hashtag);
     }
+    
+    // ================== ESTADÍSTICAS ==================
     
     public EstadisticasUsuario obtenerEstadisticas(String username) {
         EstadisticasUsuario stats = new EstadisticasUsuario();
@@ -163,6 +193,8 @@ public class GestorINSTACompleto {
         return obtenerEstadisticas(usuarioActual.getUsername());
     }
     
+    // ================== SEGUIDORES / SIGUIENDO ==================
+    
     public ArrayList<String> obtenerSeguidores(String username) {
         GestorFollowersINSTA gestor = new GestorFollowersINSTA(username);
         return gestor.obtenerSeguidores();
@@ -172,6 +204,8 @@ public class GestorINSTACompleto {
         GestorFollowingINSTA gestor = new GestorFollowingINSTA(username);
         return gestor.obtenerSiguiendo();
     }
+    
+    // ================== AUXILIARES ==================
     
     private GestorInstaINSTA obtenerGestorInsta(String username) {
         if (!cacheInsta.containsKey(username)) {
@@ -189,10 +223,12 @@ public class GestorINSTACompleto {
     }
     
     public void guardarDatos() {
-        gestorFollowing.guardarFollowing();
-        gestorFollowers.guardarFollowers();
-        gestorInsta.guardarPublicaciones();
+        if (gestorFollowing != null) gestorFollowing.guardarFollowing();
+        if (gestorFollowers != null) gestorFollowers.guardarFollowers();
+        if (gestorInsta != null) gestorInsta.guardarPublicaciones();
     }
+    
+    // ================== CLASE ESTADÍSTICAS ==================
     
     public static class EstadisticasUsuario {
         public String username;

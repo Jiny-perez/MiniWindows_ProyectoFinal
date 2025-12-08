@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @author najma
  */
 public class GestorInstaINSTA {
-     
+    
     private String username;
     private ArrayList<Publicacion> timeline;
     private String archivoInsta;
@@ -87,6 +87,27 @@ public class GestorInstaINSTA {
                 .sorted(Comparator.comparing(Publicacion::getFechaHora).reversed())
                 .collect(Collectors.toCollection(ArrayList::new));
     }
+
+    // ===== NUEVO: actualizar una publicación existente en el timeline =====
+    public void actualizarPublicacion(Publicacion publicacionActualizada) {
+        if (publicacionActualizada == null) return;
+
+        boolean cambios = false;
+
+        for (int i = 0; i < timeline.size(); i++) {
+            Publicacion p = timeline.get(i);
+            if (p.getId().equals(publicacionActualizada.getId())) {
+                timeline.set(i, publicacionActualizada);
+                cambios = true;
+                break;
+            }
+        }
+
+        if (cambios) {
+            guardarPublicaciones();
+        }
+    }
+    // =======================================================================
     
     @SuppressWarnings("unchecked")
     private void cargarPublicaciones() {

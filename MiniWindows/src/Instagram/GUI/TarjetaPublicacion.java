@@ -15,6 +15,7 @@ import java.util.ArrayList;
  */
 public class TarjetaPublicacion extends JPanel {
    
+   
     private GestorINSTACompleto gestorINSTA;
     private VentanaINSTA ventanaPrincipal;
     private Publicacion publicacion;
@@ -29,11 +30,13 @@ public class TarjetaPublicacion extends JPanel {
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
-    private static final Color LIKE_COLOR = new Color(237, 73, 86);
 
-    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter FORMATO_FECHA =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    public TarjetaPublicacion(Publicacion publicacion, GestorINSTACompleto gestor, VentanaINSTA ventana) {
+    public TarjetaPublicacion(Publicacion publicacion,
+                              GestorINSTACompleto gestor,
+                              VentanaINSTA ventana) {
         this.publicacion = publicacion;
         this.gestorINSTA = gestor;
         this.ventanaPrincipal = ventana;
@@ -41,12 +44,14 @@ public class TarjetaPublicacion extends JPanel {
         initComponents();
     }
 
+    // ================== INICIALIZACIÓN DE LA TARJETA ==================
+
     private void initComponents() {
         setLayout(new BorderLayout(0, 12));
         setBackground(CARD_COLOR);
         setBorder(new CompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(16, 16, 16, 16)
+                new LineBorder(BORDER_COLOR, 2),
+                BorderFactory.createEmptyBorder(16, 16, 16, 16)
         ));
         setMaximumSize(new Dimension(470, 800));
         setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -61,13 +66,16 @@ public class TarjetaPublicacion extends JPanel {
         add(panelInferior, BorderLayout.SOUTH);
     }
 
+    // ================== PANEL SUPERIOR (USUARIO, FECHA, ELIMINAR) ==================
+
     private JPanel crearPanelSuperior() {
         JPanel panel = new JPanel(new BorderLayout(10, 0));
         panel.setBackground(CARD_COLOR);
 
         JLabel lblAvatar = new JLabel();
         try {
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
+            ImageIcon avatarIcon = new ImageIcon(
+                    getClass().getResource("/Instagram/icons/icon_perfil.png"));
             Image img = avatarIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
             lblAvatar.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -91,12 +99,12 @@ public class TarjetaPublicacion extends JPanel {
         btnUsername.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnUsername.setHorizontalAlignment(SwingConstants.LEFT);
         btnUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnUsername.addActionListener(e ->
+                ventanaPrincipal.mostrarPerfilDeUsuario(publicacion.getUsername())
+        );
 
-        btnUsername.addActionListener(e -> {
-            ventanaPrincipal.mostrarPerfilDeUsuario(publicacion.getUsername());
-        });
-
-        JLabel lblFecha = new JLabel(publicacion.getFechaHora().format(FORMATO_FECHA));
+        JLabel lblFecha = new JLabel(
+                publicacion.getFechaHora().format(FORMATO_FECHA));
         lblFecha.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblFecha.setForeground(TEXT_SECONDARY);
         lblFecha.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -111,7 +119,8 @@ public class TarjetaPublicacion extends JPanel {
         if (publicacion.getUsername().equals(usernameActual)) {
             JButton btnEliminar = new JButton();
             try {
-                ImageIcon iconEliminar = new ImageIcon(getClass().getResource("/Instagram/icons/icon_eliminar.png"));
+                ImageIcon iconEliminar = new ImageIcon(
+                        getClass().getResource("/Instagram/icons/icon_eliminar.png"));
                 Image img = iconEliminar.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
                 btnEliminar.setIcon(new ImageIcon(img));
             } catch (Exception e) {
@@ -125,7 +134,6 @@ public class TarjetaPublicacion extends JPanel {
             btnEliminar.setFocusPainted(false);
             btnEliminar.setCursor(new Cursor(Cursor.HAND_CURSOR));
             btnEliminar.setPreferredSize(new Dimension(32, 32));
-
             btnEliminar.addActionListener(e -> eliminarPublicacion());
 
             panel.add(btnEliminar, BorderLayout.EAST);
@@ -134,12 +142,16 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
+    // ================== PANEL CONTENIDO (IMAGEN + TEXTO) ==================
+
     private JPanel crearPanelContenido() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(CARD_COLOR);
 
-        if (publicacion.getRutaImagen() != null && !publicacion.getRutaImagen().isEmpty()) {
+        if (publicacion.getRutaImagen() != null &&
+                !publicacion.getRutaImagen().isEmpty()) {
+
             JLabel lblImagen = new JLabel();
             lblImagen.setAlignmentX(Component.LEFT_ALIGNMENT);
             lblImagen.setMaximumSize(new Dimension(438, 400));
@@ -155,14 +167,15 @@ public class TarjetaPublicacion extends JPanel {
                 int altoMax = 400;
 
                 double escala = Math.min(
-                    (double) anchoMax / anchoOriginal,
-                    (double) altoMax / altoOriginal
+                        (double) anchoMax / anchoOriginal,
+                        (double) altoMax / altoOriginal
                 );
 
                 int nuevoAncho = (int) (anchoOriginal * escala);
                 int nuevoAlto = (int) (altoOriginal * escala);
 
-                Image imgEscalada = img.getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
+                Image imgEscalada = img.getScaledInstance(
+                        nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
                 lblImagen.setIcon(new ImageIcon(imgEscalada));
                 lblImagen.setBorder(new LineBorder(BORDER_COLOR, 1));
             } catch (Exception e) {
@@ -177,7 +190,9 @@ public class TarjetaPublicacion extends JPanel {
             panel.add(Box.createVerticalStrut(12));
         }
 
-        if (publicacion.getContenido() != null && !publicacion.getContenido().trim().isEmpty()) {
+        if (publicacion.getContenido() != null &&
+                !publicacion.getContenido().trim().isEmpty()) {
+
             JTextArea txtContenido = new JTextArea(publicacion.getContenido());
             txtContenido.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             txtContenido.setForeground(TEXT_PRIMARY);
@@ -195,11 +210,14 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
+    // ================== PANEL INFERIOR (LIKE, COMENTARIOS, INPUT) ==================
+
     private JPanel crearPanelInferior() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(CARD_COLOR);
 
+        // Acciones (like, comentar)
         JPanel panelAcciones = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         panelAcciones.setBackground(CARD_COLOR);
         panelAcciones.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -209,7 +227,9 @@ public class TarjetaPublicacion extends JPanel {
         boolean tieneLike = publicacion.tieneLikeDe(usernameActual);
 
         try {
-            String iconoPath = tieneLike ? "/Instagram/icons/icon_corazon_lleno.png" : "/Instagram/icons/icon_corazon_vacio.png";
+            String iconoPath = tieneLike
+                    ? "/Instagram/icons/icon_corazon_lleno.png"
+                    : "/Instagram/icons/icon_corazon_vacio.png";
             ImageIcon iconLike = new ImageIcon(getClass().getResource(iconoPath));
             Image img = iconLike.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
             btnLike.setIcon(new ImageIcon(img));
@@ -228,7 +248,8 @@ public class TarjetaPublicacion extends JPanel {
 
         JButton btnComentar = new JButton();
         try {
-            ImageIcon iconComentar = new ImageIcon(getClass().getResource("/Instagram/icons/icon_comentario.png"));
+            ImageIcon iconComentar = new ImageIcon(
+                    getClass().getResource("/Instagram/icons/icon_comentario.png"));
             Image img = iconComentar.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
             btnComentar.setIcon(new ImageIcon(img));
             btnComentar.setText(null);
@@ -250,6 +271,7 @@ public class TarjetaPublicacion extends JPanel {
         panel.add(panelAcciones);
         panel.add(Box.createVerticalStrut(8));
 
+        // Texto de likes
         lblLikes = new JLabel(obtenerTextoLikes());
         lblLikes.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblLikes.setForeground(TEXT_PRIMARY);
@@ -257,16 +279,17 @@ public class TarjetaPublicacion extends JPanel {
         panel.add(lblLikes);
         panel.add(Box.createVerticalStrut(12));
 
+        // Comentarios
         panelComentarios = new JPanel();
         panelComentarios.setLayout(new BoxLayout(panelComentarios, BoxLayout.Y_AXIS));
         panelComentarios.setBackground(CARD_COLOR);
         panelComentarios.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         actualizarComentarios();
 
         panel.add(panelComentarios);
         panel.add(Box.createVerticalStrut(8));
 
+        // Nuevo comentario
         JPanel panelNuevoComentario = new JPanel(new BorderLayout(8, 0));
         panelNuevoComentario.setBackground(CARD_COLOR);
         panelNuevoComentario.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -275,10 +298,9 @@ public class TarjetaPublicacion extends JPanel {
         txtComentario = new JTextField();
         txtComentario.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtComentario.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER_COLOR, 1),
-            BorderFactory.createEmptyBorder(6, 10, 6, 10)
+                new LineBorder(BORDER_COLOR, 1),
+                BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
-
         txtComentario.addActionListener(e -> agregarComentario());
 
         JButton btnPublicar = new JButton("Publicar");
@@ -300,41 +322,44 @@ public class TarjetaPublicacion extends JPanel {
         return panel;
     }
 
+    // ================== LIKE ==================
+
     private void toggleLike() {
         String usernameActual = gestorINSTA.getUsernameActual();
 
-        // Trabajar directamente con la publicación
         if (publicacion.tieneLikeDe(usernameActual)) {
             publicacion.quitarLike(usernameActual);
 
-            // NOTIFICACIONES: eliminar notificación de like asociada
+            // Notificación: eliminar like
             try {
                 String owner = publicacion.getUsername();
                 if (!usernameActual.equals(owner)) {
-                    ventanaPrincipal.getGestorNotificaciones().eliminarNotificacionLike(usernameActual, owner, publicacion.getId());
+                    ventanaPrincipal.getGestorNotificaciones()
+                            .eliminarNotificacionLike(usernameActual, owner, publicacion.getId());
                 }
-            } catch (Exception ex) {
-                // evita crash si la ventana no tiene gestorNotificaciones o el getter no existe
-            }
+            } catch (Exception ex) { /* ignore */ }
         } else {
             publicacion.darLike(usernameActual);
 
-            // NOTIFICACIONES: agregar notificación de like (si no es el mismo usuario)
+            // Notificación: agregar like
             try {
                 String owner = publicacion.getUsername();
                 if (!usernameActual.equals(owner)) {
-                    ventanaPrincipal.getGestorNotificaciones().agregarNotificacionLike(usernameActual, owner, publicacion.getId());
+                    ventanaPrincipal.getGestorNotificaciones()
+                            .agregarNotificacionLike(usernameActual, owner, publicacion.getId());
                 }
-            } catch (Exception ex) {
-                // evita crash si la ventana no tiene gestorNotificaciones o el getter no existe
-            }
+            } catch (Exception ex) { /* ignore */ }
         }
+
+        // 👉 Guardar la publicación actualizada (likes)
+        guardarPublicacionActualizada();
 
         boolean tieneLikeAhora = publicacion.tieneLikeDe(usernameActual);
 
-        // Actualizar icono
         try {
-            String iconoPath = tieneLikeAhora ? "/Instagram/icons/icon_corazon_lleno.png" : "/Instagram/icons/icon_corazon_vacio.png";
+            String iconoPath = tieneLikeAhora
+                    ? "/Instagram/icons/icon_corazon_lleno.png"
+                    : "/Instagram/icons/icon_corazon_vacio.png";
             ImageIcon iconLike = new ImageIcon(getClass().getResource(iconoPath));
             Image img = iconLike.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
             btnLike.setIcon(new ImageIcon(img));
@@ -345,20 +370,17 @@ public class TarjetaPublicacion extends JPanel {
 
         lblLikes.setText(obtenerTextoLikes());
 
-        // ACTUALIZAR PANEL DE NOTIFICACIONES Y BADGE
+        // Actualizar panel de notificaciones y badge
         try {
             PanelNotificaciones pn = ventanaPrincipal.getPanelNotificaciones();
             if (pn != null) pn.actualizarContenido();
-        } catch (Exception ex) {
-            // ignore
-        }
+        } catch (Exception ex) {}
 
         try {
-            int noLeidas = ventanaPrincipal.getGestorNotificaciones().contarNoLeidas(gestorINSTA.getUsernameActual());
+            int noLeidas = ventanaPrincipal.getGestorNotificaciones()
+                    .contarNoLeidas(gestorINSTA.getUsernameActual());
             ventanaPrincipal.actualizarBadgeNotificaciones(noLeidas);
-        } catch (Exception ex) {
-            // ignore
-        }
+        } catch (Exception ex) {}
     }
 
     private String obtenerTextoLikes() {
@@ -372,58 +394,62 @@ public class TarjetaPublicacion extends JPanel {
         }
     }
 
+    // ================== COMENTARIOS ==================
+
     private void agregarComentario() {
         String contenido = txtComentario.getText().trim();
-
         if (contenido.isEmpty()) {
             return;
         }
 
-        // Crear comentario directamente y agregarlo a la publicación
         Comentario nuevoComentario = new Comentario(
-            gestorINSTA.getUsernameActual(),
-            contenido,
-            publicacion.getId()
+                gestorINSTA.getUsernameActual(),
+                contenido,
+                publicacion.getId()
         );
         publicacion.agregarComentario(nuevoComentario);
+
+        // 👉 Guardar la publicación actualizada (comentarios)
+        guardarPublicacionActualizada();
 
         txtComentario.setText("");
         actualizarComentarios();
 
-        // NOTIFICACIONES: agregar notificación de comentario (si no es el autor)
+        // Notificación de comentario
         try {
             String owner = publicacion.getUsername();
             String usernameActual = gestorINSTA.getUsernameActual();
             if (!usernameActual.equals(owner)) {
-                ventanaPrincipal.getGestorNotificaciones().agregarNotificacionComentario(usernameActual, owner, publicacion.getId(), contenido);
+                ventanaPrincipal.getGestorNotificaciones()
+                        .agregarNotificacionComentario(usernameActual, owner,
+                                                       publicacion.getId(), contenido);
             }
-        } catch (Exception ex) {
-            // ignore
-        }
+        } catch (Exception ex) { }
 
-        // ACTUALIZAR PANEL DE NOTIFICACIONES Y BADGE
+        // Actualizar panel de notificaciones y badge
         try {
             PanelNotificaciones pn = ventanaPrincipal.getPanelNotificaciones();
             if (pn != null) pn.actualizarContenido();
-        } catch (Exception ex) {}
+        } catch (Exception ex) { }
 
         try {
-            int noLeidas = ventanaPrincipal.getGestorNotificaciones().contarNoLeidas(gestorINSTA.getUsernameActual());
+            int noLeidas = ventanaPrincipal.getGestorNotificaciones()
+                    .contarNoLeidas(gestorINSTA.getUsernameActual());
             ventanaPrincipal.actualizarBadgeNotificaciones(noLeidas);
-        } catch (Exception ex) {}
+        } catch (Exception ex) { }
     }
 
     private void actualizarComentarios() {
         panelComentarios.removeAll();
 
         ArrayList<Comentario> comentarios = publicacion.getComentarios();
-
         int maxComentarios = Math.min(3, comentarios.size());
 
         for (int i = 0; i < maxComentarios; i++) {
             Comentario comentario = comentarios.get(i);
             JLabel lblComentario = new JLabel(
-                "<html><b>@" + comentario.getUsername() + "</b> " + comentario.getContenido() + "</html>"
+                    "<html><b>@" + comentario.getUsername() + "</b> "
+                            + comentario.getContenido() + "</html>"
             );
             lblComentario.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             lblComentario.setForeground(TEXT_PRIMARY);
@@ -435,7 +461,8 @@ public class TarjetaPublicacion extends JPanel {
         }
 
         if (comentarios.size() > 3) {
-            JLabel lblMas = new JLabel("Ver los " + comentarios.size() + " comentarios");
+            JLabel lblMas = new JLabel(
+                    "Ver los " + comentarios.size() + " comentarios");
             lblMas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             lblMas.setForeground(TEXT_SECONDARY);
             lblMas.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -446,40 +473,52 @@ public class TarjetaPublicacion extends JPanel {
         panelComentarios.repaint();
     }
 
+    // ================== ELIMINAR PUBLICACIÓN ==================
+
     private void eliminarPublicacion() {
         int opcion = JOptionPane.showConfirmDialog(
-            this,
-            "¿Estás seguro de que deseas eliminar esta publicación?",
-            "Eliminar Publicación",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE
+                this,
+                "¿Estás seguro de que deseas eliminar esta publicación?",
+                "Eliminar Publicación",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
         );
 
         if (opcion == JOptionPane.YES_OPTION) {
             gestorINSTA.eliminarPublicacion(publicacion.getId());
 
-            // NOTIFICACIONES: eliminar notificaciones relacionadas con esta publicación
+            // Eliminar notificaciones relacionadas con esta publicación
             try {
-                ventanaPrincipal.getGestorNotificaciones().eliminarNotificacionesDePublicacion(publicacion.getId());
-            } catch (Exception ex) {
-                // ignore
-            }
+                ventanaPrincipal.getGestorNotificaciones()
+                        .eliminarNotificacionesDePublicacion(publicacion.getId());
+            } catch (Exception ex) { }
 
             Container parent = getParent();
             parent.remove(this);
             parent.revalidate();
             parent.repaint();
 
-            // ACTUALIZAR PANEL DE NOTIFICACIONES Y BADGE (por si afectó)
             try {
                 PanelNotificaciones pn = ventanaPrincipal.getPanelNotificaciones();
                 if (pn != null) pn.actualizarContenido();
-            } catch (Exception ex) {}
+            } catch (Exception ex) { }
 
             try {
-                int noLeidas = ventanaPrincipal.getGestorNotificaciones().contarNoLeidas(gestorINSTA.getUsernameActual());
+                int noLeidas = ventanaPrincipal.getGestorNotificaciones()
+                        .contarNoLeidas(gestorINSTA.getUsernameActual());
                 ventanaPrincipal.actualizarBadgeNotificaciones(noLeidas);
-            } catch (Exception ex) {}
+            } catch (Exception ex) { }
+        }
+    }
+
+    // ================== GUARDAR PUBLICACIÓN ACTUALIZADA ==================
+
+    private void guardarPublicacionActualizada() {
+        try {
+            gestorINSTA.actualizarPublicacion(publicacion);
+        } catch (Exception e) {
+            // Si algo falla, evitamos que crashee la app
+            e.printStackTrace();
         }
     }
 }
