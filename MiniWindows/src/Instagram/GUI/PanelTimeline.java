@@ -54,22 +54,28 @@ public class PanelTimeline extends JPanel {
     
     public void actualizarContenido() {
         panelPublicaciones.removeAll();
-        
+
         ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerTimeline();
-        
+
         if (publicaciones.isEmpty()) {
             mostrarMensajeVacio();
         } else {
             for (Publicacion publicacion : publicaciones) {
                 TarjetaPublicacion tarjeta = new TarjetaPublicacion(publicacion, gestorINSTA, ventanaPrincipal);
+
+                // <<< NUEVO: centrar y limitar ancho >>>
+                tarjeta.setAlignmentX(Component.CENTER_ALIGNMENT);
+                tarjeta.setMaximumSize(new Dimension(470, tarjeta.getPreferredSize().height));
+                // <<< FIN NUEVO >>>
+
                 panelPublicaciones.add(tarjeta);
                 panelPublicaciones.add(Box.createVerticalStrut(15));
             }
         }
-        
+
         panelPublicaciones.revalidate();
         panelPublicaciones.repaint();
-        
+
         SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
     

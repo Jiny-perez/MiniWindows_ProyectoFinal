@@ -51,45 +51,47 @@ public class PanelPerfil extends JPanel {
         this.ventanaPrincipal = ventana;
         
         initComponents();
+        // 👇 Muy importante: cargar datos al crear el panel
+        actualizarContenido();
     }
     
-   private void initComponents() {
-    setLayout(new BorderLayout());
-    setBackground(BACKGROUND_COLOR);
+    private void initComponents() {
+        setLayout(new BorderLayout());
+        setBackground(BACKGROUND_COLOR);
 
-    // panel superior (perfil)
-    JPanel panelSuperior = crearPanelSuperior();
-    add(panelSuperior, BorderLayout.NORTH);
+        // panel superior (perfil)
+        JPanel panelSuperior = crearPanelSuperior();
+        add(panelSuperior, BorderLayout.NORTH);
 
-    // Contenedor central con padding
-    JPanel panelCentral = new JPanel(new BorderLayout());
-    panelCentral.setBackground(BACKGROUND_COLOR);
-    panelCentral.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+        // Contenedor central con padding
+        JPanel panelCentral = new JPanel(new BorderLayout());
+        panelCentral.setBackground(BACKGROUND_COLOR);
+        panelCentral.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-    // Título fijo (fuera del scroll)
-    JLabel lblTitulo = new JLabel("Publicaciones");
-    lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
-    lblTitulo.setForeground(INSTAGRAM_PINK);
-    lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 6, 12, 0));
-    panelCentral.add(lblTitulo, BorderLayout.NORTH);
+        // Título fijo (fuera del scroll)
+        JLabel lblTitulo = new JLabel("Publicaciones");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitulo.setForeground(INSTAGRAM_PINK);
+        lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 6, 12, 0));
+        panelCentral.add(lblTitulo, BorderLayout.NORTH);
 
-    // panelPublicaciones = GRID DIRECTO (0 filas dinámicas, 3 columnas)
-    panelPublicaciones = new JPanel();
-    panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10)); // 3 columnas, gaps 10px
-    panelPublicaciones.setBackground(BACKGROUND_COLOR);
+        // panelPublicaciones = GRID DIRECTO (0 filas dinámicas, 3 columnas)
+        panelPublicaciones = new JPanel();
+        panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10)); // 3 columnas, gaps 10px
+        panelPublicaciones.setBackground(BACKGROUND_COLOR);
 
-    // JScrollPane con el grid directo como viewport view
-    scrollPane = new JScrollPane(panelPublicaciones,
-            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    scrollPane.setBorder(null);
-    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-    scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
-    scrollPane.setBackground(BACKGROUND_COLOR);
+        // JScrollPane con el grid directo como viewport view
+        scrollPane = new JScrollPane(panelPublicaciones,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
+        scrollPane.setBackground(BACKGROUND_COLOR);
 
-    panelCentral.add(scrollPane, BorderLayout.CENTER);
-    add(panelCentral, BorderLayout.CENTER);
-}
+        panelCentral.add(scrollPane, BorderLayout.CENTER);
+        add(panelCentral, BorderLayout.CENTER);
+    }
     
     private JPanel crearPanelSuperior() {
         JPanel panel = new JPanel();
@@ -105,15 +107,6 @@ public class PanelPerfil extends JPanel {
         panelInfo.setMaximumSize(new Dimension(800, 150));
         
         lblAvatar = new JLabel();
-        try {
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
-            Image img = avatarIcon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
-            lblAvatar.setIcon(new ImageIcon(img));
-        } catch (Exception e) {
-            lblAvatar.setText("👤");
-            lblAvatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 80));
-            lblAvatar.setForeground(INSTAGRAM_PINK);
-        }
         lblAvatar.setPreferredSize(new Dimension(120, 120));
         lblAvatar.setHorizontalAlignment(SwingConstants.CENTER);
         
@@ -207,18 +200,22 @@ public class PanelPerfil extends JPanel {
         lblSiguiendo.setText("<html><b style='font-size:16px'>" + stats.siguiendo + "</b> <span style='color:rgb(142,142,142)'>Siguiendo</span></html>");
         
         configurarBotonAccion();
-        
         cargarPublicaciones();
     }
     
     private void configurarBotonAccion() {
         String usernameActual = gestorINSTA.getUsernameActual();
         
+        // Aseguramos que el botón sea visible siempre que haya usuario
+        btnAccion.setVisible(true);
+        
+        // Limpiar listeners previos
         for (ActionListener al : btnAccion.getActionListeners()) {
             btnAccion.removeActionListener(al);
         }
         
-        if (usernameDelPerfil.equals(usernameActual)) {
+        if (usernameActual != null && usernameDelPerfil.equals(usernameActual)) {
+            // PERFIL PROPIO → Debe verse "Editar Perfil"
             btnAccion.setText("Editar Perfil");
             btnAccion.setForeground(TEXT_PRIMARY);
             btnAccion.setBackground(CARD_COLOR);
@@ -226,6 +223,7 @@ public class PanelPerfil extends JPanel {
             
             btnAccion.addActionListener(e -> editarPerfil());
         } else {
+            // PERFIL DE OTRO USUARIO → Seguir / Siguiendo
             boolean estaSiguiendo = gestorINSTA.estaSiguiendo(usernameDelPerfil);
             btnAccion.setText(estaSiguiendo ? "Siguiendo" : "Seguir");
             
@@ -250,64 +248,89 @@ public class PanelPerfil extends JPanel {
         Usuario usuario = gestorUsuarios.obtenerUsuario(usernameDelPerfil);
         if (usuario != null) {
             DialogEditarPerfil dialog = new DialogEditarPerfil(
-            (Frame) SwingUtilities.getWindowAncestor(this),
-            usuario,
-            gestorUsuarios
-        );
-        dialog.setVisible(true);
-        }
-    }
-    
-  private void cargarPublicaciones() {
-    panelPublicaciones.removeAll();
+                (Frame) SwingUtilities.getWindowAncestor(this),
+                usuario,
+                gestorUsuarios
+            );
+            dialog.setVisible(true); // Modal: se bloquea hasta que se cierre
 
-    ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameDelPerfil);
+            // Si se guardaron cambios, refrescamos el perfil
+            if (dialog.fueActualizado()) {
+                actualizarContenido();
 
-    if (publicaciones == null || publicaciones.isEmpty()) {
-        // si no hay publicaciones, mostramos mensaje centrado ocupando las 3 columnas
-        panelPublicaciones.setLayout(new GridLayout(1, 1));
-        JLabel lblVacio = new JLabel("No hay publicaciones para mostrar", SwingConstants.CENTER);
-        lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        lblVacio.setForeground(TEXT_SECONDARY);
-        JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(BACKGROUND_COLOR);
-        p.add(lblVacio, BorderLayout.CENTER);
-        panelPublicaciones.add(p);
-    } else {
-        // aseguramos layout GRID 3 columnas
-        panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10));
-
-        for (Publicacion publicacion : publicaciones) {
-            TarjetaPublicacion tarjeta = new TarjetaPublicacion(publicacion, gestorINSTA, ventanaPrincipal);
-
-            // Recomendado: que cada tarjeta tenga un tamaño preferido cuadrado (ajusta 240 a lo que prefieras)
-            tarjeta.setPreferredSize(new Dimension(240, 240));
-            tarjeta.setMaximumSize(new Dimension(240, 240));
-            tarjeta.setMinimumSize(new Dimension(240, 240));
-
-            // Asegurarse que la tarjeta pinta su fondo (si tiene transparencia)
-            tarjeta.setOpaque(true);
-            panelPublicaciones.add(tarjeta);
-        }
-
-        // Si la última fila queda incompleta, añadimos panels invisibles para mantener alineación
-        int resto = publicaciones.size() % 3;
-        if (resto != 0) {
-            int faltan = 3 - resto;
-            for (int i = 0; i < faltan; i++) {
-                JPanel filler = new JPanel();
-                filler.setBackground(BACKGROUND_COLOR);
-                panelPublicaciones.add(filler);
+                // Actualizar también el avatar con el icono del diálogo
+                ImageIcon icon = dialog.getIconoPerfil();
+                if (icon != null) {
+                    Image img = icon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+                    lblAvatar.setIcon(new ImageIcon(img));
+                    lblAvatar.setText(null);
+                } else {
+                    // fallback: ícono por defecto
+                    try {
+                        ImageIcon avatarIcon = new ImageIcon(
+                            getClass().getResource("/Instagram/icons/icon_perfil.png")
+                        );
+                        Image img = avatarIcon.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+                        lblAvatar.setIcon(new ImageIcon(img));
+                        lblAvatar.setText(null);
+                    } catch (Exception e) {
+                        lblAvatar.setIcon(null);
+                        lblAvatar.setText("👤");
+                        lblAvatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 80));
+                        lblAvatar.setForeground(INSTAGRAM_PINK);
+                    }
+                }
             }
         }
     }
+    
+    private void cargarPublicaciones() {
+        panelPublicaciones.removeAll();
 
-    panelPublicaciones.revalidate();
-    panelPublicaciones.repaint();
+        ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameDelPerfil);
 
-    // volver al top del scroll
-    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
-}
+        if (publicaciones == null || publicaciones.isEmpty()) {
+            // si no hay publicaciones, mostramos mensaje centrado ocupando las 3 columnas
+            panelPublicaciones.setLayout(new GridLayout(1, 1));
+            JLabel lblVacio = new JLabel("No hay publicaciones para mostrar", SwingConstants.CENTER);
+            lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+            lblVacio.setForeground(TEXT_SECONDARY);
+            JPanel p = new JPanel(new BorderLayout());
+            p.setBackground(BACKGROUND_COLOR);
+            p.add(lblVacio, BorderLayout.CENTER);
+            panelPublicaciones.add(p);
+        } else {
+            // aseguramos layout GRID 3 columnas
+            panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10));
+
+            for (Publicacion publicacion : publicaciones) {
+                TarjetaPublicacion tarjeta = new TarjetaPublicacion(publicacion, gestorINSTA, ventanaPrincipal);
+
+                tarjeta.setPreferredSize(new Dimension(240, 240));
+                tarjeta.setMaximumSize(new Dimension(240, 240));
+                tarjeta.setMinimumSize(new Dimension(240, 240));
+                tarjeta.setOpaque(true);
+                panelPublicaciones.add(tarjeta);
+            }
+
+            // Si la última fila queda incompleta, añadimos panels invisibles para mantener alineación
+            int resto = publicaciones.size() % 3;
+            if (resto != 0) {
+                int faltan = 3 - resto;
+                for (int i = 0; i < faltan; i++) {
+                    JPanel filler = new JPanel();
+                    filler.setBackground(BACKGROUND_COLOR);
+                    panelPublicaciones.add(filler);
+                }
+            }
+        }
+
+        panelPublicaciones.revalidate();
+        panelPublicaciones.repaint();
+
+        // volver al top del scroll
+        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+    }
     
     private void mostrarPerfilNoEncontrado() {
         lblUsername.setText("Usuario no encontrado");

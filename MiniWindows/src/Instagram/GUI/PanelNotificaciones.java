@@ -42,6 +42,8 @@ public class PanelNotificaciones extends JPanel {
         this.ventanaPrincipal = ventana;
         
         initComponents();
+        
+        actualizarContenido();
     }
     
     private void initComponents() {
@@ -97,10 +99,13 @@ public class PanelNotificaciones extends JPanel {
     
     public void actualizarContenido() {
         panelNotificaciones.removeAll();
-        
+
         String username = gestorINSTA.getUsernameActual();
         ArrayList<Notificacion> notificaciones = gestorNotificaciones.obtenerNotificaciones(username);
-        
+
+        System.out.println("Usuario actual: " + username);
+        System.out.println("Notificaciones encontradas: " + notificaciones.size());
+
         if (notificaciones.isEmpty()) {
             mostrarMensajeVacio();
         } else {
@@ -110,10 +115,10 @@ public class PanelNotificaciones extends JPanel {
                 panelNotificaciones.add(Box.createVerticalStrut(8));
             }
         }
-        
+
         panelNotificaciones.revalidate();
         panelNotificaciones.repaint();
-        
+
         SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
     

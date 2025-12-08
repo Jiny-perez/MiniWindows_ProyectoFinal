@@ -28,6 +28,9 @@ public class DialogEditarPerfil extends JDialog {
     private JTextArea txtBiografia;
     private JLabel lblImagenPerfil;
     private File imagenSeleccionada;
+
+    // Para indicar si se guardaron cambios
+    private boolean actualizado = false;
     
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
@@ -206,10 +209,10 @@ public class DialogEditarPerfil extends JDialog {
         if (biografia != null && !biografia.isEmpty()) {
             txtBiografia.setText(biografia);
         }
+        // Si quieres, aquí puedes cargar también la foto guardada en disco usando GestorPerfiles
     }
     
     private void cambiarFotoPerfil() {
-        // Usar el selector de imágenes del navegador en lugar de JFileChooser
         DialogSelectorImagenes selector = new DialogSelectorImagenes(
             (Frame) SwingUtilities.getWindowAncestor(this)
         );
@@ -272,7 +275,8 @@ public class DialogEditarPerfil extends JDialog {
             "Éxito", 
             JOptionPane.INFORMATION_MESSAGE);
         
-        // Notificar que se actualizó
+        actualizado = true;
+        
         setVisible(false);
         dispose();
     }
@@ -284,8 +288,17 @@ public class DialogEditarPerfil extends JDialog {
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     }
     
-    // Método para que la ventana padre actualice la vista
+    // Indica al panel padre si se guardaron cambios
     public boolean fueActualizado() {
-        return !isVisible();
+        return actualizado;
+    }
+
+    // Devuelve el icono actual de la foto (para que el PanelPerfil lo use)
+    public ImageIcon getIconoPerfil() {
+        Icon icon = lblImagenPerfil.getIcon();
+        if (icon instanceof ImageIcon) {
+            return (ImageIcon) icon;
+        }
+        return null;
     }
 }
