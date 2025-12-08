@@ -82,6 +82,8 @@ public class PanelMensajes extends JPanel {
         btnNuevoMensaje.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnNuevoMensaje.setForeground(Color.WHITE);
         btnNuevoMensaje.setBackground(INSTAGRAM_PINK);
+        btnNuevoMensaje.setOpaque(true);
+        btnNuevoMensaje.setBorderPainted(false);
         btnNuevoMensaje.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
         btnNuevoMensaje.setFocusPainted(false);
         btnNuevoMensaje.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -262,6 +264,8 @@ public class PanelMensajes extends JPanel {
         btnEnviarMensaje.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnEnviarMensaje.setForeground(Color.WHITE);
         btnEnviarMensaje.setBackground(INSTAGRAM_PINK);
+        btnEnviarMensaje.setOpaque(true);
+        btnEnviarMensaje.setBorderPainted(false);
         btnEnviarMensaje.setBorder(BorderFactory.createEmptyBorder(10, 24, 10, 24));
         btnEnviarMensaje.setFocusPainted(false);
         btnEnviarMensaje.setCursor(new Cursor(Cursor.HAND_CURSOR));

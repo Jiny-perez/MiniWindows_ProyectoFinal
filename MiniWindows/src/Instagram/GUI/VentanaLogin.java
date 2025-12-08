@@ -94,54 +94,29 @@ public class VentanaLogin extends JFrame {
         panelFormulario.add(lblTitulo);
         panelFormulario.add(Box.createVerticalStrut(30));
         
-        JLabel lblUsername = new JLabel("Usuario");
-        lblUsername.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblUsername.setForeground(TEXT_PRIMARY);
-        lblUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel panelCampos = new JPanel();
+        panelCampos.setLayout(new BoxLayout(panelCampos, BoxLayout.Y_AXIS));
+        panelCampos.setBackground(CARD_COLOR);
+        panelCampos.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        txtUsername = new JTextField();
-        txtUsername.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtUsername.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
-        txtUsername.setMaximumSize(new Dimension(320, 40));
-        txtUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        JLabel lblPassword = new JLabel("Contraseña");
-        lblPassword.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblPassword.setForeground(TEXT_PRIMARY);
-        lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        txtPassword = new JPasswordField();
-        txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtPassword.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
-        txtPassword.setMaximumSize(new Dimension(320, 40));
-        txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
+        txtUsername = crearCampo("Usuario", panelCampos);
+        txtPassword = crearCampoPassword("Contraseña", panelCampos);
         txtPassword.addActionListener(e -> iniciarSesion());
         
-        panelFormulario.add(lblUsername);
-        panelFormulario.add(Box.createVerticalStrut(6));
-        panelFormulario.add(txtUsername);
-        panelFormulario.add(Box.createVerticalStrut(16));
-        panelFormulario.add(lblPassword);
-        panelFormulario.add(Box.createVerticalStrut(6));
-        panelFormulario.add(txtPassword);
+        panelFormulario.add(panelCampos);
         panelFormulario.add(Box.createVerticalStrut(24));
         
         JButton btnLogin = new JButton("Iniciar Sesión");
         btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btnLogin.setForeground(Color.WHITE);
         btnLogin.setBackground(INSTAGRAM_PINK);
+        btnLogin.setOpaque(true);
+        btnLogin.setBorderPainted(false);
         btnLogin.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
         btnLogin.setFocusPainted(false);
         btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLogin.setMaximumSize(new Dimension(320, 44));
-        btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
         btnLogin.addActionListener(e -> iniciarSesion());
         
         panelFormulario.add(btnLogin);
@@ -150,7 +125,6 @@ public class VentanaLogin extends JFrame {
         JPanel panelRegistro = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
         panelRegistro.setBackground(CARD_COLOR);
         panelRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelRegistro.setMaximumSize(new Dimension(320, 30));
         
         JLabel lblNoTienesCuenta = new JLabel("¿No tienes cuenta?");
         lblNoTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -191,7 +165,7 @@ public class VentanaLogin extends JFrame {
             new LineBorder(BORDER_COLOR, 3, true),
             BorderFactory.createEmptyBorder(40, 40, 40, 40)
         ));
-        panelFormulario.setMaximumSize(new Dimension(400, 650));
+        panelFormulario.setMaximumSize(new Dimension(400, 700));
         
         JLabel lblLogo = new JLabel();
         try {
@@ -215,55 +189,59 @@ public class VentanaLogin extends JFrame {
         panelFormulario.add(lblTitulo);
         panelFormulario.add(Box.createVerticalStrut(24));
         
-        JTextField txtNombreCompleto = new JTextField();
-        JTextField txtUsernameReg = new JTextField();
-        JPasswordField txtPasswordReg = new JPasswordField();
-        JPasswordField txtConfirmarPassword = new JPasswordField();
-        JComboBox<String> cmbGenero = new JComboBox<>(new String[]{"Masculino", "Femenino", "Otro"});
-        JSpinner spnEdad = new JSpinner(new SpinnerNumberModel(18, 13, 100, 1));
+        JPanel panelCampos = new JPanel();
+        panelCampos.setLayout(new BoxLayout(panelCampos, BoxLayout.Y_AXIS));
+        panelCampos.setBackground(CARD_COLOR);
+        panelCampos.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        agregarCampoFormulario(panelFormulario, "Nombre completo", txtNombreCompleto);
-        agregarCampoFormulario(panelFormulario, "Usuario", txtUsernameReg);
-        agregarCampoFormulario(panelFormulario, "Contraseña", txtPasswordReg);
-        agregarCampoFormulario(panelFormulario, "Confirmar contraseña", txtConfirmarPassword);
+        JTextField txtNombreCompleto = crearCampo("Nombre completo", panelCampos);
+        JTextField txtUsernameReg = crearCampo("Usuario", panelCampos);
+        JPasswordField txtPasswordReg = crearCampoPassword("Contraseña", panelCampos);
+        JPasswordField txtConfirmarPassword = crearCampoPassword("Confirmar contraseña", panelCampos);
         
         JLabel lblGenero = new JLabel("Género");
         lblGenero.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblGenero.setForeground(TEXT_PRIMARY);
-        lblGenero.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblGenero.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        JComboBox<String> cmbGenero = new JComboBox<>(new String[]{"Masculino", "Femenino", "Otro"});
         cmbGenero.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         cmbGenero.setMaximumSize(new Dimension(320, 40));
-        cmbGenero.setAlignmentX(Component.LEFT_ALIGNMENT);
+        cmbGenero.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        panelFormulario.add(lblGenero);
-        panelFormulario.add(Box.createVerticalStrut(6));
-        panelFormulario.add(cmbGenero);
-        panelFormulario.add(Box.createVerticalStrut(14));
+        panelCampos.add(lblGenero);
+        panelCampos.add(Box.createVerticalStrut(6));
+        panelCampos.add(cmbGenero);
+        panelCampos.add(Box.createVerticalStrut(14));
         
         JLabel lblEdad = new JLabel("Edad");
         lblEdad.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblEdad.setForeground(TEXT_PRIMARY);
-        lblEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblEdad.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        JSpinner spnEdad = new JSpinner(new SpinnerNumberModel(18, 13, 100, 1));
         spnEdad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         spnEdad.setMaximumSize(new Dimension(320, 40));
-        spnEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
+        spnEdad.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        panelFormulario.add(lblEdad);
-        panelFormulario.add(Box.createVerticalStrut(6));
-        panelFormulario.add(spnEdad);
+        panelCampos.add(lblEdad);
+        panelCampos.add(Box.createVerticalStrut(6));
+        panelCampos.add(spnEdad);
+        
+        panelFormulario.add(panelCampos);
         panelFormulario.add(Box.createVerticalStrut(20));
         
         JButton btnRegistro = new JButton("Registrarse");
         btnRegistro.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btnRegistro.setForeground(Color.WHITE);
         btnRegistro.setBackground(INSTAGRAM_PINK);
+        btnRegistro.setOpaque(true);
+        btnRegistro.setBorderPainted(false);
         btnRegistro.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
         btnRegistro.setFocusPainted(false);
         btnRegistro.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnRegistro.setMaximumSize(new Dimension(320, 44));
-        btnRegistro.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         btnRegistro.addActionListener(e -> {
             String nombreCompleto = txtNombreCompleto.getText().trim();
@@ -304,9 +282,6 @@ public class VentanaLogin extends JFrame {
                 txtConfirmarPassword.setText("");
                 
                 cardLayout.show(panelPrincipal, "LOGIN");
-            } else {
-                JOptionPane.showMessageDialog(this, "Error al crear la cuenta", 
-                    "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         
@@ -316,7 +291,6 @@ public class VentanaLogin extends JFrame {
         JPanel panelLogin = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
         panelLogin.setBackground(CARD_COLOR);
         panelLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelLogin.setMaximumSize(new Dimension(320, 30));
         
         JLabel lblYaTienesCuenta = new JLabel("¿Ya tienes cuenta?");
         lblYaTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -344,24 +318,50 @@ public class VentanaLogin extends JFrame {
         return panel;
     }
     
-    private void agregarCampoFormulario(JPanel panel, String etiqueta, JTextField campo) {
+    private JTextField crearCampo(String etiqueta, JPanel panel) {
         JLabel lbl = new JLabel(etiqueta);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lbl.setForeground(TEXT_PRIMARY);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        JTextField campo = new JTextField();
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(BORDER_COLOR, 2),
             BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
         campo.setMaximumSize(new Dimension(320, 40));
-        campo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        campo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         panel.add(lbl);
         panel.add(Box.createVerticalStrut(6));
         panel.add(campo);
-        panel.add(Box.createVerticalStrut(14));
+        panel.add(Box.createVerticalStrut(16));
+        
+        return campo;
+    }
+    
+    private JPasswordField crearCampoPassword(String etiqueta, JPanel panel) {
+        JLabel lbl = new JLabel(etiqueta);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lbl.setForeground(TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JPasswordField campo = new JPasswordField();
+        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        campo.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        campo.setMaximumSize(new Dimension(320, 40));
+        campo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        panel.add(lbl);
+        panel.add(Box.createVerticalStrut(6));
+        panel.add(campo);
+        panel.add(Box.createVerticalStrut(16));
+        
+        return campo;
     }
     
     private void iniciarSesion() {
@@ -397,9 +397,9 @@ public class VentanaLogin extends JFrame {
     
     private void configurarVentana() {
         setTitle("Instagram - Login");
-        setSize(550, 750);
-        setMinimumSize(new Dimension(500, 700));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(550, 820);
+        setMinimumSize(new Dimension(500, 750));
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
     }
     

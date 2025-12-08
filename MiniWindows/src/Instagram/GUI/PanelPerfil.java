@@ -232,15 +232,11 @@ public class PanelPerfil extends JPanel {
         Usuario usuario = gestorUsuarios.obtenerUsuario(usernameDelPerfil);
         if (usuario != null) {
             DialogEditarPerfil dialog = new DialogEditarPerfil(
-                (Frame) SwingUtilities.getWindowAncestor(this),
-                usuario,
-                gestorUsuarios
-            );
-            dialog.setVisible(true);
-            
-            if (dialog.isPerfilActualizado()) {
-                actualizarContenido();
-            }
+            (Frame) SwingUtilities.getWindowAncestor(this),
+            usuario,
+            gestorUsuarios
+        );
+        dialog.setVisible(true);
         }
     }
     
