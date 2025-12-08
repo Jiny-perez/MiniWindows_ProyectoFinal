@@ -212,19 +212,18 @@ public class DialogCrearPublicacion extends JDialog {
     }
     
     private void seleccionarImagen() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar Imagen");
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Imágenes (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"
-        ));
-        
-        int resultado = fileChooser.showOpenDialog(this);
-        
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            imagenSeleccionada = fileChooser.getSelectedFile();
-            mostrarPreviewImagen();
-        }
+    // Usar el selector de imágenes del navegador en lugar de JFileChooser
+    DialogSelectorImagenes selector = new DialogSelectorImagenes(
+        (Frame) SwingUtilities.getWindowAncestor(this)
+    );
+    selector.setVisible(true);
+    
+    File archivoSeleccionado = selector.getArchivoSeleccionado();
+    if (archivoSeleccionado != null) {
+        imagenSeleccionada = archivoSeleccionado;
+        mostrarPreviewImagen();
     }
+}
     
     private void mostrarPreviewImagen() {
         if (imagenSeleccionada != null) {

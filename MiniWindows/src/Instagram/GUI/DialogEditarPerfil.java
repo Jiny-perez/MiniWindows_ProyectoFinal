@@ -209,14 +209,15 @@ public class DialogEditarPerfil extends JDialog {
     }
     
     private void cambiarFotoPerfil() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-            "Imágenes", "jpg", "jpeg", "png", "gif"
-        ));
+        // Usar el selector de imágenes del navegador en lugar de JFileChooser
+        DialogSelectorImagenes selector = new DialogSelectorImagenes(
+            (Frame) SwingUtilities.getWindowAncestor(this)
+        );
+        selector.setVisible(true);
         
-        int resultado = fileChooser.showOpenDialog(this);
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            imagenSeleccionada = fileChooser.getSelectedFile();
+        File archivoSeleccionado = selector.getArchivoSeleccionado();
+        if (archivoSeleccionado != null) {
+            imagenSeleccionada = archivoSeleccionado;
             
             try {
                 ImageIcon icon = new ImageIcon(imagenSeleccionada.getAbsolutePath());
@@ -245,12 +246,15 @@ public class DialogEditarPerfil extends JDialog {
             return;
         }
         
+        // ACTUALIZAR USUARIO
         usuario.setNombreCompleto(nuevoNombre);
         usuario.setEmail(nuevoEmail);
         usuario.setBiografia(nuevaBiografia);
         
+        // GUARDAR EN GESTOR DE USUARIOS
         gestorUsuarios.actualizarUsuario(usuario);
         
+        // ACTUALIZAR IMAGEN DE PERFIL
         if (imagenSeleccionada != null) {
             gestorPerfiles.actualizarImagenPerfil(
                 usuario.getUsername(), 
@@ -258,6 +262,7 @@ public class DialogEditarPerfil extends JDialog {
             );
         }
         
+        // ACTUALIZAR BIOGRAFÍA EN PERFIL
         if (!nuevaBiografia.isEmpty()) {
             gestorPerfiles.actualizarBiografia(usuario.getUsername(), nuevaBiografia);
         }
@@ -267,6 +272,8 @@ public class DialogEditarPerfil extends JDialog {
             "Éxito", 
             JOptionPane.INFORMATION_MESSAGE);
         
+        // Notificar que se actualizó
+        setVisible(false);
         dispose();
     }
     
@@ -275,5 +282,10 @@ public class DialogEditarPerfil extends JDialog {
         setMinimumSize(new Dimension(450, 700));
         setLocationRelativeTo(getParent());
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    }
+    
+    // Método para que la ventana padre actualice la vista
+    public boolean fueActualizado() {
+        return !isVisible();
     }
 }
