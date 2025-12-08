@@ -87,8 +87,11 @@ public class NavegadorArchivos extends JFrame {
 
         barraHerramientas = new JToolBar();
         barraHerramientas.setFloatable(false);
-        barraHerramientas.setBackground(Color.WHITE);
-        barraHerramientas.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        barraHerramientas.setRollover(false);
+        barraHerramientas.setBackground(new Color(255, 240, 245));
+        barraHerramientas.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255, 200, 210)));
+        barraHerramientas.setOpaque(true);
+        barraHerramientas.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 
         btnNuevaCarpeta = crearBotonHerramienta("Nueva Carpeta");
         btnNuevaCarpeta.addActionListener(e -> crearNuevaCarpeta());
@@ -120,22 +123,23 @@ public class NavegadorArchivos extends JFrame {
         barraHerramientas.add(btnActualizar);
 
         JPanel panelRuta = new JPanel(new BorderLayout());
-        panelRuta.setBackground(Color.WHITE);
+        panelRuta.setBackground(new Color(255, 245, 247));
         panelRuta.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         JLabel lblRuta = new JLabel("Ubicación:");
         lblRuta.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         lblRuta.setForeground(new Color(100, 100, 100));
         lblRutaActual = new JLabel(sistemaArchivos.getRutaActual());
         lblRutaActual.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lblRutaActual.setForeground(new Color(0, 102, 204));
+        lblRutaActual.setForeground(new Color(219, 112, 147));
 
         JPanel panelRutaTexto = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        panelRutaTexto.setBackground(Color.WHITE);
+        panelRutaTexto.setBackground(new Color(255, 245, 247));
         panelRutaTexto.add(lblRuta);
         panelRutaTexto.add(lblRutaActual);
 
         JPanel panelOrden = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
-        panelOrden.setBackground(Color.WHITE);
+        panelOrden.setBackground(new Color(255, 245, 247));
+
         JLabel lblOrden = new JLabel("Ordenar por:");
         lblOrden.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 
@@ -178,32 +182,46 @@ public class NavegadorArchivos extends JFrame {
 
     private JButton crearBotonHerramienta(String texto) {
         JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 11));
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setBackground(Color.WHITE);
+
+        btn.setBackground(new Color(255, 182, 193));
+        btn.setForeground(Color.WHITE);
         btn.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createLineBorder(new Color(230, 150, 170), 1),
                 BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
 
+        btn.setOpaque(true);
+        btn.setContentAreaFilled(true);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setFocusable(false);
+        btn.setRequestFocusEnabled(false);
+        btn.setRolloverEnabled(false);
+
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                btn.setBackground(new Color(230, 240, 255));
+                btn.setBackground(new Color(219, 112, 147));
+                btn.setForeground(Color.WHITE);
                 btn.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(0, 120, 215), 1),
+                        BorderFactory.createLineBorder(new Color(219, 112, 147).darker(), 1),
                         BorderFactory.createEmptyBorder(5, 10, 5, 10)
                 ));
             }
 
             public void mouseExited(MouseEvent e) {
-                btn.setBackground(Color.WHITE);
+                btn.setBackground(new Color(255, 182, 193));
+                btn.setForeground(Color.WHITE);
+
                 btn.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                        BorderFactory.createLineBorder(new Color(230, 150, 170), 1),
                         BorderFactory.createEmptyBorder(5, 10, 5, 10)
                 ));
             }
         });
+
         return btn;
     }
 
@@ -236,7 +254,7 @@ public class NavegadorArchivos extends JFrame {
         scrollArbol.setBackground(Color.WHITE);
         panelArbol.add(scrollArbol, BorderLayout.CENTER);
         JPanel panelTabla = new JPanel(new BorderLayout());
-        panelTabla.setBackground(Color.WHITE);
+        panelTabla.setBackground(Color.WHITE); 
         String[] columnas = {"Nombre", "Tipo", "Tamaño", "Fecha Modificación"};
         modeloTabla = new DefaultTableModel(columnas, 0) {
             public boolean isCellEditable(int row, int column) {
@@ -366,13 +384,13 @@ public class NavegadorArchivos extends JFrame {
         BufferedImage imagen = new BufferedImage(ancho, alto, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = imagen.createGraphics();
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setColor(new Color(255, 193, 7));
+        g2d.setColor(new Color(255, 182, 193));
         g2d.fillRect(1, 4, 6, 2);
         g2d.fillRect(1, 6, 14, 8);
-        g2d.setColor(new Color(230, 170, 0));
+        g2d.setColor(new Color(219, 112, 147));
         g2d.drawRect(1, 4, 6, 2);
         g2d.drawRect(1, 6, 14, 8);
-        g2d.setColor(new Color(255, 220, 100));
+        g2d.setColor(new Color(255, 200, 220));
         g2d.drawLine(2, 7, 13, 7);
         g2d.dispose();
         return new ImageIcon(imagen);
@@ -1155,7 +1173,6 @@ public class NavegadorArchivos extends JFrame {
         }
     }
 
-   
     private String formatearTamanio(long bytes) {
         if (bytes < 1024) {
             return bytes + " B";
@@ -1235,24 +1252,24 @@ public class NavegadorArchivos extends JFrame {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             if (abierta) {
-                g2d.setColor(new Color(255, 193, 7));
+                g2d.setColor(new Color(255, 182, 193));
                 g2d.fillRect(1, 3, 6, 3);
                 int[] xPoints = {1, 15, 14, 2};
                 int[] yPoints = {6, 6, 14, 14};
                 g2d.fillPolygon(xPoints, yPoints, 4);
-                g2d.setColor(new Color(230, 170, 0));
+                g2d.setColor(new Color(219, 112, 147));
                 g2d.drawPolygon(xPoints, yPoints, 4);
                 g2d.drawRect(1, 3, 6, 3);
-                g2d.setColor(new Color(245, 200, 50));
+                g2d.setColor(new Color(255, 200, 220));
                 g2d.drawLine(2, 7, 14, 7);
             } else {
-                g2d.setColor(new Color(255, 193, 7));
+                g2d.setColor(new Color(255, 182, 193));
                 g2d.fillRect(1, 4, 6, 2);
                 g2d.fillRect(1, 6, 14, 8);
-                g2d.setColor(new Color(230, 170, 0));
+                g2d.setColor(new Color(219, 112, 147));
                 g2d.drawRect(1, 4, 6, 2);
                 g2d.drawRect(1, 6, 14, 8);
-                g2d.setColor(new Color(255, 220, 100));
+                g2d.setColor(new Color(255, 200, 220));
                 g2d.drawLine(2, 7, 13, 7);
             }
 

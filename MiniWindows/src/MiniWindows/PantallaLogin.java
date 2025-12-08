@@ -108,7 +108,7 @@ public class PantallaLogin extends JFrame {
 
         btnLogin = new JButton("Iniciar Sesión");
         btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btnLogin.setBackground(new Color(0, 120, 215));
+        btnLogin.setBackground(new Color(255, 20, 147));
         btnLogin.setForeground(Color.WHITE);
         btnLogin.setFocusPainted(false);
         btnLogin.setBorderPainted(false);
@@ -117,11 +117,11 @@ public class PantallaLogin extends JFrame {
 
         btnLogin.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                btnLogin.setBackground(new Color(0, 100, 190));
+                btnLogin.setBackground(new Color(255, 20, 147).darker());
             }
 
             public void mouseExited(MouseEvent e) {
-                btnLogin.setBackground(new Color(0, 120, 215));
+                btnLogin.setBackground(new Color(255, 20, 147));
             }
         });
 
