@@ -224,7 +224,7 @@ public class VentanaINSTA extends JFrame {
         setTitle("Instagram - @" + usuarioActual.getUsername());
         setSize(1200, 800);
         setMinimumSize(new Dimension(1000, 600));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
     }
     

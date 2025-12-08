@@ -20,7 +20,7 @@ import java.io.File;
  * @author najma
  */
 public class DialogEditarPerfil extends JDialog {
-    
+   
     private Usuario usuario;
     private GestorUsuariosLocal gestorUsuarios;
     private boolean cambiosGuardados = false;
@@ -85,7 +85,7 @@ public class DialogEditarPerfil extends JDialog {
         centro.add(Box.createVerticalStrut(8));
         
         txtBiografia = new JTextArea(4, 40);
-        txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtBiografia.setForeground(TEXT_PRIMARY);
         txtBiografia.setLineWrap(true);
         txtBiografia.setWrapStyleWord(true);
@@ -306,6 +306,7 @@ public class DialogEditarPerfil extends JDialog {
     private void guardarCambios() {
         String biografia = txtBiografia.getText().trim();
         
+        // Validar longitud de biografía
         if (biografia.length() > 150) {
             JOptionPane.showMessageDialog(
                 this,
@@ -329,7 +330,6 @@ public class DialogEditarPerfil extends JDialog {
                 usuario.setRutaFotoPerfil(perfil.getRutaAvatar());
             }
         } else if (rutaFotoActual == null) {
-            // Eliminar foto
             usuario.setRutaFotoPerfil(null);
             GestorPerfiles.actualizarAvatar(usuario.getUsername(), null);
         }

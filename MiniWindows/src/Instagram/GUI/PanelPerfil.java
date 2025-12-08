@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * @author najma
  */
 public class PanelPerfil extends JPanel {
-    
+   
     private GestorINSTA gestorINSTA;
     private GestorUsuariosLocal gestorUsuarios;
     private String usernameVisualizando;
@@ -93,7 +93,6 @@ public class PanelPerfil extends JPanel {
         panelSuperior.setBackground(CARD_COLOR);
         panelSuperior.setMaximumSize(new Dimension(800, 160));
         
-
         JLabel fotoPerfil = new JLabel();
         try {
             Instagram.Modelo.Usuario usuario = gestorUsuarios.obtenerUsuario(usernameVisualizando);
@@ -382,12 +381,12 @@ public class PanelPerfil extends JPanel {
         }
         lblIconoFotos.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblTitulo = new JLabel("Fotos Compartidas");
+        JLabel lblTitulo = new JLabel("Share Photos");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(TEXT_PRIMARY);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblMensaje = new JLabel("Cuando compartas fotos, aparecerán en tu perfil");
+        JLabel lblMensaje = new JLabel("When you share photos, they will appear on your profile.");
         lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblMensaje.setForeground(TEXT_SECONDARY);
         lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -416,3 +415,4 @@ public class PanelPerfil extends JPanel {
         return new ImageIcon(buffered);
     }
 }
+ 
