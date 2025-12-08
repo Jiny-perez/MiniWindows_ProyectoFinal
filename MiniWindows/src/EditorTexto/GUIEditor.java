@@ -3,7 +3,6 @@ package EditorTexto;
 import GestorArchivos.MiniWindowsClass;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -599,32 +598,38 @@ public class GUIEditor extends JFrame {
                 fc.setCurrentDirectory(raizCanonical);
                 final File[] ultimo = new File[1];
                 ultimo[0] = raizCanonical;
+
                 fc.addPropertyChangeListener(evt -> {
-                    if (JFileChooser.DIRECTORY_CHANGED_PROPERTY.equals(evt.getPropertyName())) {
-                        Object newVal = evt.getNewValue();
-                        if (newVal instanceof File) {
-                            File nuevoDir = (File) newVal;
-                            try {
-                                File nuevoCanon = nuevoDir.getCanonicalFile();
-                                String raizPath = raizCanonical.getAbsolutePath();
-                                String nuevoPath = nuevoCanon.getAbsolutePath();
-                                if (!nuevoPath.equals(raizPath) && !nuevoPath.startsWith(raizPath + File.separator)) {
-                                    SwingUtilities.invokeLater(() -> {
-                                        JOptionPane.showMessageDialog(fc,
-                                                "No puede salir de la carpeta del usuario.",
-                                                "Acceso denegado",
-                                                JOptionPane.WARNING_MESSAGE);
-                                        fc.setCurrentDirectory(ultimo[0]);
-                                    });
-                                } else {
-                                    ultimo[0] = nuevoCanon;
-                                }
-                            } catch (Exception ex) {
-                                SwingUtilities.invokeLater(() -> fc.setCurrentDirectory(ultimo[0]));
-                            }
+                    if (!JFileChooser.DIRECTORY_CHANGED_PROPERTY.equals(evt.getPropertyName())) {
+                        return;
+                    }
+                    Object newVal = evt.getNewValue();
+                    if (!(newVal instanceof File)) {
+                        return;
+                    }
+                    File nuevoDir = (File) newVal;
+                    try {
+                        File nuevoCanon = nuevoDir.getCanonicalFile();
+                        String raizPath = raizCanonical.getAbsolutePath();
+                        String nuevoPath = nuevoCanon.getAbsolutePath();
+
+                        if (nuevoPath.equals(raizPath) || nuevoPath.startsWith(raizPath + File.separator)) {
+                            ultimo[0] = nuevoCanon;
+                            return;
                         }
+
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(fc,
+                                    "No puede salir de la carpeta del usuario.",
+                                    "Acceso denegado",
+                                    JOptionPane.WARNING_MESSAGE);
+                            fc.setCurrentDirectory(raizCanonical);
+                        });
+                    } catch (Exception ex) {
+                        SwingUtilities.invokeLater(() -> fc.setCurrentDirectory(ultimo[0]));
                     }
                 });
+
             } catch (Exception e) {
                 try {
                     fc.setCurrentDirectory(raizPermitida);

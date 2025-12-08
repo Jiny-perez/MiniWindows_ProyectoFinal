@@ -1,14 +1,20 @@
 package GestorArchivos;
 
+import GestorUsuario.Usuario;
+import Excepciones.*;
+
 import java.io.*;
 import java.util.*;
 import java.nio.file.*;
-import GestorUsuario.Usuario;
-import Excepciones.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.*;
 
+/**
+ *
+ * @author marye
+ */
 public class SistemaArchivos implements Serializable {
-   private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 1L;
     private final String BASE_FISICO;
     private String rutaActualRelativa;
     private Usuario usuarioActual;
@@ -54,7 +60,7 @@ public class SistemaArchivos implements Serializable {
         }
     }
 
-    private Calendar fileTimeToCalendar(File f) {
+    private Calendar ultimaModificacion(File f) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(f.lastModified());
         return cal;
@@ -89,7 +95,7 @@ public class SistemaArchivos implements Serializable {
             return lista;
         }
         for (File f : hijos) {
-            Calendar cal = fileTimeToCalendar(f);
+            Calendar cal = ultimaModificacion(f);
             String rel = buildRelativePath(f);
             lista.add(new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, cal, rel, f.getAbsolutePath()));
         }
@@ -100,13 +106,14 @@ public class SistemaArchivos implements Serializable {
         if (nombre == null) {
             return null;
         }
+
         String rnorm = normalizeRel(rutaRelativa);
         File padre = fileFromRel(rnorm);
         File f = new File(padre, nombre);
         if (!f.exists()) {
             return null;
         }
-        return new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, fileTimeToCalendar(f), buildRelativePath(f), f.getAbsolutePath());
+        return new Archivo(f.getName(), f.isDirectory(), f.isFile() ? f.length() : 0L, ultimaModificacion(f), buildRelativePath(f), f.getAbsolutePath());
     }
 
     public Archivo obtenerArchivoEnRuta(String nombre) {
@@ -151,27 +158,37 @@ public class SistemaArchivos implements Serializable {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("El nombre del archivo no puede estar vacío");
         }
+
         if (nombre.contains("/") || nombre.contains("\\")) {
             throw new ArchivoNoValidoException("Nombre de archivo inválido");
         }
+
         String padreRel = normalizeRel(rutaVirtualPadre);
         File padre = fileFromRel(padreRel);
         if (!padre.exists() || !padre.isDirectory()) {
             throw new ArchivoNoValidoException(rutaVirtualPadre, "la ruta padre no existe");
         }
+
         File archivo = new File(padre, nombre);
         if (archivo.exists()) {
             throw new ArchivoNoValidoException(nombre, "ya existe");
         }
+
         try {
             File parent = archivo.getParentFile();
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
+
             try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(archivo), "UTF-8"))) {
                 if (contenido != null) {
                     bw.write(contenido);
                 }
+            }
+
+            try {
+                archivo.setLastModified(System.currentTimeMillis());
+            } catch (Exception ignored) {
             }
         } catch (IOException | SecurityException e) {
             if (archivo.exists()) {
@@ -186,15 +203,18 @@ public class SistemaArchivos implements Serializable {
         if (nombreActual == null || nombreNuevo == null || nombreNuevo.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Nombre inválido");
         }
+
         File padre = fileFromRel(rutaActualRelativa);
         File a = new File(padre, nombreActual);
         if (!a.exists()) {
             throw new ArchivoNoValidoException(nombreActual, "no existe");
         }
+
         File b = new File(padre, nombreNuevo);
         if (b.exists()) {
             throw new ArchivoNoValidoException(nombreNuevo, "ya existe un archivo o carpeta con ese nombre");
         }
+
         boolean ok = a.renameTo(b);
         if (!ok) {
             if (a.isFile()) {
@@ -215,18 +235,20 @@ public class SistemaArchivos implements Serializable {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Debe especificar un nombre");
         }
+
         File padre = fileFromRel(rutaActualRelativa);
         File objetivo = new File(padre, nombre);
         if (!objetivo.exists()) {
             throw new ArchivoNoValidoException(nombre, "no existe");
         }
+
         try {
             if (objetivo.isFile()) {
                 Files.deleteIfExists(objetivo.toPath());
             } else {
                 boolean fisicoTieneContenido = objetivo.isDirectory() && (objetivo.list() != null && objetivo.list().length > 0);
                 if (fisicoTieneContenido && !force) {
-                    throw new ArchivoNoValidoException(nombre, "no está vacía. Usa force=true para eliminar recursivamente");
+                    throw new ArchivoNoValidoException(nombre, "No esta vacia");
                 }
                 borrarFisicoRecursivo(objetivo);
             }
@@ -244,11 +266,13 @@ public class SistemaArchivos implements Serializable {
         if (nombre == null || nombre.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Debe especificar un nombre de carpeta");
         }
+
         String nuevaRel = (rutaActualRelativa == null || rutaActualRelativa.isEmpty()) ? nombre : rutaActualRelativa + "/" + nombre;
         File f = fileFromRel(nuevaRel);
         if (!f.exists() || !f.isDirectory()) {
             throw new ArchivoNoValidoException(nombre, "no existe o no es una carpeta");
         }
+
         rutaActualRelativa = normalizeRel(nuevaRel);
         return true;
     }
@@ -257,12 +281,14 @@ public class SistemaArchivos implements Serializable {
         if (rutaActualRelativa == null || rutaActualRelativa.isEmpty()) {
             return false;
         }
+
         int last = rutaActualRelativa.lastIndexOf('/');
         if (last <= 0) {
             rutaActualRelativa = "";
         } else {
             rutaActualRelativa = rutaActualRelativa.substring(0, last);
         }
+
         return true;
     }
 
@@ -270,12 +296,14 @@ public class SistemaArchivos implements Serializable {
         if (ruta == null) {
             return false;
         }
+
         String r = ruta.replaceFirst("(?i)^Z:[:\\\\/]*", "");
         r = normalizeRel(r);
         File f = fileFromRel(r);
         if (!f.exists() || !f.isDirectory()) {
             throw new ArchivoNoValidoException("Ruta no existe: " + ruta);
         }
+
         rutaActualRelativa = r;
         return true;
     }
@@ -330,6 +358,7 @@ public class SistemaArchivos implements Serializable {
         if (username == null || username.trim().isEmpty()) {
             throw new ArchivoNoValidoException("Usuario inválido");
         }
+
         String anterior = rutaActualRelativa;
         try {
             rutaActualRelativa = "";
@@ -370,11 +399,116 @@ public class SistemaArchivos implements Serializable {
         }
     }
 
+    public String generarNombreCopia(File destinoDir, String nombreOriginal, boolean esCarpeta) {
+        if (nombreOriginal == null) {
+            nombreOriginal = "";
+        }
+
+        String nombre = nombreOriginal;
+        String ext = "";
+        if (!esCarpeta) {
+            int lastDot = nombreOriginal.lastIndexOf('.');
+            if (lastDot > 0 && lastDot < nombreOriginal.length() - 1) {
+                ext = nombreOriginal.substring(lastDot);
+                nombre = nombreOriginal.substring(0, lastDot);
+            }
+        }
+
+        String copia = nombre + " - copia";
+        String candidato = copia + ext;
+        int contador = 1;
+        while (new File(destinoDir, candidato).exists()) {
+            contador++;
+            candidato = copia + " (" + contador + ")" + ext;
+        }
+        return candidato;
+    }
+
+    public void subirArchivo(File archivoOrigen, String nombreDestino) throws ArchivoNoValidoException, IOException {
+        if (archivoOrigen == null || !archivoOrigen.exists() || !archivoOrigen.isFile()) {
+            throw new ArchivoNoValidoException("Archivo origen inválido: " + archivoOrigen);
+        }
+
+        File dir = this.getDirectorioActualFisico();
+        if (dir == null) {
+            throw new ArchivoNoValidoException("Directorio físico actual no disponible.");
+        }
+
+        File destino = new File(dir, nombreDestino);
+        if (destino.exists()) {
+            throw new ArchivoNoValidoException("El archivo destino ya existe: " + destino.getName());
+        }
+
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("No se pudo crear el directorio destino: " + dir.getAbsolutePath());
+            }
+        }
+
+        try {
+            Files.copy(archivoOrigen.toPath(), destino.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+        } catch (IOException e) { }
+
+        try {
+            destino.setLastModified(System.currentTimeMillis());
+        } catch (Exception ignored) {}
+    }
+
+    public void copiarCarpetaRecursiva(String rutaFisicaOrigen, String nombreCarpetaDestino)
+            throws ArchivoNoValidoException, IOException {
+
+        if (rutaFisicaOrigen == null || rutaFisicaOrigen.trim().isEmpty()) {
+            throw new ArchivoNoValidoException("Ruta origen inválida.");
+        }
+
+        Path origen = Paths.get(rutaFisicaOrigen);
+        if (!Files.exists(origen) || !Files.isDirectory(origen)) {
+            throw new ArchivoNoValidoException("La ruta origen no es una carpeta válida: " + rutaFisicaOrigen);
+        }
+
+        File dir = this.getDirectorioActualFisico();
+        if (dir == null) {
+            throw new ArchivoNoValidoException("Directorio físico actual no disponible.");
+        }
+
+        File destinoRaiz = new File(dir, nombreCarpetaDestino);
+        if (destinoRaiz.exists()) {
+            throw new ArchivoNoValidoException("La carpeta destino ya existe: " + destinoRaiz.getName());
+        }
+
+        try {
+            Files.createDirectories(destinoRaiz.toPath());
+        } catch (IOException e) {
+            throw new IOException("No se pudo crear la carpeta destino: " + destinoRaiz.getAbsolutePath(), e);
+        }
+
+        Files.walkFileTree(origen, new SimpleFileVisitor<Path>() {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetDir = destinoRaiz.toPath().resolve(origen.relativize(dir));
+                if (!Files.exists(targetDir)) {
+                    Files.createDirectories(targetDir);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Path targetFile = destinoRaiz.toPath().resolve(origen.relativize(file));
+                Files.copy(file, targetFile, StandardCopyOption.COPY_ATTRIBUTES);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+
+        try {
+            destinoRaiz.setLastModified(Files.getLastModifiedTime(origen).toMillis());
+        } catch (Exception ignored) {
+        }
+    }
+
     public void guardar() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_SISTEMA))) {
             oos.writeObject(this.rutaActualRelativa);
         } catch (IOException e) {
-            System.err.println("Warning: no se pudo guardar archivo de sistema: " + e.getMessage());
+            System.err.println("ERROR: no se pudo guardar archivo de sistema: " + e.getMessage());
         }
     }
 
@@ -383,6 +517,7 @@ public class SistemaArchivos implements Serializable {
         if (!archivo.exists()) {
             return false;
         }
+
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(ARCHIVO_SISTEMA))) {
             Object o = ois.readObject();
             if (o instanceof String) {
@@ -390,7 +525,7 @@ public class SistemaArchivos implements Serializable {
             }
             return true;
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Warning: no se pudo cargar archivo de sistema: " + e.getMessage());
+            System.err.println("ERROR: no se pudo cargar archivo de sistema: " + e.getMessage());
             return false;
         }
     }
@@ -399,9 +534,9 @@ public class SistemaArchivos implements Serializable {
         if (fichero == null || !fichero.exists()) {
             return;
         }
+
         final Path root = fichero.toPath();
         Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
-            @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 try {
                     Files.deleteIfExists(file);
@@ -417,7 +552,6 @@ public class SistemaArchivos implements Serializable {
                 return FileVisitResult.CONTINUE;
             }
 
-            @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 if (exc != null) {
                     throw exc;

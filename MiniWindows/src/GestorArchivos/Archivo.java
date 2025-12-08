@@ -1,6 +1,7 @@
 package GestorArchivos;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 /**
  *
@@ -12,12 +13,11 @@ public class Archivo implements Serializable {
     private String nombre;
     private boolean esCarpeta;
     private long tamanio;
-    private java.util.Calendar fechaModificacion;
+    private Calendar fechaModificacion;
     private String rutaRelativa;
     private String rutaAbsoluta;
 
-    public Archivo(String nombre, boolean esCarpeta, long tamanio,
-            java.util.Calendar fechaModificacion, String rutaRelativa, String rutaAbsoluta) {
+    public Archivo(String nombre, boolean esCarpeta, long tamanio, Calendar fechaModificacion, String rutaRelativa, String rutaAbsoluta) {
         this.nombre = nombre;
         this.esCarpeta = esCarpeta;
         this.tamanio = tamanio;
@@ -38,8 +38,12 @@ public class Archivo implements Serializable {
         return tamanio;
     }
 
-    public java.util.Calendar getFechaModificacion() {
+    public Calendar getFechaModificacion() {
         return fechaModificacion;
+    }
+
+    public Calendar setFechaModificacion(Calendar fechaModificacion) {
+        return fechaModificacion=fechaModificacion;
     }
 
     public String getRutaRelativa() {
@@ -48,10 +52,5 @@ public class Archivo implements Serializable {
 
     public String getRutaAbsoluta() {
         return rutaAbsoluta;
-    }
-
-    @Override
-    public String toString() {
-        return esCarpeta ? "[DIR] " + nombre : nombre + " (" + tamanio + " bytes)";
     }
 }
