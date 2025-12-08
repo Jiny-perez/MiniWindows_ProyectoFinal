@@ -463,7 +463,6 @@ public class VentanaLogin extends JFrame {
                 abrirInstagram(usuario);
             }
         } else {
-            // Usuario activo, abrir Instagram normalmente
             abrirInstagram(usuario);
         }
     }
@@ -514,7 +513,7 @@ public class VentanaLogin extends JFrame {
             this.setVisible(false);
             
             JOptionPane.showMessageDialog(
-                null, // Sin parent para que no dependa de la ventana cerrada
+                null,
                 "¡Cuenta creada exitosamente! Bienvenido/a a Instagram, " + username + "!",
                 "Registro Exitoso",
                 JOptionPane.INFORMATION_MESSAGE
