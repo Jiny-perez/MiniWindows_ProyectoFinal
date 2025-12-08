@@ -9,10 +9,8 @@ import java.util.Calendar;
  */
 public class Usuario implements Serializable {
    
-    // atributo constante
     private static final long serialVersionUID = 1L;
     
-    // atributoss
     private String nombreCompleto;
     private String username;
     private String password;
@@ -20,7 +18,6 @@ public class Usuario implements Serializable {
     private Calendar fechaCreacion;
     private boolean activo;
     
-    // constructor
     public Usuario(String nombreCompleto, String username, String password, boolean esAdmin) {
         this.nombreCompleto = nombreCompleto;
         this.username = username;
@@ -30,17 +27,14 @@ public class Usuario implements Serializable {
         this.activo = true;
     }
     
-    // constructor para usuario admin
     public static Usuario crearAdmin() {
         return new Usuario("Administrador", "admin", "admin123", true);
     }
     
-    // método para verificar contraseña
     public boolean verificarPassword(String password) {
         return this.password.equals(password);
     }
     
-    // getters
     public String getNombreCompleto() {
         return nombreCompleto;
     }
@@ -65,7 +59,6 @@ public class Usuario implements Serializable {
         return activo;
     }
     
-    // setters
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
     }
@@ -84,9 +77,5 @@ public class Usuario implements Serializable {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }
-    
-    public String toString() {
-        return username + (esAdmin ? " [ADMIN]" : "");
     }
 } 
