@@ -5,7 +5,7 @@
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
-import Instagram.Logica.GestorINSTA;
+import Instagram.Logica.GestorINSTACompleto;
 import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Logica.GestorNotificaciones;
 import java.awt.*;
@@ -19,7 +19,7 @@ import javax.swing.border.*;
  */
 public class VentanaINSTA extends JFrame {
     
-    private GestorINSTA gestorINSTA;
+    private GestorINSTACompleto gestorINSTA;
     private GestorUsuariosLocalINSTA gestorUsuarios;
     private GestorNotificaciones gestorNotificaciones;
     private Usuario usuarioActual;
@@ -42,7 +42,7 @@ public class VentanaINSTA extends JFrame {
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color HOVER_COLOR = new Color(255, 230, 240);
     
-    public VentanaINSTA(Usuario usuario, GestorINSTA gestor, GestorUsuariosLocal gestorUsuariosLocal) {
+    public VentanaINSTA(Usuario usuario, GestorINSTACompleto gestor, GestorUsuariosLocalINSTA gestorUsuariosLocal) {
         this.usuarioActual = usuario;
         this.gestorINSTA = gestor;
         this.gestorUsuarios = gestorUsuariosLocal;
@@ -89,7 +89,7 @@ public class VentanaINSTA extends JFrame {
         
         JLabel lblLogo = new JLabel();
         try {
-            ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram.icons/icon_insta.png"));
+            ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_insta.png"));
             Image img = logoIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             lblLogo.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -239,7 +239,7 @@ public class VentanaINSTA extends JFrame {
         return usuarioActual;
     }
     
-    public GestorINSTA getGestorINSTA() {
+    public GestorINSTACompleto getGestorINSTA() {
         return gestorINSTA;
     }
     

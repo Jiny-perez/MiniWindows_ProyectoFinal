@@ -5,13 +5,13 @@
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
-import Instagram.Logica.GestorINSTA;
+import Instagram.Logica.GestorINSTACompleto;
 import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Logica.GestorArchivosUsuarioINSTA;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-
+import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  *
@@ -19,37 +19,26 @@ import java.awt.event.*;
  */
 public class VentanaLogin extends JFrame {
    
+    private GestorINSTACompleto gestorINSTA;
     private GestorUsuariosLocalINSTA gestorUsuarios;
     
+    private JTextField txtUsername;
+    private JPasswordField txtPassword;
     private JPanel panelPrincipal;
-    private JPanel panelLogin;
-    private JPanel panelRegistro;
     private CardLayout cardLayout;
     
-    private JTextField txtUsernameLogin;
-    private JPasswordField txtPasswordLogin;
-    private JButton btnLogin;
-    private JButton btnIrARegistro;
-    
-    private JTextField txtUsernameRegistro;
-    private JTextField txtNombreCompleto;
-    private JComboBox<String> cmbGenero;
-    private JSpinner spnEdad;
-    private JPasswordField txtPasswordRegistro;
-    private JPasswordField txtConfirmarPassword;
-    private JButton btnRegistrar;
-    private JButton btnIrALogin;
-    
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
-    private static final Color INSTAGRAM_PINK_HOVER = new Color(220, 60, 110);
     private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
+    private static final Color CARD_COLOR = Color.WHITE;
+    private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
-    private static final Color BORDER_COLOR = new Color(255, 192, 203);
     
     public VentanaLogin() {
         GestorArchivosUsuarioINSTA.inicializarEstructura();
         gestorUsuarios = new GestorUsuariosLocalINSTA();
+        gestorINSTA = new GestorINSTACompleto(gestorUsuarios);
+        
         initComponents();
         configurarVentana();
     }
@@ -59,32 +48,29 @@ public class VentanaLogin extends JFrame {
         panelPrincipal = new JPanel(cardLayout);
         panelPrincipal.setBackground(BACKGROUND_COLOR);
         
-        panelLogin = crearPanelLogin();
-        panelRegistro = crearPanelRegistro();
+        JPanel panelLogin = crearPanelLogin();
+        JPanel panelRegistro = crearPanelRegistro();
         
         panelPrincipal.add(panelLogin, "LOGIN");
         panelPrincipal.add(panelRegistro, "REGISTRO");
         
-        getContentPane().add(panelPrincipal);
+        add(panelPrincipal);
     }
     
     private JPanel crearPanelLogin() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
         
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        JPanel container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        container.setBackground(Color.WHITE);
-        container.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 2),
+        JPanel panelFormulario = new JPanel();
+        panelFormulario.setLayout(new BoxLayout(panelFormulario, BoxLayout.Y_AXIS));
+        panelFormulario.setBackground(CARD_COLOR);
+        panelFormulario.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 3, true),
             BorderFactory.createEmptyBorder(40, 40, 40, 40)
         ));
-        container.setMaximumSize(new Dimension(350, 500));
+        panelFormulario.setMaximumSize(new Dimension(400, 500));
         
         JLabel lblLogo = new JLabel();
         try {
@@ -93,79 +79,119 @@ public class VentanaLogin extends JFrame {
             lblLogo.setIcon(new ImageIcon(img));
         } catch (Exception e) {
             lblLogo.setText("Instagram");
-            lblLogo.setFont(new Font("Brush Script MT", Font.ITALIC, 48));
+            lblLogo.setFont(new Font("Brush Script MT", Font.ITALIC, 42));
             lblLogo.setForeground(INSTAGRAM_PINK);
         }
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblLogo.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        container.add(lblLogo);
-        container.add(Box.createVerticalStrut(30));
         
-        txtUsernameLogin = crearCampoTexto("Username");
-        txtUsernameLogin.setMaximumSize(new Dimension(270, 40));
-        txtUsernameLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtUsernameLogin);
-        container.add(Box.createVerticalStrut(10));
+        JLabel lblTitulo = new JLabel("Iniciar Sesión");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitulo.setForeground(TEXT_PRIMARY);
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        txtPasswordLogin = crearCampoPassword("Contraseña");
-        txtPasswordLogin.setMaximumSize(new Dimension(270, 40));
-        txtPasswordLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtPasswordLogin);
-        container.add(Box.createVerticalStrut(20));
+        panelFormulario.add(lblLogo);
+        panelFormulario.add(Box.createVerticalStrut(20));
+        panelFormulario.add(lblTitulo);
+        panelFormulario.add(Box.createVerticalStrut(30));
         
-        btnLogin = crearBotonPrincipal("Iniciar Sesión");
-        btnLogin.addActionListener(e -> intentarLogin());
-        btnLogin.setMaximumSize(new Dimension(270, 40));
-        btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(btnLogin);
-        container.add(Box.createVerticalStrut(30));
+        JLabel lblUsername = new JLabel("Usuario");
+        lblUsername.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblUsername.setForeground(TEXT_PRIMARY);
+        lblUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JSeparator separador = new JSeparator();
-        separador.setMaximumSize(new Dimension(270, 1));
-        separador.setForeground(BORDER_COLOR);
-        separador.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(separador);
-        container.add(Box.createVerticalStrut(20));
+        txtUsername = new JTextField();
+        txtUsername.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtUsername.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        txtUsername.setMaximumSize(new Dimension(320, 40));
+        txtUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JLabel lblNoTienesCuenta = new JLabel("¿No tienes una cuenta?");
-        lblNoTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JLabel lblPassword = new JLabel("Contraseña");
+        lblPassword.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblPassword.setForeground(TEXT_PRIMARY);
+        lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        txtPassword = new JPasswordField();
+        txtPassword.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPassword.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        txtPassword.setMaximumSize(new Dimension(320, 40));
+        txtPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        txtPassword.addActionListener(e -> iniciarSesion());
+        
+        panelFormulario.add(lblUsername);
+        panelFormulario.add(Box.createVerticalStrut(6));
+        panelFormulario.add(txtUsername);
+        panelFormulario.add(Box.createVerticalStrut(16));
+        panelFormulario.add(lblPassword);
+        panelFormulario.add(Box.createVerticalStrut(6));
+        panelFormulario.add(txtPassword);
+        panelFormulario.add(Box.createVerticalStrut(24));
+        
+        JButton btnLogin = new JButton("Iniciar Sesión");
+        btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setBackground(INSTAGRAM_PINK);
+        btnLogin.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
+        btnLogin.setFocusPainted(false);
+        btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLogin.setMaximumSize(new Dimension(320, 44));
+        btnLogin.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnLogin.addActionListener(e -> iniciarSesion());
+        
+        panelFormulario.add(btnLogin);
+        panelFormulario.add(Box.createVerticalStrut(20));
+        
+        JPanel panelRegistro = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+        panelRegistro.setBackground(CARD_COLOR);
+        panelRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelRegistro.setMaximumSize(new Dimension(320, 30));
+        
+        JLabel lblNoTienesCuenta = new JLabel("¿No tienes cuenta?");
+        lblNoTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblNoTienesCuenta.setForeground(TEXT_SECONDARY);
-        lblNoTienesCuenta.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(lblNoTienesCuenta);
-        container.add(Box.createVerticalStrut(10));
         
-        btnIrARegistro = crearBotonSecundario("Regístrate");
-        btnIrARegistro.addActionListener(e -> mostrarRegistro());
-        btnIrARegistro.setMaximumSize(new Dimension(270, 40));
-        btnIrARegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(btnIrARegistro);
+        JButton btnIrARegistro = new JButton("Regístrate");
+        btnIrARegistro.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnIrARegistro.setForeground(INSTAGRAM_PINK);
+        btnIrARegistro.setBackground(CARD_COLOR);
+        btnIrARegistro.setBorderPainted(false);
+        btnIrARegistro.setContentAreaFilled(false);
+        btnIrARegistro.setFocusPainted(false);
+        btnIrARegistro.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnIrARegistro.addActionListener(e -> cardLayout.show(panelPrincipal, "REGISTRO"));
         
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(container, gbc);
+        panelRegistro.add(lblNoTienesCuenta);
+        panelRegistro.add(btnIrARegistro);
         
-        txtPasswordLogin.addActionListener(e -> btnLogin.doClick());
+        panelFormulario.add(panelRegistro);
+        
+        panel.add(Box.createVerticalGlue());
+        panel.add(panelFormulario);
+        panel.add(Box.createVerticalGlue());
         
         return panel;
     }
     
     private JPanel crearPanelRegistro() {
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
         
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        JPanel container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
-        container.setBackground(Color.WHITE);
-        container.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 2),
+        JPanel panelFormulario = new JPanel();
+        panelFormulario.setLayout(new BoxLayout(panelFormulario, BoxLayout.Y_AXIS));
+        panelFormulario.setBackground(CARD_COLOR);
+        panelFormulario.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 3, true),
             BorderFactory.createEmptyBorder(40, 40, 40, 40)
         ));
-        container.setMaximumSize(new Dimension(350, 700));
+        panelFormulario.setMaximumSize(new Dimension(400, 650));
         
         JLabel lblLogo = new JLabel();
         try {
@@ -174,427 +200,219 @@ public class VentanaLogin extends JFrame {
             lblLogo.setIcon(new ImageIcon(img));
         } catch (Exception e) {
             lblLogo.setText("Instagram");
-            lblLogo.setFont(new Font("Brush Script MT", Font.ITALIC, 42));
+            lblLogo.setFont(new Font("Brush Script MT", Font.ITALIC, 38));
             lblLogo.setForeground(INSTAGRAM_PINK);
         }
         lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        lblLogo.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        container.add(lblLogo);
-        container.add(Box.createVerticalStrut(10));
         
-        JLabel lblTitulo = new JLabel("Regístrate en Instagram");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTitulo.setForeground(TEXT_SECONDARY);
+        JLabel lblTitulo = new JLabel("Crear Cuenta");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitulo.setForeground(TEXT_PRIMARY);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(lblTitulo);
-        container.add(Box.createVerticalStrut(20));
         
-        txtUsernameRegistro = crearCampoTexto("Username");
-        txtUsernameRegistro.setMaximumSize(new Dimension(270, 40));
-        txtUsernameRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtUsernameRegistro);
-        container.add(Box.createVerticalStrut(10));
+        panelFormulario.add(lblLogo);
+        panelFormulario.add(Box.createVerticalStrut(16));
+        panelFormulario.add(lblTitulo);
+        panelFormulario.add(Box.createVerticalStrut(24));
         
-        txtNombreCompleto = crearCampoTexto("Nombre completo");
-        txtNombreCompleto.setMaximumSize(new Dimension(270, 40));
-        txtNombreCompleto.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtNombreCompleto);
-        container.add(Box.createVerticalStrut(10));
+        JTextField txtNombreCompleto = new JTextField();
+        JTextField txtUsernameReg = new JTextField();
+        JPasswordField txtPasswordReg = new JPasswordField();
+        JPasswordField txtConfirmarPassword = new JPasswordField();
+        JComboBox<String> cmbGenero = new JComboBox<>(new String[]{"Masculino", "Femenino", "Otro"});
+        JSpinner spnEdad = new JSpinner(new SpinnerNumberModel(18, 13, 100, 1));
         
-        cmbGenero = new JComboBox<>(new String[]{"Género", "Masculino", "Femenino"});
+        agregarCampoFormulario(panelFormulario, "Nombre completo", txtNombreCompleto);
+        agregarCampoFormulario(panelFormulario, "Usuario", txtUsernameReg);
+        agregarCampoFormulario(panelFormulario, "Contraseña", txtPasswordReg);
+        agregarCampoFormulario(panelFormulario, "Confirmar contraseña", txtConfirmarPassword);
+        
+        JLabel lblGenero = new JLabel("Género");
+        lblGenero.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblGenero.setForeground(TEXT_PRIMARY);
+        lblGenero.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
         cmbGenero.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        cmbGenero.setMaximumSize(new Dimension(270, 40));
-        cmbGenero.setAlignmentX(Component.CENTER_ALIGNMENT);
-        cmbGenero.setBackground(Color.WHITE);
-        cmbGenero.setForeground(TEXT_SECONDARY);
-        cmbGenero.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            BorderFactory.createEmptyBorder(8, 8, 8, 8)
-        ));
-        container.add(cmbGenero);
-        container.add(Box.createVerticalStrut(10));
+        cmbGenero.setMaximumSize(new Dimension(320, 40));
+        cmbGenero.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JPanel panelEdad = new JPanel(new BorderLayout(10, 0));
-        panelEdad.setMaximumSize(new Dimension(270, 40));
-        panelEdad.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelEdad.setBackground(Color.WHITE);
-        panelEdad.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
+        panelFormulario.add(lblGenero);
+        panelFormulario.add(Box.createVerticalStrut(6));
+        panelFormulario.add(cmbGenero);
+        panelFormulario.add(Box.createVerticalStrut(14));
         
-        JLabel lblEdad = new JLabel("Edad:");
-        lblEdad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblEdad.setForeground(TEXT_SECONDARY);
+        JLabel lblEdad = new JLabel("Edad");
+        lblEdad.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblEdad.setForeground(TEXT_PRIMARY);
+        lblEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        SpinnerNumberModel modeloEdad = new SpinnerNumberModel(18, 13, 120, 1);
-        spnEdad = new JSpinner(modeloEdad);
-        spnEdad.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        spnEdad.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        spnEdad.setMaximumSize(new Dimension(320, 40));
+        spnEdad.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        panelEdad.add(lblEdad, BorderLayout.WEST);
-        panelEdad.add(spnEdad, BorderLayout.EAST);
+        panelFormulario.add(lblEdad);
+        panelFormulario.add(Box.createVerticalStrut(6));
+        panelFormulario.add(spnEdad);
+        panelFormulario.add(Box.createVerticalStrut(20));
         
-        container.add(panelEdad);
-        container.add(Box.createVerticalStrut(10));
+        JButton btnRegistro = new JButton("Registrarse");
+        btnRegistro.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnRegistro.setForeground(Color.WHITE);
+        btnRegistro.setBackground(INSTAGRAM_PINK);
+        btnRegistro.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
+        btnRegistro.setFocusPainted(false);
+        btnRegistro.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnRegistro.setMaximumSize(new Dimension(320, 44));
+        btnRegistro.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        txtPasswordRegistro = crearCampoPassword("Contraseña");
-        txtPasswordRegistro.setMaximumSize(new Dimension(270, 40));
-        txtPasswordRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtPasswordRegistro);
-        container.add(Box.createVerticalStrut(10));
+        btnRegistro.addActionListener(e -> {
+            String nombreCompleto = txtNombreCompleto.getText().trim();
+            String username = txtUsernameReg.getText().trim();
+            String password = new String(txtPasswordReg.getPassword());
+            String confirmarPassword = new String(txtConfirmarPassword.getPassword());
+            String generoStr = (String) cmbGenero.getSelectedItem();
+            int edad = (Integer) spnEdad.getValue();
+            
+            char genero = generoStr.equals("Masculino") ? 'M' : (generoStr.equals("Femenino") ? 'F' : 'O');
+            
+            if (nombreCompleto.isEmpty() || username.isEmpty() || 
+                password.isEmpty() || confirmarPassword.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (!password.equals(confirmarPassword)) {
+                JOptionPane.showMessageDialog(this, "Las contraseñas no coinciden", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (gestorUsuarios.existeUsuario(username)) {
+                JOptionPane.showMessageDialog(this, "El usuario ya existe", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (gestorUsuarios.registrarUsuario(username, password, genero, edad, nombreCompleto)) {
+                JOptionPane.showMessageDialog(this, "Cuenta creada exitosamente", 
+                    "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                
+                txtNombreCompleto.setText("");
+                txtUsernameReg.setText("");
+                txtPasswordReg.setText("");
+                txtConfirmarPassword.setText("");
+                
+                cardLayout.show(panelPrincipal, "LOGIN");
+            } else {
+                JOptionPane.showMessageDialog(this, "Error al crear la cuenta", 
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         
-        txtConfirmarPassword = crearCampoPassword("Confirmar contraseña");
-        txtConfirmarPassword.setMaximumSize(new Dimension(270, 40));
-        txtConfirmarPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(txtConfirmarPassword);
-        container.add(Box.createVerticalStrut(20));
+        panelFormulario.add(btnRegistro);
+        panelFormulario.add(Box.createVerticalStrut(16));
         
-        btnRegistrar = crearBotonPrincipal("Registrarse");
-        btnRegistrar.addActionListener(e -> intentarRegistro());
-        btnRegistrar.setMaximumSize(new Dimension(270, 40));
-        btnRegistrar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(btnRegistrar);
-        container.add(Box.createVerticalStrut(20));
+        JPanel panelLogin = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+        panelLogin.setBackground(CARD_COLOR);
+        panelLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelLogin.setMaximumSize(new Dimension(320, 30));
         
-        JSeparator separador = new JSeparator();
-        separador.setMaximumSize(new Dimension(270, 1));
-        separador.setForeground(BORDER_COLOR);
-        separador.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(separador);
-        container.add(Box.createVerticalStrut(15));
-        
-        JLabel lblYaTienesCuenta = new JLabel("¿Ya tienes una cuenta?");
-        lblYaTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        JLabel lblYaTienesCuenta = new JLabel("¿Ya tienes cuenta?");
+        lblYaTienesCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblYaTienesCuenta.setForeground(TEXT_SECONDARY);
-        lblYaTienesCuenta.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(lblYaTienesCuenta);
-        container.add(Box.createVerticalStrut(10));
         
-        btnIrALogin = crearBotonSecundario("Inicia sesión");
-        btnIrALogin.addActionListener(e -> mostrarLogin());
-        btnIrALogin.setMaximumSize(new Dimension(270, 40));
-        btnIrALogin.setAlignmentX(Component.CENTER_ALIGNMENT);
-        container.add(btnIrALogin);
+        JButton btnIrALogin = new JButton("Inicia sesión");
+        btnIrALogin.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnIrALogin.setForeground(INSTAGRAM_PINK);
+        btnIrALogin.setBackground(CARD_COLOR);
+        btnIrALogin.setBorderPainted(false);
+        btnIrALogin.setContentAreaFilled(false);
+        btnIrALogin.setFocusPainted(false);
+        btnIrALogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnIrALogin.addActionListener(e -> cardLayout.show(panelPrincipal, "LOGIN"));
         
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(container, gbc);
+        panelLogin.add(lblYaTienesCuenta);
+        panelLogin.add(btnIrALogin);
+        
+        panelFormulario.add(panelLogin);
+        
+        panel.add(Box.createVerticalGlue());
+        panel.add(panelFormulario);
+        panel.add(Box.createVerticalGlue());
         
         return panel;
     }
     
-    private JTextField crearCampoTexto(String placeholder) {
-        JTextField campo = new JTextField();
+    private void agregarCampoFormulario(JPanel panel, String etiqueta, JTextField campo) {
+        JLabel lbl = new JLabel(etiqueta);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lbl.setForeground(TEXT_PRIMARY);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         campo.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
+        campo.setMaximumSize(new Dimension(320, 40));
+        campo.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        campo.setText(placeholder);
-        campo.setForeground(TEXT_SECONDARY);
-        
-        campo.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (campo.getText().equals(placeholder)) {
-                    campo.setText("");
-                    campo.setForeground(TEXT_PRIMARY);
-                }
-                campo.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(INSTAGRAM_PINK, 2),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
-                ));
-            }
-            
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (campo.getText().isEmpty()) {
-                    campo.setText(placeholder);
-                    campo.setForeground(TEXT_SECONDARY);
-                }
-                campo.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER_COLOR, 1),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
-                ));
-            }
-        });
-        
-        return campo;
+        panel.add(lbl);
+        panel.add(Box.createVerticalStrut(6));
+        panel.add(campo);
+        panel.add(Box.createVerticalStrut(14));
     }
     
-    private JPasswordField crearCampoPassword(String placeholder) {
-        JPasswordField campo = new JPasswordField();
-        campo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        campo.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
-        campo.setEchoChar((char) 0);
-        campo.setText(placeholder);
-        campo.setForeground(TEXT_SECONDARY);
+    private void iniciarSesion() {
+        String username = txtUsername.getText().trim();
+        String password = new String(txtPassword.getPassword());
         
-        campo.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (String.valueOf(campo.getPassword()).equals(placeholder)) {
-                    campo.setText("");
-                    campo.setEchoChar('•');
-                    campo.setForeground(TEXT_PRIMARY);
-                }
-                campo.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(INSTAGRAM_PINK, 2),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
-                ));
-            }
-            
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (String.valueOf(campo.getPassword()).isEmpty()) {
-                    campo.setEchoChar((char) 0);
-                    campo.setText(placeholder);
-                    campo.setForeground(TEXT_SECONDARY);
-                }
-                campo.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(BORDER_COLOR, 1),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
-                ));
-            }
-        });
-        
-        return campo;
-    }
-    
-    private JButton crearBotonPrincipal(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        boton.setForeground(Color.WHITE);
-        boton.setBackground(INSTAGRAM_PINK);
-        boton.setBorderPainted(false);
-        boton.setFocusPainted(false);
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        boton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(INSTAGRAM_PINK_HOVER);
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(INSTAGRAM_PINK);
-            }
-        });
-        
-        return boton;
-    }
-    
-    private JButton crearBotonSecundario(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        boton.setForeground(INSTAGRAM_PINK);
-        boton.setBackground(Color.WHITE);
-        boton.setBorder(BorderFactory.createLineBorder(INSTAGRAM_PINK, 2));
-        boton.setFocusPainted(false);
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        boton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(new Color(255, 230, 240));
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(Color.WHITE);
-            }
-        });
-        
-        return boton;
-    }
-    
-    private void mostrarLogin() {
-        cardLayout.show(panelPrincipal, "LOGIN");
-    }
-    
-    private void mostrarRegistro() {
-        cardLayout.show(panelPrincipal, "REGISTRO");
-    }
-    
-    private void intentarLogin() {
-        String username = txtUsernameLogin.getText().trim();
-        String password = String.valueOf(txtPasswordLogin.getPassword());
-        
-        if (username.isEmpty() || username.equals("Username")) {
-            mostrarError("Por favor ingresa tu username");
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingresa usuario y contraseña", 
+                "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        if (password.isEmpty() || password.equals("Contraseña")) {
-            mostrarError("Por favor ingresa tu contraseña");
-            return;
-        }
+        Usuario usuario = gestorUsuarios.validarLogin(username, password);
         
-        if (!gestorUsuarios.validarCredenciales(username, password)) {
-            mostrarError("Username o contraseña incorrectos");
-            return;
-        }
-        
-        Usuario usuario = gestorUsuarios.obtenerUsuario(username);
-        
-        if (!usuario.isActivo()) {
-            int opcion = JOptionPane.showConfirmDialog(
-                this,
-                "Tu cuenta está desactivada.\n¿Deseas reactivarla?",
-                "Reactivar cuenta",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-            );
-            
-            if (opcion == JOptionPane.YES_OPTION) {
-                gestorUsuarios.activarUsuario(username);
-                usuario = gestorUsuarios.obtenerUsuario(username);
-                JOptionPane.showMessageDialog(
-                    this,
-                    "¡Tu cuenta ha sido reactivada exitosamente!",
-                    "Cuenta reactivada",
-                    JOptionPane.INFORMATION_MESSAGE
-                );
-                abrirInstagram(usuario);
-            }
-        } else {
-            abrirInstagram(usuario);
-        }
-    }
-    
-    private void intentarRegistro() {
-        String username = txtUsernameRegistro.getText().trim();
-        String nombreCompleto = txtNombreCompleto.getText().trim();
-        String password = String.valueOf(txtPasswordRegistro.getPassword());
-        String confirmarPassword = String.valueOf(txtConfirmarPassword.getPassword());
-        
-        if (username.isEmpty() || username.equals("Username")) {
-            mostrarError("Por favor ingresa un username");
-            return;
-        }
-        
-        if (nombreCompleto.isEmpty() || nombreCompleto.equals("Nombre completo")) {
-            mostrarError("Por favor ingresa tu nombre completo");
-            return;
-        }
-        
-        if (cmbGenero.getSelectedIndex() == 0) {
-            mostrarError("Por favor selecciona tu género");
-            return;
-        }
-        
-        int edad = (int) spnEdad.getValue();
-        
-        if (password.isEmpty() || password.equals("Contraseña")) {
-            mostrarError("Por favor ingresa una contraseña");
-            return;
-        }
-        
-        if (password.length() < 6) {
-            mostrarError("La contraseña debe tener al menos 6 caracteres");
-            return;
-        }
-        
-        if (!password.equals(confirmarPassword)) {
-            mostrarError("Las contraseñas no coinciden");
-            return;
-        }
-        
-        char genero = cmbGenero.getSelectedIndex() == 1 ? 'M' : 'F';
-        
-        if (gestorUsuarios.registrarUsuario(username, nombreCompleto, genero, edad, password)) {
-            Usuario usuario = gestorUsuarios.obtenerUsuario(username);
-            
-            this.setVisible(false);
-            
-            JOptionPane.showMessageDialog(
-                null,
-                "¡Cuenta creada exitosamente! Bienvenido/a a Instagram, " + username + "!",
-                "Registro Exitoso",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-            
+        if (usuario != null) {
+            gestorINSTA.setUsuarioActual(usuario);
             abrirInstagram(usuario);
         } else {
-            mostrarError("Error al crear la cuenta. El username puede estar en uso.");
+            JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", 
+                "Error", JOptionPane.ERROR_MESSAGE);
+            txtPassword.setText("");
         }
     }
     
-    private void abrirInstagram(String usuario) {
+    private void abrirInstagram(Usuario usuario) {
+        dispose();
+        
         SwingUtilities.invokeLater(() -> {
-            try {
-                System.out.println("═══════════════════════════════════════");
-                System.out.println("Abriendo Instagram para: " + usuario.getUsername());
-                
-                // Crear gestor de INSTA
-                GestorINSTA gestorINSTA = new GestorINSTA(usuario);
-                System.out.println("✓ GestorINSTA inicializado");
-                
-                // Crear ventana principal
-                VentanaINSTA ventanaINSTA = new VentanaINSTA(usuario, gestorINSTA, gestorUsuarios);
-                System.out.println("✓ VentanaINSTA creada");
-                
-                VentanaLogin.this.dispose();
-                System.out.println("✓ VentanaLogin cerrada");
-                
-                ventanaINSTA.setVisible(true);
-                System.out.println("✓ VentanaINSTA visible");
-                
-                System.out.println("═══════════════════════════════════════");
-                System.out.println("¡Instagram abierto exitosamente!");
-                System.out.println("Usuario: @" + usuario.getUsername());
-                System.out.println("═══════════════════════════════════════");
-                
-            } catch (Exception e) {
-                System.err.println("═══════════════════════════════════════");
-                System.err.println("ERROR al abrir Instagram:");
-                System.err.println("═══════════════════════════════════════");
-                e.printStackTrace();
-                
-                JOptionPane.showMessageDialog(
-                    null,
-                    "Error al abrir la aplicación:\n" + e.getMessage() + 
-                    "\n\nRevisa la consola para más detalles.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                
-                VentanaLogin nuevaVentana = new VentanaLogin();
-                nuevaVentana.setVisible(true);
-            }
+            VentanaINSTA ventana = new VentanaINSTA(usuario, gestorINSTA, gestorUsuarios);
+            ventana.setVisible(true);
         });
-    }
-    
-    private void mostrarError(String mensaje) {
-        JOptionPane.showMessageDialog(
-            this,
-            mensaje,
-            "Error",
-            JOptionPane.ERROR_MESSAGE
-        );
-    }
-    
-    private void mostrarExito(String mensaje) {
-        JOptionPane.showMessageDialog(
-            this,
-            mensaje,
-            "Éxito",
-            JOptionPane.INFORMATION_MESSAGE
-        );
     }
     
     private void configurarVentana() {
-        setTitle("Instagram - Iniciar Sesión");
-        setSize(450, 650);
-        setMinimumSize(new Dimension(450, 650));
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setTitle("Instagram - Login");
+        setSize(550, 750);
+        setMinimumSize(new Dimension(500, 700));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
     }
     
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        SwingUtilities.invokeLater(() -> {
+            VentanaLogin ventana = new VentanaLogin();
+            ventana.setVisible(true);
+        });
+    }
 }

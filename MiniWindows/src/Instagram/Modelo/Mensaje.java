@@ -17,18 +17,18 @@ public class Mensaje implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private String id;
-    private String remitente;
-    private String destinatario;
+    private String emisor;
+    private String receptor;
     private String contenido;
-    private LocalDateTime fechaEnvio;
+    private LocalDateTime fechaHora;
     private boolean leido;
     
-    public Mensaje(String remitente, String destinatario, String contenido) {
+    public Mensaje(String emisor, String receptor, String contenido) {
         this.id = UUID.randomUUID().toString();
-        this.remitente = remitente;
-        this.destinatario = destinatario;
+        this.emisor = emisor;
+        this.receptor = receptor;
         this.contenido = contenido;
-        this.fechaEnvio = LocalDateTime.now();
+        this.fechaHora = LocalDateTime.now();
         this.leido = false;
     }
     
@@ -36,55 +36,55 @@ public class Mensaje implements Serializable {
         return id;
     }
     
-    public String getRemitente() {
-        return remitente;
+    public String getEmisor() {
+        return emisor;
     }
     
-    public String getDestinatario() {
-        return destinatario;
+    public void setEmisor(String emisor) {
+        this.emisor = emisor;
+    }
+    
+    public String getReceptor() {
+        return receptor;
+    }
+    
+    public void setReceptor(String receptor) {
+        this.receptor = receptor;
     }
     
     public String getContenido() {
         return contenido;
     }
     
-    public LocalDateTime getFechaEnvio() {
-        return fechaEnvio;
+    public void setContenido(String contenido) {
+        this.contenido = contenido;
+    }
+    
+    public LocalDateTime getFechaHora() {
+        return fechaHora;
+    }
+    
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
     }
     
     public boolean isLeido() {
         return leido;
     }
     
-    public void marcarComoLeido() {
-        this.leido = true;
-    }
-    
-    public String getTiempoTranscurrido() {
-        LocalDateTime ahora = LocalDateTime.now();
-        long minutos = java.time.Duration.between(fechaEnvio, ahora).toMinutes();
-        
-        if (minutos < 1) {
-            return "ahora";
-        } else if (minutos < 60) {
-            return minutos + "m";
-        } else if (minutos < 1440) {
-            return (minutos / 60) + "h";
-        } else {
-            return (minutos / 1440) + "d";
-        }
-    }
-    
-    public boolean involucra(String username) {
-        return remitente.equals(username) || destinatario.equals(username);
-    }
-    
-    public String getOtroUsuario(String username) {
-        return remitente.equals(username) ? destinatario : remitente;
+    public void setLeido(boolean leido) {
+        this.leido = leido;
     }
     
     @Override
     public String toString() {
-        return remitente + " → " + destinatario + ": " + contenido;
+        return "Mensaje{" +
+                "id='" + id + '\'' +
+                ", emisor='" + emisor + '\'' +
+                ", receptor='" + receptor + '\'' +
+                ", contenido='" + contenido + '\'' +
+                ", fechaHora=" + fechaHora +
+                ", leido=" + leido +
+                '}';
     }
 }

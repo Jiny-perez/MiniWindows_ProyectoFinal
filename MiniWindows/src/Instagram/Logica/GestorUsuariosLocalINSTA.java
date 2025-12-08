@@ -16,195 +16,122 @@ import java.util.ArrayList;
 public class GestorUsuariosLocalINSTA {
    
     private HashMap<String, Usuario> usuarios;
+    private static final String ARCHIVO_USUARIOS = "datos/users.ins";
     
     public GestorUsuariosLocalINSTA() {
+        this.usuarios = new HashMap<>();
         cargarUsuarios();
     }
     
-    private void cargarUsuarios() {
-        File archivo = new File(GestorArchivosUsuarioINSTA.ARCHIVO_USERS);
+    public boolean registrarUsuario(String username, String password, char genero, int edad, String nombreCompleto) {
+        if (usuarios.containsKey(username)) {
+            return false;
+        }
         
-        if (archivo.exists()) {
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
-                usuarios = (HashMap<String, Usuario>) ois.readObject();
-                System.out.println("✓ Usuarios cargados desde users.ins: " + usuarios.size());
-            } catch (Exception e) {
-                System.err.println("Error al cargar users.ins: " + e.getMessage());
-                usuarios = new HashMap<>();
-            }
-        } else {
-            usuarios = new HashMap<>();
-            System.out.println("○ Iniciando con nuevo archivo users.ins");
-        }
+        Usuario nuevoUsuario = new Usuario(username, password, genero, edad, nombreCompleto, true);
+        usuarios.put(username, nuevoUsuario);
+        
+        GestorArchivosUsuarioINSTA.crearDirectorioUsuario(username);
+        
+        guardarUsuarios();
+        return true;
     }
     
-    private void guardarUsuarios() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(
-                new FileOutputStream(GestorArchivosUsuarioINSTA.ARCHIVO_USERS))) {
-            oos.writeObject(usuarios);
-            System.out.println("✓ Usuarios guardados en users.ins");
-        } catch (Exception e) {
-            System.err.println("Error al guardar users.ins: " + e.getMessage());
-            e.printStackTrace();
+    public Usuario validarLogin(String username, String password) {
+        Usuario usuario = usuarios.get(username);
+        
+        if (usuario != null && usuario.getPassword().equals(password) && usuario.isActivo()) {
+            return usuario;
         }
-    }
-    
-    public boolean existeUsuario(String username) {
-        return usuarios.containsKey(username);
+        
+        return null;
     }
     
     public Usuario obtenerUsuario(String username) {
         return usuarios.get(username);
     }
     
-    public boolean registrarUsuario(String username, String nombreCompleto, char genero, 
-                                   int edad, String password) {
-        if (existeUsuario(username)) {
-            System.out.println("El usuario ya existe: " + username);
-            return false;
-        }
-        
-        try {
-            Usuario nuevoUsuario = new Usuario(username, nombreCompleto, genero, edad, password, true);
-            usuarios.put(username, nuevoUsuario);
-            
-            // Crear directorio del usuario con archivos .ins
-            GestorArchivosUsuarioINSTA.crearDirectorioUsuario(username);
-            
+    public boolean existeUsuario(String username) {
+        return usuarios.containsKey(username);
+    }
+    
+    public void actualizarUsuario(Usuario usuario) {
+        if (usuarios.containsKey(usuario.getUsername())) {
+            usuarios.put(usuario.getUsername(), usuario);
             guardarUsuarios();
-            
-            System.out.println("✓ Usuario registrado exitosamente: " + username);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Error al registrar usuario: " + e.getMessage());
-            e.printStackTrace();
-            return false;
         }
     }
     
-    public boolean validarLogin(String username, String password) {
+    public void desactivarUsuario(String username) {
         Usuario usuario = usuarios.get(username);
-        
-        if (usuario == null) {
-            return false;
-        }
-        
-        if (!usuario.isActivo()) {
-            return false;
-        }
-        
-        return usuario.getPassword().equals(password);
-    }
-    
-    public boolean validarCredenciales(String username, String password) {
-        Usuario usuario = usuarios.get(username);
-        
-        if (usuario == null) {
-            return false;
-        }
-        
-        return usuario.getPassword().equals(password);
-    }
-    
-    public boolean actualizarUsuario(Usuario usuario) {
-        if (usuario == null || !existeUsuario(usuario.getUsername())) {
-            return false;
-        }
-        
-        usuarios.put(usuario.getUsername(), usuario);
-        guardarUsuarios();
-        return true;
-    }
-    
-    public boolean desactivarUsuario(String username) {
-        Usuario usuario = obtenerUsuario(username);
         if (usuario != null) {
             usuario.setActivo(false);
             guardarUsuarios();
-            return true;
         }
-        return false;
-    }
-    
-    public boolean activarUsuario(String username) {
-        Usuario usuario = obtenerUsuario(username);
-        if (usuario != null) {
-            usuario.setActivo(true);
-            guardarUsuarios();
-            return true;
-        }
-        return false;
-    }
-    
-    public int getCantidadUsuarios() {
-        return usuarios.size();
-    }
-    
-    public int getCantidadUsuariosActivos() {
-        return (int) usuarios.values().stream()
-            .filter(Usuario::isActivo)
-            .count();
     }
     
     public ArrayList<Usuario> buscarUsuarios(String termino) {
         ArrayList<Usuario> resultados = new ArrayList<>();
         
-        if (termino == null || termino.trim().isEmpty()) {
-            return resultados;
-        }
-        
-        String terminoLower = termino.toLowerCase();
-        
         for (Usuario usuario : usuarios.values()) {
-            if (!usuario.isActivo()) {
-                continue;
-            }
-            
-            if (usuario.getUsername().toLowerCase().contains(terminoLower) ||
-                usuario.getNombreCompleto().toLowerCase().contains(terminoLower)) {
+            if (usuario.isActivo() && 
+                (usuario.getUsername().toLowerCase().contains(termino.toLowerCase()) ||
+                 usuario.getNombreCompleto().toLowerCase().contains(termino.toLowerCase()))) {
                 resultados.add(usuario);
             }
         }
         
         return resultados;
     }
-
-    public ArrayList<Usuario> obtenerTodosLosUsuarios() {
-        return new ArrayList<>(usuarios.values());
-    }
     
-    public ArrayList<Usuario> obtenerUsuariosActivos() {
-        ArrayList<Usuario> activos = new ArrayList<>();
-        for (Usuario usuario : usuarios.values()) {
-            if (usuario.isActivo()) {
-                activos.add(usuario);
-            }
-        }
-        return activos;
-    }
-    
-    public ArrayList<Usuario> obtenerUsuariosSugeridos(String usernameActual, int limite) {
+    public ArrayList<Usuario> obtenerUsuariosSugeridos(String usernameActual, int cantidad) {
         ArrayList<Usuario> sugeridos = new ArrayList<>();
         
         for (Usuario usuario : usuarios.values()) {
-            if (!usuario.getUsername().equals(usernameActual) && usuario.isActivo()) {
+            if (usuario.isActivo() && 
+                !usuario.getUsername().equals(usernameActual) && 
+                sugeridos.size() < cantidad) {
                 sugeridos.add(usuario);
-                if (sugeridos.size() >= limite) {
-                    break;
-                }
             }
         }
         
         return sugeridos;
     }
     
-    public ArrayList<String> obtenerUsernamesActivos() {
-        ArrayList<String> usernames = new ArrayList<>();
-        for (Usuario usuario : usuarios.values()) {
-            if (usuario.isActivo()) {
-                usernames.add(usuario.getUsername());
+    @SuppressWarnings("unchecked")
+    private void cargarUsuarios() {
+        File archivo = new File(ARCHIVO_USUARIOS);
+        
+        if (archivo.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
+                usuarios = (HashMap<String, Usuario>) ois.readObject();
+                System.out.println("✓ Usuarios cargados: " + usuarios.size());
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Error al cargar usuarios: " + e.getMessage());
+                usuarios = new HashMap<>();
             }
+        } else {
+            System.out.println("⚠ Archivo users.ins no existe, se creará al registrar usuarios");
         }
-        return usernames;
+    }
+    
+    private void guardarUsuarios() {
+        File archivo = new File(ARCHIVO_USUARIOS);
+        archivo.getParentFile().mkdirs();
+        
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivo))) {
+            oos.writeObject(usuarios);
+            System.out.println("✓ Usuarios guardados: " + usuarios.size());
+        } catch (IOException e) {
+            System.err.println("Error al guardar usuarios: " + e.getMessage());
+        }
+    }
+    
+    public int contarUsuarios() {
+        return usuarios.size();
+    }
+    
+    public ArrayList<String> obtenerTodosLosUsernames() {
+        return new ArrayList<>(usuarios.keySet());
     }
 }

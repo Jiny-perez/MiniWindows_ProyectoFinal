@@ -5,7 +5,6 @@
 package Instagram.Modelo;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  *
@@ -16,23 +15,37 @@ public class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
     
     private String username;
+    private String password;
     private String nombreCompleto;
+    private String email;
     private char genero;
     private int edad;
-    private String password;
-    private Date fechaEntrada;
+    private String biografia;
     private boolean activo;
-    private String rutaFotoPerfil;
+    private String rutaImagenPerfil;
     
-    public Usuario(String username, String nombreCompleto, char genero, int edad, String password, boolean activo) {
+    public Usuario(String username, String password, char genero, int edad, String nombreCompleto, boolean activo) {
         this.username = username;
-        this.nombreCompleto = nombreCompleto;
+        this.password = password;
         this.genero = genero;
         this.edad = edad;
-        this.password = password;
+        this.nombreCompleto = nombreCompleto;
         this.activo = activo;
-        this.fechaEntrada = new Date();
-        this.rutaFotoPerfil = null;
+        this.email = "";
+        this.biografia = "";
+        this.rutaImagenPerfil = null;
+    }
+    
+    public Usuario(String username, String password, String nombreCompleto, String email) {
+        this.username = username;
+        this.password = password;
+        this.nombreCompleto = nombreCompleto;
+        this.email = email;
+        this.genero = 'O';
+        this.edad = 18;
+        this.activo = true;
+        this.biografia = "";
+        this.rutaImagenPerfil = null;
     }
     
     public String getUsername() {
@@ -43,12 +56,28 @@ public class Usuario implements Serializable {
         this.username = username;
     }
     
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
     public String getNombreCompleto() {
         return nombreCompleto;
     }
     
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
     }
     
     public char getGenero() {
@@ -67,16 +96,12 @@ public class Usuario implements Serializable {
         this.edad = edad;
     }
     
-    public String getPassword() {
-        return password;
+    public String getBiografia() {
+        return biografia;
     }
     
-    public void setPassword(String password) {
-        this.password = password;
-    }
-    
-    public Date getFechaEntrada() {
-        return fechaEntrada;
+    public void setBiografia(String biografia) {
+        this.biografia = biografia;
     }
     
     public boolean isActivo() {
@@ -87,16 +112,12 @@ public class Usuario implements Serializable {
         this.activo = activo;
     }
     
-    public String getRutaFotoPerfil() {
-        return rutaFotoPerfil;
+    public String getRutaImagenPerfil() {
+        return rutaImagenPerfil;
     }
     
-    public void setRutaFotoPerfil(String rutaFotoPerfil) {
-        this.rutaFotoPerfil = rutaFotoPerfil;
-    }
-    
-    public boolean tieneFotoPersonalizada() {
-        return rutaFotoPerfil != null && !rutaFotoPerfil.isEmpty();
+    public void setRutaImagenPerfil(String rutaImagenPerfil) {
+        this.rutaImagenPerfil = rutaImagenPerfil;
     }
     
     @Override
@@ -104,8 +125,7 @@ public class Usuario implements Serializable {
         return "Usuario{" +
                 "username='" + username + '\'' +
                 ", nombreCompleto='" + nombreCompleto + '\'' +
-                ", genero=" + genero +
-                ", edad=" + edad +
+                ", email='" + email + '\'' +
                 ", activo=" + activo +
                 '}';
     }

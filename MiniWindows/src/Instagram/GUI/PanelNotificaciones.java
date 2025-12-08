@@ -4,13 +4,14 @@
  */
 package Instagram.GUI;
 
-import Instagram.Logica.GestorINSTA;
+import Instagram.Logica.GestorINSTACompleto;
 import Instagram.Logica.GestorNotificaciones;
 import Instagram.Modelo.Notificacion;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 
 /**
  *
@@ -18,7 +19,7 @@ import java.util.ArrayList;
  */
 public class PanelNotificaciones extends JPanel {
     
-    private GestorINSTA gestorINSTA;
+    private GestorINSTACompleto gestorINSTA;
     private GestorNotificaciones gestorNotificaciones;
     private VentanaINSTA ventanaPrincipal;
     
@@ -31,8 +32,11 @@ public class PanelNotificaciones extends JPanel {
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
+    private static final Color UNREAD_BG = new Color(255, 245, 250);
     
-    public PanelNotificaciones(GestorINSTA gestor, GestorNotificaciones gestorNotif, VentanaINSTA ventana) {
+    private static final DateTimeFormatter FORMATO_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    
+    public PanelNotificaciones(GestorINSTACompleto gestor, GestorNotificaciones gestorNotif, VentanaINSTA ventana) {
         this.gestorINSTA = gestor;
         this.gestorNotificaciones = gestorNotif;
         this.ventanaPrincipal = ventana;
@@ -44,19 +48,8 @@ public class PanelNotificaciones extends JPanel {
         setLayout(new BorderLayout());
         setBackground(BACKGROUND_COLOR);
         
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(CARD_COLOR);
-        header.setBorder(new CompoundBorder(
-            new MatteBorder(0, 0, 1, 0, BORDER_COLOR),
-            BorderFactory.createEmptyBorder(20, 20, 20, 20)
-        ));
-        
-        JLabel lblTitulo = new JLabel("Notificaciones");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        lblTitulo.setForeground(INSTAGRAM_PINK);
-        
-        header.add(lblTitulo, BorderLayout.WEST);
-        add(header, BorderLayout.NORTH);
+        JPanel panelSuperior = crearPanelSuperior();
+        add(panelSuperior, BorderLayout.NORTH);
         
         panelNotificaciones = new JPanel();
         panelNotificaciones.setLayout(new BoxLayout(panelNotificaciones, BoxLayout.Y_AXIS));
@@ -66,142 +59,148 @@ public class PanelNotificaciones extends JPanel {
         scrollPane = new JScrollPane(panelNotificaciones);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         
         add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    private JPanel crearPanelSuperior() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(CARD_COLOR);
+        panel.setBorder(new CompoundBorder(
+            new MatteBorder(0, 0, 1, 0, BORDER_COLOR),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        
+        JLabel lblTitulo = new JLabel("Notificaciones");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitulo.setForeground(INSTAGRAM_PINK);
+        
+        JButton btnMarcarLeidas = new JButton("Marcar todas como leídas");
+        btnMarcarLeidas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        btnMarcarLeidas.setForeground(INSTAGRAM_PINK);
+        btnMarcarLeidas.setBackground(CARD_COLOR);
+        btnMarcarLeidas.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
+        btnMarcarLeidas.setFocusPainted(false);
+        btnMarcarLeidas.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnMarcarLeidas.addActionListener(e -> {
+            String username = gestorINSTA.getUsernameActual();
+            gestorNotificaciones.marcarTodasComoLeidas(username);
+            actualizarContenido();
+        });
+        
+        panel.add(lblTitulo, BorderLayout.WEST);
+        panel.add(btnMarcarLeidas, BorderLayout.EAST);
+        
+        return panel;
     }
     
     public void actualizarContenido() {
         panelNotificaciones.removeAll();
         
-        String usernameActual = gestorINSTA.getUsernameActual();
-        ArrayList<Notificacion> notificaciones = gestorNotificaciones.obtenerNotificaciones(usernameActual);
+        String username = gestorINSTA.getUsernameActual();
+        ArrayList<Notificacion> notificaciones = gestorNotificaciones.obtenerNotificaciones(username);
         
         if (notificaciones.isEmpty()) {
             mostrarMensajeVacio();
         } else {
-            gestorNotificaciones.marcarTodasComoLeidas(usernameActual);
-            
-            for (Notificacion notif : notificaciones) {
-                JPanel tarjetaNotif = crearTarjetaNotificacion(notif);
-                panelNotificaciones.add(tarjetaNotif);
+            for (Notificacion notificacion : notificaciones) {
+                JPanel tarjeta = crearTarjetaNotificacion(notificacion);
+                panelNotificaciones.add(tarjeta);
                 panelNotificaciones.add(Box.createVerticalStrut(8));
             }
         }
         
         panelNotificaciones.revalidate();
         panelNotificaciones.repaint();
+        
+        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
-
-    private JPanel crearTarjetaNotificacion(Notificacion notif) {
+    
+    private JPanel crearTarjetaNotificacion(Notificacion notificacion) {
         JPanel tarjeta = new JPanel(new BorderLayout(12, 0));
-        tarjeta.setBackground(CARD_COLOR);
+        
+        if (!notificacion.isLeida()) {
+            tarjeta.setBackground(UNREAD_BG);
+        } else {
+            tarjeta.setBackground(CARD_COLOR);
+        }
+        
         tarjeta.setBorder(new CompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(12, 12, 12, 12)
+            new LineBorder(BORDER_COLOR, notificacion.isLeida() ? 1 : 2),
+            BorderFactory.createEmptyBorder(14, 14, 14, 14)
         ));
-        tarjeta.setMaximumSize(new Dimension(800, 80));
+        tarjeta.setMaximumSize(new Dimension(700, 90));
         tarjeta.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        // Avatar
-        JLabel lblAvatar = new JLabel();
-        try {
-            ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
-            Image img = avatarIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
-            lblAvatar.setIcon(new ImageIcon(img));
-        } catch (Exception e) {
-            lblAvatar.setText("👤");
-            lblAvatar.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 30));
-            lblAvatar.setForeground(INSTAGRAM_PINK);
+        JLabel lblIcono = new JLabel();
+        lblIcono.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 32));
+        lblIcono.setForeground(INSTAGRAM_PINK);
+        
+        switch (notificacion.getTipo()) {
+            case LIKE:
+                lblIcono.setText("❤️");
+                break;
+            case COMENTARIO:
+                lblIcono.setText("💬");
+                break;
+            case SEGUIDOR:
+                lblIcono.setText("👤");
+                break;
+            case MENCION:
+                lblIcono.setText("@");
+                break;
+            default:
+                lblIcono.setText("🔔");
         }
-        lblAvatar.setPreferredSize(new Dimension(40, 40));
+        
+        lblIcono.setPreferredSize(new Dimension(40, 40));
+        lblIcono.setHorizontalAlignment(SwingConstants.CENTER);
         
         JPanel panelContenido = new JPanel();
         panelContenido.setLayout(new BoxLayout(panelContenido, BoxLayout.Y_AXIS));
-        panelContenido.setBackground(CARD_COLOR);
+        panelContenido.setBackground(tarjeta.getBackground());
         
-        JPanel panelMensaje = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        panelMensaje.setBackground(CARD_COLOR);
-        panelMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel lblMensaje = new JLabel("<html><b>@" + notificacion.getUsuarioOrigen() + "</b> " + notificacion.getMensaje() + "</html>");
+        lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblMensaje.setForeground(TEXT_PRIMARY);
+        lblMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JButton btnUsuario = new JButton("@" + notif.getUsernameOrigen());
-        btnUsuario.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnUsuario.setForeground(TEXT_PRIMARY);
-        btnUsuario.setBackground(CARD_COLOR);
-        btnUsuario.setBorderPainted(false);
-        btnUsuario.setContentAreaFilled(false);
-        btnUsuario.setFocusPainted(false);
-        btnUsuario.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JLabel lblFecha = new JLabel(notificacion.getFechaHora().format(FORMATO_FECHA));
+        lblFecha.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblFecha.setForeground(TEXT_SECONDARY);
+        lblFecha.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        btnUsuario.addActionListener(e -> {
-            ventanaPrincipal.mostrarPerfilDeUsuario(notif.getUsernameOrigen());
-        });
-        
-        String textoAccion = "";
-        switch (notif.getTipo()) {
-            case LIKE:
-                textoAccion = " le gustó tu publicación";
-                break;
-            case COMENTARIO:
-                textoAccion = " comentó en tu publicación";
-                break;
-            case MENCION:
-                textoAccion = " te mencionó en una publicación";
-                break;
-            case SEGUIDOR:
-                textoAccion = " comenzó a seguirte";
-                break;
-        }
-        
-        JLabel lblAccion = new JLabel(textoAccion);
-        lblAccion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblAccion.setForeground(TEXT_PRIMARY);
-        
-        panelMensaje.add(btnUsuario);
-        panelMensaje.add(lblAccion);
-        
-        JLabel lblTiempo = new JLabel(notif.getTiempoTranscurrido());
-        lblTiempo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblTiempo.setForeground(TEXT_SECONDARY);
-        lblTiempo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        panelContenido.add(panelMensaje);
+        panelContenido.add(lblMensaje);
         panelContenido.add(Box.createVerticalStrut(4));
-        panelContenido.add(lblTiempo);
+        panelContenido.add(lblFecha);
         
-        JButton btnAccion = null;
-        if (notif.getIdPublicacion() != null) {
-            btnAccion = new JButton("Ver publicación");
-            btnAccion.setFont(new Font("Segoe UI", Font.BOLD, 13));
-            btnAccion.setForeground(Color.WHITE);
-            btnAccion.setBackground(INSTAGRAM_PINK);
-            btnAccion.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-            btnAccion.setFocusPainted(false);
-            btnAccion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btnAccion.setPreferredSize(new Dimension(140, 32));
-            
-            btnAccion.addActionListener(e -> {
-                ventanaPrincipal.mostrarTimeline();
-            });
-        } else if (notif.getTipo() == Notificacion.TipoNotificacion.SEGUIDOR) {
-            btnAccion = new JButton("Ver perfil");
-            btnAccion.setFont(new Font("Segoe UI", Font.BOLD, 13));
-            btnAccion.setForeground(Color.WHITE);
-            btnAccion.setBackground(INSTAGRAM_PINK);
-            btnAccion.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-            btnAccion.setFocusPainted(false);
-            btnAccion.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btnAccion.setPreferredSize(new Dimension(100, 32));
-            
-            btnAccion.addActionListener(e -> {
-                ventanaPrincipal.mostrarPerfilDeUsuario(notif.getUsernameOrigen());
-            });
+        JPanel panelDerecha = new JPanel();
+        panelDerecha.setLayout(new BoxLayout(panelDerecha, BoxLayout.Y_AXIS));
+        panelDerecha.setBackground(tarjeta.getBackground());
+        
+        if (!notificacion.isLeida()) {
+            JLabel lblNueva = new JLabel("●");
+            lblNueva.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            lblNueva.setForeground(INSTAGRAM_PINK);
+            lblNueva.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panelDerecha.add(lblNueva);
         }
         
-        tarjeta.add(lblAvatar, BorderLayout.WEST);
+        tarjeta.add(lblIcono, BorderLayout.WEST);
         tarjeta.add(panelContenido, BorderLayout.CENTER);
-        if (btnAccion != null) {
-            tarjeta.add(btnAccion, BorderLayout.EAST);
-        }
+        tarjeta.add(panelDerecha, BorderLayout.EAST);
+        
+        tarjeta.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (!notificacion.isLeida()) {
+                    String username = gestorINSTA.getUsernameActual();
+                    gestorNotificaciones.marcarComoLeida(username, notificacion.getId());
+                    actualizarContenido();
+                }
+            }
+        });
         
         return tarjeta;
     }
@@ -209,17 +208,43 @@ public class PanelNotificaciones extends JPanel {
     private void mostrarMensajeVacio() {
         JPanel panelVacio = new JPanel();
         panelVacio.setLayout(new BoxLayout(panelVacio, BoxLayout.Y_AXIS));
-        panelVacio.setBackground(BACKGROUND_COLOR);
+        panelVacio.setBackground(CARD_COLOR);
+        panelVacio.setBorder(new CompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(60, 40, 60, 40)
+        ));
+        panelVacio.setMaximumSize(new Dimension(500, 240));
+        panelVacio.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblMensaje = new JLabel("No tienes notificaciones nuevas");
-        lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        JLabel lblIcono = new JLabel();
+        try {
+            ImageIcon icono = new ImageIcon(getClass().getResource("/Instagram/icons/icon_notificacion.png"));
+            Image img = icono.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+            lblIcono.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            lblIcono.setText("🔔");
+            lblIcono.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 60));
+        }
+        lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel lblTitulo = new JLabel("Sin notificaciones");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTitulo.setForeground(INSTAGRAM_PINK);
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel lblMensaje = new JLabel("Aquí aparecerán tus notificaciones");
+        lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblMensaje.setForeground(TEXT_SECONDARY);
         lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        panelVacio.add(Box.createVerticalGlue());
+        panelVacio.add(lblIcono);
+        panelVacio.add(Box.createVerticalStrut(20));
+        panelVacio.add(lblTitulo);
+        panelVacio.add(Box.createVerticalStrut(10));
         panelVacio.add(lblMensaje);
-        panelVacio.add(Box.createVerticalGlue());
         
+        panelNotificaciones.add(Box.createVerticalGlue());
         panelNotificaciones.add(panelVacio);
+        panelNotificaciones.add(Box.createVerticalGlue());
     }
 }

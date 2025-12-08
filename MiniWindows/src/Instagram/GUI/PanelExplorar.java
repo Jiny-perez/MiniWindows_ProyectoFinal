@@ -5,8 +5,8 @@
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
-import Instagram.Logica.GestorINSTA;
-import Instagram.Logica.GestorUsuariosLocal;
+import Instagram.Logica.GestorINSTACompleto;
+import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Modelo.Publicacion;
 import java.awt.*;
 import java.awt.event.*;
@@ -19,9 +19,9 @@ import java.util.ArrayList;
  * @author najma
  */
 public class PanelExplorar extends JPanel {
-    
-    private GestorINSTA gestorINSTA;
-    private GestorUsuariosLocal gestorUsuarios;
+     
+    private GestorINSTACompleto gestorINSTA;
+    private GestorUsuariosLocalINSTA gestorUsuarios;
     private VentanaINSTA ventanaPrincipal;
     
     private JTextField txtBusqueda;
@@ -35,7 +35,7 @@ public class PanelExplorar extends JPanel {
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     
-    public PanelExplorar(GestorINSTA gestor, GestorUsuariosLocal gestorUsuariosLocal, VentanaINSTA ventana) {
+    public PanelExplorar(GestorINSTACompleto gestor, GestorUsuariosLocalINSTA gestorUsuariosLocal, VentanaINSTA ventana) {
         this.gestorINSTA = gestor;
         this.gestorUsuarios = gestorUsuariosLocal;
         this.ventanaPrincipal = ventana;

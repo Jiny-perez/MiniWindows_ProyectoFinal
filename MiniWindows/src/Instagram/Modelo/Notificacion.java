@@ -6,114 +6,125 @@ package Instagram.Modelo;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 /**
  *
  * @author najma
  */
 public class Notificacion implements Serializable {
+     
+    private static final long serialVersionUID = 1L;
     
     public enum TipoNotificacion {
         LIKE,
         COMENTARIO,
+        SEGUIDOR,
         MENCION,
-        SEGUIDOR 
+        MENSAJE
     }
     
+    private String id;
+    private String usuarioDestino;
+    private String usuarioOrigen;
     private TipoNotificacion tipo;
-    private String usernameOrigen;
-    private String usernameDestino;
-    private String idPublicacion;
-    private String contenido;
-    private LocalDateTime fechaCreacion;
+    private String mensaje;
+    private String idReferencia;
+    private LocalDateTime fechaHora;
     private boolean leida;
     
-    public Notificacion(TipoNotificacion tipo, String usernameOrigen, String usernameDestino) {
+    public Notificacion(String usuarioDestino, String usuarioOrigen, TipoNotificacion tipo, String mensaje) {
+        this.id = UUID.randomUUID().toString();
+        this.usuarioDestino = usuarioDestino;
+        this.usuarioOrigen = usuarioOrigen;
         this.tipo = tipo;
-        this.usernameOrigen = usernameOrigen;
-        this.usernameDestino = usernameDestino;
-        this.fechaCreacion = LocalDateTime.now();
+        this.mensaje = mensaje;
+        this.fechaHora = LocalDateTime.now();
+        this.leida = false;
+        this.idReferencia = null;
+    }
+    
+    public Notificacion(String usuarioDestino, String usuarioOrigen, TipoNotificacion tipo, String mensaje, String idReferencia) {
+        this.id = UUID.randomUUID().toString();
+        this.usuarioDestino = usuarioDestino;
+        this.usuarioOrigen = usuarioOrigen;
+        this.tipo = tipo;
+        this.mensaje = mensaje;
+        this.idReferencia = idReferencia;
+        this.fechaHora = LocalDateTime.now();
         this.leida = false;
     }
     
-    public Notificacion(TipoNotificacion tipo, String usernameOrigen, String usernameDestino, 
-                       String idPublicacion, String contenido) {
-        this(tipo, usernameOrigen, usernameDestino);
-        this.idPublicacion = idPublicacion;
-        this.contenido = contenido;
+    public String getId() {
+        return id;
     }
     
-    public TipoNotificacion getTipo() { return tipo; }
-    public String getUsernameOrigen() { return usernameOrigen; }
-    public String getUsernameDestino() { return usernameDestino; }
-    public String getIdPublicacion() { return idPublicacion; }
-    public String getContenido() { return contenido; }
-    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    public boolean isLeida() { return leida; }
+    public String getUsuarioDestino() {
+        return usuarioDestino;
+    }
     
-    public void setLeida(boolean leida) { this.leida = leida; }
+    public void setUsuarioDestino(String usuarioDestino) {
+        this.usuarioDestino = usuarioDestino;
+    }
+    
+    public String getUsuarioOrigen() {
+        return usuarioOrigen;
+    }
+    
+    public void setUsuarioOrigen(String usuarioOrigen) {
+        this.usuarioOrigen = usuarioOrigen;
+    }
+    
+    public TipoNotificacion getTipo() {
+        return tipo;
+    }
+    
+    public void setTipo(TipoNotificacion tipo) {
+        this.tipo = tipo;
+    }
     
     public String getMensaje() {
-        switch (tipo) {
-            case LIKE:
-                return "@" + usernameOrigen + " le gustó tu publicación";
-            case COMENTARIO:
-                return "@" + usernameOrigen + " comentó en tu publicación";
-            case MENCION:
-                return "@" + usernameOrigen + " te mencionó en una publicación";
-            case SEGUIDOR:
-                return "@" + usernameOrigen + " comenzó a seguirte";
-            default:
-                return "@" + usernameOrigen + " interactuó contigo";
-        }
+        return mensaje;
     }
     
-    public String getIcono() {
-        switch (tipo) {
-            case LIKE:
-                return "❤️";
-            case COMENTARIO:
-                return "💬";
-            case MENCION:
-                return "@";
-            case SEGUIDOR:
-                return "👤";
-            default:
-                return "📬";
-        }
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
     }
-
-    public String getTiempoTranscurrido() {
-        LocalDateTime ahora = LocalDateTime.now();
-        
-        long segundos = ChronoUnit.SECONDS.between(fechaCreacion, ahora);
-        if (segundos < 60) {
-            return "Ahora";
-        }
-        
-        long minutos = ChronoUnit.MINUTES.between(fechaCreacion, ahora);
-        if (minutos < 60) {
-            return minutos + "m";
-        }
-        
-        long horas = ChronoUnit.HOURS.between(fechaCreacion, ahora);
-        if (horas < 24) {
-            return horas + "h";
-        }
-        
-        long dias = ChronoUnit.DAYS.between(fechaCreacion, ahora);
-        if (dias < 7) {
-            return dias + "d";
-        }
-        
-        long semanas = ChronoUnit.WEEKS.between(fechaCreacion, ahora);
-        if (semanas < 4) {
-            return semanas + "sem";
-        }
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM");
-        return fechaCreacion.format(formatter);
+    
+    public String getIdReferencia() {
+        return idReferencia;
+    }
+    
+    public void setIdReferencia(String idReferencia) {
+        this.idReferencia = idReferencia;
+    }
+    
+    public LocalDateTime getFechaHora() {
+        return fechaHora;
+    }
+    
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
+    }
+    
+    public boolean isLeida() {
+        return leida;
+    }
+    
+    public void setLeida(boolean leida) {
+        this.leida = leida;
+    }
+    
+    @Override
+    public String toString() {
+        return "Notificacion{" +
+                "id='" + id + '\'' +
+                ", usuarioDestino='" + usuarioDestino + '\'' +
+                ", usuarioOrigen='" + usuarioOrigen + '\'' +
+                ", tipo=" + tipo +
+                ", mensaje='" + mensaje + '\'' +
+                ", fechaHora=" + fechaHora +
+                ", leida=" + leida +
+                '}';
     }
 }

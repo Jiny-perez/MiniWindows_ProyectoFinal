@@ -4,7 +4,7 @@
  */
 package Instagram.GUI;
 
-import Instagram.Logica.GestorINSTA;
+import Instagram.Logica.GestorINSTACompleto;
 import Instagram.Modelo.Publicacion;
 import java.awt.*;
 import javax.swing.*;
@@ -17,18 +17,18 @@ import java.util.ArrayList;
  */
 public class PanelTimeline extends JPanel {
     
-    private GestorINSTA gestorINSTA;
+    private GestorINSTACompleto gestorINSTA;
     private VentanaINSTA ventanaPrincipal;
     
     private JPanel panelPublicaciones;
     private JScrollPane scrollPane;
     
-    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245); // Rosa pastel
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
     private static final Color CARD_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     
-    public PanelTimeline(GestorINSTA gestor, VentanaINSTA ventana) {
+    public PanelTimeline(GestorINSTACompleto gestor, VentanaINSTA ventana) {
         this.gestorINSTA = gestor;
         this.ventanaPrincipal = ventana;
         
@@ -85,7 +85,7 @@ public class PanelTimeline extends JPanel {
         
         JLabel lblIcono = new JLabel();
         try {
-            ImageIcon icono = new ImageIcon(getClass().getResource("/Instagram.icons/icon_insta.png"));
+            ImageIcon icono = new ImageIcon(getClass().getResource("/Instagram/icons/icon_insta.png"));
             Image img = icono.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
             lblIcono.setIcon(new ImageIcon(img));
         } catch (Exception e) {

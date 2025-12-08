@@ -8,8 +8,6 @@ import Instagram.Modelo.Notificacion;
 import Instagram.Modelo.Notificacion.TipoNotificacion;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  *
@@ -17,155 +15,191 @@ import java.util.Comparator;
  */
 public class GestorNotificaciones {
     
-    private static final String ARCHIVO_NOTIFICACIONES = "notificaciones_insta.dat";
     private ArrayList<Notificacion> notificaciones;
+    private static final String ARCHIVO_NOTIFICACIONES = "datos/notificaciones_insta.dat";
     
     public GestorNotificaciones() {
+        this.notificaciones = new ArrayList<>();
         cargarNotificaciones();
     }
     
-    private void cargarNotificaciones() {
-        File archivo = new File(ARCHIVO_NOTIFICACIONES);
-        
-        if (archivo.exists()) {
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
-                notificaciones = (ArrayList<Notificacion>) ois.readObject();
-            } catch (Exception e) {
-                System.err.println("Error al cargar notificaciones: " + e.getMessage());
-                notificaciones = new ArrayList<>();
-            }
-        } else {
-            notificaciones = new ArrayList<>();
-        }
-    }
-    
-    public void guardarNotificaciones() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_NOTIFICACIONES))) {
-            oos.writeObject(notificaciones);
-        } catch (Exception e) {
-            System.err.println("Error al guardar notificaciones: " + e.getMessage());
-        }
-    }
-
-    public void crearNotificacionLike(String usernameOrigen, String usernameDestino, String idPublicacion) {
-        if (usernameOrigen.equals(usernameDestino)) {
-            return;
-        }
-        
+    public void agregarNotificacionLike(String usernameOrigen, String usernameDestino, String idPublicacion) {
         for (Notificacion notif : notificaciones) {
-            if (notif.getTipo() == TipoNotificacion.LIKE &&
-                notif.getUsernameOrigen().equals(usernameOrigen) &&
-                notif.getUsernameDestino().equals(usernameDestino) &&
-                notif.getIdPublicacion().equals(idPublicacion)) {
+            if (notif.getUsuarioOrigen().equals(usernameOrigen) &&
+                notif.getUsuarioDestino().equals(usernameDestino) &&
+                notif.getIdReferencia() != null &&
+                notif.getIdReferencia().equals(idPublicacion)) {
                 return;
             }
         }
         
-        Notificacion notif = new Notificacion(TipoNotificacion.LIKE, usernameOrigen, usernameDestino, idPublicacion, null);
+        Notificacion notif = new Notificacion(
+            usernameDestino,
+            usernameOrigen,
+            TipoNotificacion.LIKE,
+            "le dio like a tu publicación",
+            idPublicacion
+        );
+        
         notificaciones.add(notif);
         guardarNotificaciones();
     }
-
+    
     public void eliminarNotificacionLike(String usernameOrigen, String usernameDestino, String idPublicacion) {
-        notificaciones.removeIf(notif -> 
-            notif.getTipo() == TipoNotificacion.LIKE &&
-            notif.getUsernameOrigen().equals(usernameOrigen) &&
-            notif.getUsernameDestino().equals(usernameDestino) &&
-            notif.getIdPublicacion().equals(idPublicacion)
+        notificaciones.removeIf(notif ->
+            notif.getUsuarioOrigen().equals(usernameOrigen) &&
+            notif.getUsuarioDestino().equals(usernameDestino) &&
+            notif.getIdReferencia() != null &&
+            notif.getIdReferencia().equals(idPublicacion)
         );
         guardarNotificaciones();
     }
-
-    public void crearNotificacionComentario(String usernameOrigen, String usernameDestino, 
-                                           String idPublicacion, String contenidoComentario) {
-        if (usernameOrigen.equals(usernameDestino)) {
-            return;
-        }
+    
+    public void agregarNotificacionComentario(String usernameOrigen, String usernameDestino, 
+                                             String idPublicacion, String comentario) {
+        Notificacion notif = new Notificacion(
+            usernameDestino,
+            usernameOrigen,
+            TipoNotificacion.COMENTARIO,
+            "comentó: \"" + comentario + "\"",
+            idPublicacion
+        );
         
-        Notificacion notif = new Notificacion(TipoNotificacion.COMENTARIO, usernameOrigen, 
-                                              usernameDestino, idPublicacion, contenidoComentario);
         notificaciones.add(notif);
         guardarNotificaciones();
     }
-
-    public void crearNotificacionMencion(String usernameOrigen, String usernameDestino, 
-                                        String idPublicacion, String contenido) {
-        // No crear notificación si el usuario se menciona a sí mismo
-        if (usernameOrigen.equals(usernameDestino)) {
-            return;
-        }
+    
+    public void agregarNotificacionMencion(String usernameOrigen, String usernameDestino, 
+                                          String idPublicacion, String contenido) {
+        Notificacion notif = new Notificacion(
+            usernameDestino,
+            usernameOrigen,
+            TipoNotificacion.MENCION,
+            "te mencionó en una publicación",
+            idPublicacion
+        );
         
-        Notificacion notif = new Notificacion(TipoNotificacion.MENCION, usernameOrigen, 
-                                              usernameDestino, idPublicacion, contenido);
         notificaciones.add(notif);
         guardarNotificaciones();
     }
-
-    public void crearNotificacionSeguidor(String usernameOrigen, String usernameDestino) {
+    
+    public void agregarNotificacionSeguidor(String usernameOrigen, String usernameDestino) {
         for (Notificacion notif : notificaciones) {
-            if (notif.getTipo() == TipoNotificacion.SEGUIDOR &&
-                notif.getUsernameOrigen().equals(usernameOrigen) &&
-                notif.getUsernameDestino().equals(usernameDestino)) {
-                return; // Ya existe
+            if (notif.getUsuarioOrigen().equals(usernameOrigen) &&
+                notif.getUsuarioDestino().equals(usernameDestino) &&
+                notif.getTipo() == TipoNotificacion.SEGUIDOR) {
+                return;
             }
         }
         
-        Notificacion notif = new Notificacion(TipoNotificacion.SEGUIDOR, usernameOrigen, usernameDestino);
+        Notificacion notif = new Notificacion(
+            usernameDestino,
+            usernameOrigen,
+            TipoNotificacion.SEGUIDOR,
+            "comenzó a seguirte"
+        );
+        
         notificaciones.add(notif);
         guardarNotificaciones();
     }
-
+    
     public void eliminarNotificacionSeguidor(String usernameOrigen, String usernameDestino) {
-        notificaciones.removeIf(notif -> 
-            notif.getTipo() == TipoNotificacion.SEGUIDOR &&
-            notif.getUsernameOrigen().equals(usernameOrigen) &&
-            notif.getUsernameDestino().equals(usernameDestino)
+        notificaciones.removeIf(notif ->
+            notif.getUsuarioOrigen().equals(usernameOrigen) &&
+            notif.getUsuarioDestino().equals(usernameDestino) &&
+            notif.getTipo() == TipoNotificacion.SEGUIDOR
         );
         guardarNotificaciones();
     }
-
+    
     public ArrayList<Notificacion> obtenerNotificaciones(String username) {
-        ArrayList<Notificacion> notificacionesUsuario = new ArrayList<>();
+        ArrayList<Notificacion> notifUsuario = new ArrayList<>();
         
         for (Notificacion notif : notificaciones) {
-            if (notif.getUsernameDestino().equals(username)) {
-                notificacionesUsuario.add(notif);
+            if (notif.getUsuarioDestino().equals(username)) {
+                notifUsuario.add(notif);
             }
         }
         
-        Collections.sort(notificacionesUsuario, new Comparator<Notificacion>() {
-            @Override
-            public int compare(Notificacion n1, Notificacion n2) {
-                return n2.getFechaCreacion().compareTo(n1.getFechaCreacion());
-            }
-        });
+        notifUsuario.sort((n1, n2) -> 
+            n2.getFechaHora().compareTo(n1.getFechaHora())
+        );
         
-        return notificacionesUsuario;
+        return notifUsuario;
     }
-
+    
     public int contarNoLeidas(String username) {
         int count = 0;
         for (Notificacion notif : notificaciones) {
-            if (notif.getUsernameDestino().equals(username) && !notif.isLeida()) {
+            if (notif.getUsuarioDestino().equals(username) && !notif.isLeida()) {
                 count++;
             }
         }
         return count;
     }
     
-    /**
-     * Marca todas las notificaciones de un usuario como leídas
-     */
-    public void marcarTodasComoLeidas(String username) {
+    public void marcarComoLeida(String username, String idNotificacion) {
         for (Notificacion notif : notificaciones) {
-            if (notif.getUsernameDestino().equals(username)) {
+            if (notif.getId().equals(idNotificacion) && 
+                notif.getUsuarioDestino().equals(username)) {
                 notif.setLeida(true);
+                guardarNotificaciones();
+                return;
             }
         }
+    }
+    
+    public void marcarTodasComoLeidas(String username) {
+        boolean cambios = false;
+        for (Notificacion notif : notificaciones) {
+            if (notif.getUsuarioDestino().equals(username) && !notif.isLeida()) {
+                notif.setLeida(true);
+                cambios = true;
+            }
+        }
+        if (cambios) {
+            guardarNotificaciones();
+        }
+    }
+    
+    public void eliminarNotificacionesDeUsuario(String username) {
+        notificaciones.removeIf(notif -> 
+            notif.getUsuarioOrigen().equals(username) || 
+            notif.getUsuarioDestino().equals(username)
+        );
         guardarNotificaciones();
     }
-
-    public void limpiarNotificacionesAntiguas() {
-        // En proceso
+    
+    public void eliminarNotificacionesDePublicacion(String idPublicacion) {
+        notificaciones.removeIf(notif -> 
+            notif.getIdReferencia() != null && 
+            notif.getIdReferencia().equals(idPublicacion)
+        );
+        guardarNotificaciones();
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void cargarNotificaciones() {
+        File archivo = new File(ARCHIVO_NOTIFICACIONES);
+        
+        if (archivo.exists()) {
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivo))) {
+                notificaciones = (ArrayList<Notificacion>) ois.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                System.err.println("Error al cargar notificaciones: " + e.getMessage());
+                notificaciones = new ArrayList<>();
+            }
+        }
+    }
+    
+    private void guardarNotificaciones() {
+        File archivo = new File(ARCHIVO_NOTIFICACIONES);
+        archivo.getParentFile().mkdirs();
+        
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivo))) {
+            oos.writeObject(notificaciones);
+        } catch (IOException e) {
+            System.err.println("Error al guardar notificaciones: " + e.getMessage());
+        }
     }
 }

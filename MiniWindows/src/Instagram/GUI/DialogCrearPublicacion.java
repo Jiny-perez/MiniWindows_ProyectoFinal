@@ -4,12 +4,12 @@
  */
 package Instagram.GUI;
 
-import Instagram.Logica.GestorINSTA;
+import Instagram.Logica.GestorINSTACompleto;
+import Instagram.Modelo.Publicacion;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
 /**
@@ -18,182 +18,202 @@ import java.io.File;
  */
 public class DialogCrearPublicacion extends JDialog {
     
-    private GestorINSTA gestorINSTA;
+    private GestorINSTACompleto gestorINSTA;
     private boolean publicacionCreada = false;
     
     private JTextArea txtContenido;
+    private JLabel lblContador;
     private JLabel lblImagenPreview;
     private JButton btnSeleccionarImagen;
-    private JButton btnQuitarImagen;
+    private JButton btnPublicar;
     private File imagenSeleccionada;
     
-    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
+    private static final Color CARD_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
+    private static final Color WARNING_COLOR = new Color(220, 53, 69);
     
-    public DialogCrearPublicacion(Frame parent, GestorINSTA gestor) {
-        super(parent, true);
+    public DialogCrearPublicacion(Frame parent, GestorINSTACompleto gestor) {
+        super(parent, "Crear Publicación", true);
         this.gestorINSTA = gestor;
-        setUndecorated(true);
         
         initComponents();
-        configurarDialogo();
+        configurarVentana();
     }
     
     private void initComponents() {
-        setLayout(new BorderLayout(0, 0));
+        setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
         
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(BACKGROUND_COLOR);
-        header.setBorder(new CompoundBorder(
-            new MatteBorder(0, 0, 1, 0, BORDER_COLOR),
-            BorderFactory.createEmptyBorder(12, 16, 12, 16)
-        ));
+        JPanel panelPrincipal = new JPanel();
+        panelPrincipal.setLayout(new BoxLayout(panelPrincipal, BoxLayout.Y_AXIS));
+        panelPrincipal.setBackground(CARD_COLOR);
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
         
         JLabel lblTitulo = new JLabel("Crear nueva publicación");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTitulo.setForeground(INSTAGRAM_PINK);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JButton btnCerrar = new JButton("×");
-        btnCerrar.setFont(new Font("Segoe UI", Font.PLAIN, 28));
-        btnCerrar.setForeground(INSTAGRAM_PINK);
-        btnCerrar.setBackground(BACKGROUND_COLOR);
-        btnCerrar.setBorderPainted(false);
-        btnCerrar.setContentAreaFilled(false);
-        btnCerrar.setFocusPainted(false);
-        btnCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnCerrar.addActionListener(e -> dispose());
+        JLabel lblDescripcion = new JLabel("Comparte algo con tus seguidores");
+        lblDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblDescripcion.setForeground(TEXT_SECONDARY);
+        lblDescripcion.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        header.add(lblTitulo, BorderLayout.CENTER);
-        header.add(btnCerrar, BorderLayout.EAST);
+        panelPrincipal.add(lblTitulo);
+        panelPrincipal.add(Box.createVerticalStrut(4));
+        panelPrincipal.add(lblDescripcion);
+        panelPrincipal.add(Box.createVerticalStrut(24));
         
-        add(header, BorderLayout.NORTH);
+        JLabel lblContenidoLabel = new JLabel("¿Qué estás pensando?");
+        lblContenidoLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblContenidoLabel.setForeground(TEXT_PRIMARY);
+        lblContenidoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblContenidoLabel);
+        panelPrincipal.add(Box.createVerticalStrut(8));
         
-        JPanel centro = new JPanel();
-        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
-        centro.setBackground(BACKGROUND_COLOR);
-        centro.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        
-        JLabel lblContenido = new JLabel("Escribe algo...");
-        lblContenido.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblContenido.setForeground(TEXT_SECONDARY);
-        lblContenido.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        txtContenido = new JTextArea(6, 40);
+        txtContenido = new JTextArea(5, 40);
         txtContenido.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtContenido.setForeground(TEXT_PRIMARY);
         txtContenido.setLineWrap(true);
         txtContenido.setWrapStyleWord(true);
         txtContenido.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 8, 8, 8)
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
+        
+        txtContenido.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                actualizarContador();
+            }
+        });
         
         JScrollPane scrollContenido = new JScrollPane(txtContenido);
         scrollContenido.setBorder(null);
         scrollContenido.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollContenido.setMaximumSize(new Dimension(500, 120));
         
-        centro.add(lblContenido);
-        centro.add(Box.createVerticalStrut(8));
-        centro.add(scrollContenido);
-        centro.add(Box.createVerticalStrut(16));
+        panelPrincipal.add(scrollContenido);
+        panelPrincipal.add(Box.createVerticalStrut(8));
         
-        JPanel panelImagen = new JPanel();
-        panelImagen.setLayout(new BoxLayout(panelImagen, BoxLayout.Y_AXIS));
-        panelImagen.setBackground(BACKGROUND_COLOR);
+        lblContador = new JLabel("0 / " + Publicacion.MAX_CARACTERES + " caracteres");
+        lblContador.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblContador.setForeground(TEXT_SECONDARY);
+        lblContador.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblContador);
+        panelPrincipal.add(Box.createVerticalStrut(20));
+        
+        JLabel lblImagenLabel = new JLabel("Imagen (opcional)");
+        lblImagenLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblImagenLabel.setForeground(TEXT_PRIMARY);
+        lblImagenLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblImagenLabel);
+        panelPrincipal.add(Box.createVerticalStrut(8));
+        
+        JPanel panelImagen = new JPanel(new BorderLayout(12, 0));
+        panelImagen.setBackground(CARD_COLOR);
         panelImagen.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelImagen.setMaximumSize(new Dimension(500, 200));
         
-        btnSeleccionarImagen = new JButton("Agregar imagen");
-        btnSeleccionarImagen.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnSeleccionarImagen.setForeground(INSTAGRAM_PINK);
-        btnSeleccionarImagen.setBackground(BACKGROUND_COLOR);
-        btnSeleccionarImagen.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(INSTAGRAM_PINK, 2),
-            BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
+        lblImagenPreview = new JLabel("No hay imagen seleccionada");
+        lblImagenPreview.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblImagenPreview.setForeground(TEXT_SECONDARY);
+        lblImagenPreview.setHorizontalAlignment(SwingConstants.CENTER);
+        lblImagenPreview.setBorder(new LineBorder(BORDER_COLOR, 2, true));
+        lblImagenPreview.setPreferredSize(new Dimension(200, 180));
+        lblImagenPreview.setBackground(new Color(250, 250, 250));
+        lblImagenPreview.setOpaque(true);
+        
+        JPanel panelBotonesImagen = new JPanel();
+        panelBotonesImagen.setLayout(new BoxLayout(panelBotonesImagen, BoxLayout.Y_AXIS));
+        panelBotonesImagen.setBackground(CARD_COLOR);
+        
+        btnSeleccionarImagen = new JButton("Seleccionar Imagen");
+        btnSeleccionarImagen.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnSeleccionarImagen.setForeground(Color.WHITE);
+        btnSeleccionarImagen.setBackground(INSTAGRAM_PINK);
+        btnSeleccionarImagen.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btnSeleccionarImagen.setFocusPainted(false);
         btnSeleccionarImagen.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSeleccionarImagen.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        try {
-            ImageIcon iconCamera = new ImageIcon(getClass().getResource("/Instagram/icons/icon_crear.png"));
-            Image img = iconCamera.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-            btnSeleccionarImagen.setIcon(new ImageIcon(img));
-            btnSeleccionarImagen.setHorizontalTextPosition(SwingConstants.RIGHT);
-            btnSeleccionarImagen.setIconTextGap(8);
-        } catch (Exception e) {
-        }
-        
         btnSeleccionarImagen.addActionListener(e -> seleccionarImagen());
         
-        lblImagenPreview = new JLabel();
-        lblImagenPreview.setBorder(new LineBorder(BORDER_COLOR, 2));
-        lblImagenPreview.setAlignmentX(Component.LEFT_ALIGNMENT);
-        lblImagenPreview.setVisible(false);
-        
-        btnQuitarImagen = new JButton("Quitar imagen");
-        btnQuitarImagen.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnQuitarImagen.setForeground(INSTAGRAM_PINK);
-        btnQuitarImagen.setBackground(BACKGROUND_COLOR);
-        btnQuitarImagen.setBorderPainted(false);
-        btnQuitarImagen.setContentAreaFilled(false);
+        JButton btnQuitarImagen = new JButton("Quitar Imagen");
+        btnQuitarImagen.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        btnQuitarImagen.setForeground(TEXT_PRIMARY);
+        btnQuitarImagen.setBackground(CARD_COLOR);
+        btnQuitarImagen.setBorder(new LineBorder(BORDER_COLOR, 2));
         btnQuitarImagen.setFocusPainted(false);
         btnQuitarImagen.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnQuitarImagen.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnQuitarImagen.setVisible(false);
+        btnQuitarImagen.setMaximumSize(new Dimension(200, 36));
         btnQuitarImagen.addActionListener(e -> quitarImagen());
         
-        panelImagen.add(btnSeleccionarImagen);
-        panelImagen.add(Box.createVerticalStrut(12));
-        panelImagen.add(lblImagenPreview);
-        panelImagen.add(Box.createVerticalStrut(8));
-        panelImagen.add(btnQuitarImagen);
+        panelBotonesImagen.add(btnSeleccionarImagen);
+        panelBotonesImagen.add(Box.createVerticalStrut(10));
+        panelBotonesImagen.add(btnQuitarImagen);
+        panelBotonesImagen.add(Box.createVerticalGlue());
         
-        centro.add(panelImagen);
+        panelImagen.add(lblImagenPreview, BorderLayout.WEST);
+        panelImagen.add(panelBotonesImagen, BorderLayout.CENTER);
         
-        add(centro, BorderLayout.CENTER);
+        panelPrincipal.add(panelImagen);
+        panelPrincipal.add(Box.createVerticalStrut(24));
         
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
-        footer.setBackground(BACKGROUND_COLOR);
-        footer.setBorder(new MatteBorder(1, 0, 0, 0, BORDER_COLOR));
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        panelBotones.setBackground(CARD_COLOR);
+        panelBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelBotones.setMaximumSize(new Dimension(500, 40));
         
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnCancelar.setForeground(TEXT_PRIMARY);
-        btnCancelar.setBackground(BACKGROUND_COLOR);
-        btnCancelar.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
+        btnCancelar.setBackground(CARD_COLOR);
+        btnCancelar.setBorder(new LineBorder(BORDER_COLOR, 2));
         btnCancelar.setFocusPainted(false);
         btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCancelar.setPreferredSize(new Dimension(100, 36));
         btnCancelar.addActionListener(e -> dispose());
         
-        JButton btnPublicar = new JButton("Publicar");
+        btnPublicar = new JButton("Publicar");
         btnPublicar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnPublicar.setForeground(Color.WHITE);
         btnPublicar.setBackground(INSTAGRAM_PINK);
-        btnPublicar.setBorder(BorderFactory.createEmptyBorder(8, 24, 8, 24));
+        btnPublicar.setBorder(null);
         btnPublicar.setFocusPainted(false);
-        btnPublicar.setOpaque(true);
-        btnPublicar.setBorderPainted(false);
         btnPublicar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnPublicar.setPreferredSize(new Dimension(100, 36));
         btnPublicar.addActionListener(e -> publicar());
         
-        footer.add(btnCancelar);
-        footer.add(btnPublicar);
+        panelBotones.add(btnCancelar);
+        panelBotones.add(btnPublicar);
         
-        add(footer, BorderLayout.SOUTH);
+        panelPrincipal.add(panelBotones);
+        
+        add(panelPrincipal, BorderLayout.CENTER);
+    }
+    
+    private void actualizarContador() {
+        int longitud = txtContenido.getText().length();
+        lblContador.setText(longitud + " / " + Publicacion.MAX_CARACTERES + " caracteres");
+        
+        if (longitud > Publicacion.MAX_CARACTERES) {
+            lblContador.setForeground(WARNING_COLOR);
+            btnPublicar.setEnabled(false);
+        } else {
+            lblContador.setForeground(TEXT_SECONDARY);
+            btnPublicar.setEnabled(true);
+        }
     }
     
     private void seleccionarImagen() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar imagen");
-        fileChooser.setFileFilter(new FileNameExtensionFilter(
-            "Imágenes (*.png, *.jpg, *.jpeg, *.gif)", "png", "jpg", "jpeg", "gif"
+        fileChooser.setDialogTitle("Seleccionar Imagen");
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+            "Imágenes (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"
         ));
         
         int resultado = fileChooser.showOpenDialog(this);
@@ -205,57 +225,52 @@ public class DialogCrearPublicacion extends JDialog {
     }
     
     private void mostrarPreviewImagen() {
-        try {
-            ImageIcon iconoOriginal = new ImageIcon(imagenSeleccionada.getAbsolutePath());
-            
-            int anchoMax = 400;
-            int altoMax = 300;
-            
-            Image imagen = iconoOriginal.getImage();
-            int anchoOriginal = imagen.getWidth(null);
-            int altoOriginal = imagen.getHeight(null);
-            
-            double escala = Math.min(
-                (double) anchoMax / anchoOriginal,
-                (double) altoMax / altoOriginal
-            );
-            
-            int nuevoAncho = (int) (anchoOriginal * escala);
-            int nuevoAlto = (int) (altoOriginal * escala);
-            
-            Image imagenEscalada = imagen.getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
-            
-            lblImagenPreview.setIcon(new ImageIcon(imagenEscalada));
-            lblImagenPreview.setVisible(true);
-            btnQuitarImagen.setVisible(true);
-            btnSeleccionarImagen.setText("Cambiar imagen");
-            
-            revalidate();
-            repaint();
-            
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Error al cargar la imagen",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
+        if (imagenSeleccionada != null) {
+            try {
+                ImageIcon iconImagen = new ImageIcon(imagenSeleccionada.getAbsolutePath());
+                Image img = iconImagen.getImage();
+                
+                int anchoMax = 200;
+                int altoMax = 180;
+                
+                double escala = Math.min(
+                    (double) anchoMax / img.getWidth(null),
+                    (double) altoMax / img.getHeight(null)
+                );
+                
+                int nuevoAncho = (int) (img.getWidth(null) * escala);
+                int nuevoAlto = (int) (img.getHeight(null) * escala);
+                
+                Image imgEscalada = img.getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
+                lblImagenPreview.setIcon(new ImageIcon(imgEscalada));
+                lblImagenPreview.setText(null);
+            } catch (Exception e) {
+                lblImagenPreview.setIcon(null);
+                lblImagenPreview.setText("Error al cargar imagen");
+            }
         }
     }
     
     private void quitarImagen() {
         imagenSeleccionada = null;
         lblImagenPreview.setIcon(null);
-        lblImagenPreview.setVisible(false);
-        btnQuitarImagen.setVisible(false);
-        btnSeleccionarImagen.setText("Agregar imagen");
-        
-        revalidate();
-        repaint();
+        lblImagenPreview.setText("No hay imagen seleccionada");
     }
     
     private void publicar() {
         String contenido = txtContenido.getText().trim();
+        
+        // VALIDACIÓN CRÍTICA: 140 CARACTERES
+        if (contenido.length() > Publicacion.MAX_CARACTERES) {
+            JOptionPane.showMessageDialog(
+                this,
+                "El contenido no puede exceder " + Publicacion.MAX_CARACTERES + " caracteres.\n" +
+                "Caracteres actuales: " + contenido.length(),
+                "Contenido demasiado largo",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
         
         if (contenido.isEmpty() && imagenSeleccionada == null) {
             JOptionPane.showMessageDialog(
@@ -267,28 +282,46 @@ public class DialogCrearPublicacion extends JDialog {
             return;
         }
         
-        if (imagenSeleccionada != null) {
-            gestorINSTA.crearPublicacion(contenido, imagenSeleccionada.getAbsolutePath());
-        } else {
-            gestorINSTA.crearPublicacion(contenido);
+        try {
+            if (imagenSeleccionada != null) {
+                gestorINSTA.crearPublicacion(contenido, imagenSeleccionada.getAbsolutePath());
+            } else {
+                gestorINSTA.crearPublicacion(contenido);
+            }
+            
+            publicacionCreada = true;
+            
+            JOptionPane.showMessageDialog(
+                this,
+                "¡Publicación creada exitosamente!",
+                "Éxito",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            
+            dispose();
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(
+                this,
+                e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Error al crear la publicación: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
         }
-        
-        publicacionCreada = true;
-        
-        JOptionPane.showMessageDialog(
-            this,
-            "¡Publicación creada exitosamente!",
-            "Éxito",
-            JOptionPane.INFORMATION_MESSAGE
-        );
-        
-        dispose();
     }
     
-    private void configurarDialogo() {
-        setSize(600, 650);
-        setResizable(false);
+    private void configurarVentana() {
+        setSize(580, 650);
+        setMinimumSize(new Dimension(580, 650));
         setLocationRelativeTo(getParent());
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setResizable(false);
     }
     
     public boolean isPublicacionCreada() {

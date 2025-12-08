@@ -6,14 +6,10 @@ package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
 import Instagram.Logica.GestorUsuariosLocalINSTA;
-import Instagram.Logica.GestorPerfiles;
-import Instagram.Modelo.PerfilUsuario;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 
 /**
  *
@@ -23,17 +19,14 @@ public class DialogEditarPerfil extends JDialog {
    
     private Usuario usuario;
     private GestorUsuariosLocalINSTA gestorUsuarios;
-    private boolean cambiosGuardados = false;
+    private boolean perfilActualizado = false;
     
+    private JTextField txtNombreCompleto;
     private JTextArea txtBiografia;
-    private JLabel lblFotoPreview;
-    private JButton btnCambiarFoto;
-    private JButton btnEliminarFoto;
-    private File fotoSeleccionada;
-    private String rutaFotoActual;
-    private JCheckBox chkDesactivarCuenta;
+    private JTextField txtEmail;
     
-    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
+    private static final Color CARD_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
@@ -45,344 +38,198 @@ public class DialogEditarPerfil extends JDialog {
         this.gestorUsuarios = gestorUsuarios;
         
         initComponents();
-        cargarDatosActuales();
-        configurarDialogo();
+        cargarDatos();
+        configurarVentana();
     }
     
     private void initComponents() {
         setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
         
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(BACKGROUND_COLOR);
-        header.setBorder(new CompoundBorder(
-            new MatteBorder(0, 0, 1, 0, BORDER_COLOR),
-            BorderFactory.createEmptyBorder(16, 20, 16, 20)
-        ));
+        JPanel panelPrincipal = new JPanel();
+        panelPrincipal.setLayout(new BoxLayout(panelPrincipal, BoxLayout.Y_AXIS));
+        panelPrincipal.setBackground(CARD_COLOR);
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
         
-        JLabel lblTitulo = new JLabel("Editar Perfil");
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        JLabel lblTitulo = new JLabel("Editar tu perfil");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTitulo.setForeground(INSTAGRAM_PINK);
+        lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        header.add(lblTitulo, BorderLayout.WEST);
-        add(header, BorderLayout.NORTH);
+        JLabel lblDescripcion = new JLabel("@" + usuario.getUsername());
+        lblDescripcion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblDescripcion.setForeground(TEXT_SECONDARY);
+        lblDescripcion.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        JPanel centro = new JPanel();
-        centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
-        centro.setBackground(BACKGROUND_COLOR);
-        centro.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        panelPrincipal.add(lblTitulo);
+        panelPrincipal.add(Box.createVerticalStrut(4));
+        panelPrincipal.add(lblDescripcion);
+        panelPrincipal.add(Box.createVerticalStrut(24));
         
-        JPanel panelFoto = crearPanelFoto();
-        panelFoto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(panelFoto);
-        centro.add(Box.createVerticalStrut(20));
+        JLabel lblNombreLabel = new JLabel("Nombre completo");
+        lblNombreLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblNombreLabel.setForeground(TEXT_PRIMARY);
+        lblNombreLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblNombreLabel);
+        panelPrincipal.add(Box.createVerticalStrut(6));
         
-        JLabel lblBiografiaTitulo = new JLabel("Biografía");
-        lblBiografiaTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblBiografiaTitulo.setForeground(TEXT_PRIMARY);
-        lblBiografiaTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(lblBiografiaTitulo);
-        centro.add(Box.createVerticalStrut(8));
+        txtNombreCompleto = new JTextField();
+        txtNombreCompleto.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtNombreCompleto.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        txtNombreCompleto.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtNombreCompleto.setMaximumSize(new Dimension(400, 40));
+        panelPrincipal.add(txtNombreCompleto);
+        panelPrincipal.add(Box.createVerticalStrut(16));
         
-        txtBiografia = new JTextArea(4, 40);
+        JLabel lblEmailLabel = new JLabel("Correo electrónico");
+        lblEmailLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblEmailLabel.setForeground(TEXT_PRIMARY);
+        lblEmailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblEmailLabel);
+        panelPrincipal.add(Box.createVerticalStrut(6));
+        
+        txtEmail = new JTextField();
+        txtEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtEmail.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER_COLOR, 2),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+        txtEmail.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtEmail.setMaximumSize(new Dimension(400, 40));
+        panelPrincipal.add(txtEmail);
+        panelPrincipal.add(Box.createVerticalStrut(16));
+        
+        JLabel lblBiografiaLabel = new JLabel("Biografía");
+        lblBiografiaLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblBiografiaLabel.setForeground(TEXT_PRIMARY);
+        lblBiografiaLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPrincipal.add(lblBiografiaLabel);
+        panelPrincipal.add(Box.createVerticalStrut(6));
+        
+        txtBiografia = new JTextArea(4, 30);
         txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtBiografia.setForeground(TEXT_PRIMARY);
         txtBiografia.setLineWrap(true);
         txtBiografia.setWrapStyleWord(true);
         txtBiografia.setBorder(BorderFactory.createCompoundBorder(
             new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 8, 8, 8)
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
         
         JScrollPane scrollBiografia = new JScrollPane(txtBiografia);
         scrollBiografia.setBorder(null);
         scrollBiografia.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(scrollBiografia);
+        scrollBiografia.setMaximumSize(new Dimension(400, 100));
+        panelPrincipal.add(scrollBiografia);
+        panelPrincipal.add(Box.createVerticalStrut(24));
         
-        JLabel lblCaracteres = new JLabel("Máximo 150 caracteres");
-        lblCaracteres.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblCaracteres.setForeground(TEXT_SECONDARY);
-        lblCaracteres.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(lblCaracteres);
-        centro.add(Box.createVerticalStrut(20));
-        
-        JSeparator sep1 = new JSeparator();
-        sep1.setMaximumSize(new Dimension(500, 1));
-        sep1.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(sep1);
-        centro.add(Box.createVerticalStrut(20));
-        
-        JLabel lblDesactivarTitulo = new JLabel("Configuración de Cuenta");
-        lblDesactivarTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblDesactivarTitulo.setForeground(TEXT_PRIMARY);
-        lblDesactivarTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(lblDesactivarTitulo);
-        centro.add(Box.createVerticalStrut(8));
-        
-        chkDesactivarCuenta = new JCheckBox("Desactivar mi cuenta temporalmente");
-        chkDesactivarCuenta.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        chkDesactivarCuenta.setForeground(TEXT_PRIMARY);
-        chkDesactivarCuenta.setBackground(BACKGROUND_COLOR);
-        chkDesactivarCuenta.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(chkDesactivarCuenta);
-        
-        JLabel lblDesactivarInfo = new JLabel("<html>Al desactivar tu cuenta, tu perfil y publicaciones no serán visibles<br>" +
-                                             "para otros usuarios hasta que la reactives.</html>");
-        lblDesactivarInfo.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        lblDesactivarInfo.setForeground(TEXT_SECONDARY);
-        lblDesactivarInfo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        centro.add(lblDesactivarInfo);
-        
-        JScrollPane scrollCentro = new JScrollPane(centro);
-        scrollCentro.setBorder(null);
-        scrollCentro.getVerticalScrollBar().setUnitIncrement(16);
-        add(scrollCentro, BorderLayout.CENTER);
-        
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
-        footer.setBackground(BACKGROUND_COLOR);
-        footer.setBorder(new MatteBorder(1, 0, 0, 0, BORDER_COLOR));
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        panelBotones.setBackground(CARD_COLOR);
+        panelBotones.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelBotones.setMaximumSize(new Dimension(400, 40));
         
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnCancelar.setForeground(TEXT_PRIMARY);
-        btnCancelar.setBackground(BACKGROUND_COLOR);
-        btnCancelar.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(BORDER_COLOR, 2),
-            BorderFactory.createEmptyBorder(8, 20, 8, 20)
-        ));
+        btnCancelar.setBackground(CARD_COLOR);
+        btnCancelar.setBorder(new LineBorder(BORDER_COLOR, 2));
         btnCancelar.setFocusPainted(false);
         btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCancelar.setPreferredSize(new Dimension(100, 36));
         btnCancelar.addActionListener(e -> dispose());
         
-        JButton btnGuardar = new JButton("Guardar Cambios");
+        JButton btnGuardar = new JButton("Guardar");
         btnGuardar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnGuardar.setForeground(Color.WHITE);
         btnGuardar.setBackground(INSTAGRAM_PINK);
-        btnGuardar.setBorder(BorderFactory.createEmptyBorder(8, 24, 8, 24));
+        btnGuardar.setBorder(null);
         btnGuardar.setFocusPainted(false);
-        btnGuardar.setOpaque(true);
-        btnGuardar.setBorderPainted(false);
         btnGuardar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGuardar.setPreferredSize(new Dimension(100, 36));
         btnGuardar.addActionListener(e -> guardarCambios());
         
-        footer.add(btnCancelar);
-        footer.add(btnGuardar);
+        panelBotones.add(btnCancelar);
+        panelBotones.add(btnGuardar);
         
-        add(footer, BorderLayout.SOUTH);
+        panelPrincipal.add(panelBotones);
+        
+        add(panelPrincipal, BorderLayout.CENTER);
     }
     
-    private JPanel crearPanelFoto() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
-        panel.setBackground(BACKGROUND_COLOR);
-        panel.setMaximumSize(new Dimension(600, 180));
+    private void cargarDatos() {
+        txtNombreCompleto.setText(usuario.getNombreCompleto());
+        txtEmail.setText(usuario.getEmail());
         
-        lblFotoPreview = new JLabel();
-        lblFotoPreview.setPreferredSize(new Dimension(150, 150));
-        lblFotoPreview.setBorder(new LineBorder(BORDER_COLOR, 2));
-        lblFotoPreview.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
-        panelBotones.setBackground(BACKGROUND_COLOR);
-        
-        JLabel lblFotoTitulo = new JLabel("Foto de Perfil");
-        lblFotoTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblFotoTitulo.setForeground(TEXT_PRIMARY);
-        lblFotoTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        
-        btnCambiarFoto = new JButton("Cambiar Foto");
-        btnCambiarFoto.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btnCambiarFoto.setForeground(INSTAGRAM_PINK);
-        btnCambiarFoto.setBackground(BACKGROUND_COLOR);
-        btnCambiarFoto.setBorder(BorderFactory.createCompoundBorder(
-            new LineBorder(INSTAGRAM_PINK, 2),
-            BorderFactory.createEmptyBorder(8, 16, 8, 16)
-        ));
-        btnCambiarFoto.setFocusPainted(false);
-        btnCambiarFoto.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnCambiarFoto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnCambiarFoto.addActionListener(e -> seleccionarFoto());
-        
-        btnEliminarFoto = new JButton("Eliminar Foto");
-        btnEliminarFoto.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btnEliminarFoto.setForeground(INSTAGRAM_PINK);
-        btnEliminarFoto.setBackground(BACKGROUND_COLOR);
-        btnEliminarFoto.setBorderPainted(false);
-        btnEliminarFoto.setContentAreaFilled(false);
-        btnEliminarFoto.setFocusPainted(false);
-        btnEliminarFoto.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnEliminarFoto.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnEliminarFoto.addActionListener(e -> eliminarFoto());
-        
-        panelBotones.add(lblFotoTitulo);
-        panelBotones.add(Box.createVerticalStrut(12));
-        panelBotones.add(btnCambiarFoto);
-        panelBotones.add(Box.createVerticalStrut(8));
-        panelBotones.add(btnEliminarFoto);
-        
-        panel.add(lblFotoPreview);
-        panel.add(panelBotones);
-        
-        return panel;
-    }
-    
-    private void cargarDatosActuales() {
-        PerfilUsuario perfil = GestorPerfiles.cargarPerfil(usuario.getUsername());
-        
-        if (perfil.getBiografia() != null && !perfil.getBiografia().isEmpty()) {
-            txtBiografia.setText(perfil.getBiografia());
+        String biografia = usuario.getBiografia();
+        if (biografia != null && !biografia.isEmpty()) {
+            txtBiografia.setText(biografia);
         }
-        
-        rutaFotoActual = usuario.getRutaFotoPerfil();
-        mostrarFotoActual();
-        
-        chkDesactivarCuenta.setSelected(!usuario.isActivo());
-    }
-    
-    private void mostrarFotoActual() {
-        try {
-            if (rutaFotoActual != null && !rutaFotoActual.isEmpty()) {
-                ImageIcon iconoOriginal = new ImageIcon(rutaFotoActual);
-                Image img = iconoOriginal.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-                lblFotoPreview.setIcon(new ImageIcon(img));
-                lblFotoPreview.setText(null);
-            } else {
-                // Mostrar icono según género
-                String iconoPath = usuario.getGenero() == 'F' ? 
-                    "/Instagram/icons/icon_usuario_mujer.png" : 
-                    "/Instagram/icons/icon_usuario_hombre.png";
-                
-                ImageIcon avatarIcon = new ImageIcon(getClass().getResource(iconoPath));
-                Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-                lblFotoPreview.setIcon(new ImageIcon(img));
-                lblFotoPreview.setText(null);
-            }
-        } catch (Exception e) {
-            lblFotoPreview.setText("👤");
-            lblFotoPreview.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 80));
-            lblFotoPreview.setForeground(INSTAGRAM_PINK);
-        }
-    }
-    
-    private void seleccionarFoto() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Seleccionar foto de perfil");
-        fileChooser.setFileFilter(new FileNameExtensionFilter(
-            "Imágenes (*.png, *.jpg, *.jpeg)", "png", "jpg", "jpeg"
-        ));
-        
-        int resultado = fileChooser.showOpenDialog(this);
-        
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            fotoSeleccionada = fileChooser.getSelectedFile();
-            mostrarPreviewFoto();
-        }
-    }
-    
-    private void mostrarPreviewFoto() {
-        try {
-            ImageIcon iconoOriginal = new ImageIcon(fotoSeleccionada.getAbsolutePath());
-            Image img = iconoOriginal.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-            lblFotoPreview.setIcon(new ImageIcon(img));
-            lblFotoPreview.setText(null);
-            btnCambiarFoto.setText("Cambiar Foto");
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(
-                this,
-                "Error al cargar la imagen",
-                "Error",
-                JOptionPane.ERROR_MESSAGE
-            );
-        }
-    }
-    
-    private void eliminarFoto() {
-        fotoSeleccionada = null;
-        rutaFotoActual = null;
-        mostrarFotoActual();
-        btnCambiarFoto.setText("Agregar Foto");
     }
     
     private void guardarCambios() {
-        String biografia = txtBiografia.getText().trim();
+        String nuevoNombre = txtNombreCompleto.getText().trim();
+        String nuevoEmail = txtEmail.getText().trim();
+        String nuevaBiografia = txtBiografia.getText().trim();
         
-        // Validar longitud de biografía
-        if (biografia.length() > 150) {
+        if (nuevoNombre.isEmpty()) {
             JOptionPane.showMessageDialog(
                 this,
-                "La biografía no puede tener más de 150 caracteres",
+                "El nombre completo no puede estar vacío",
                 "Error",
-                JOptionPane.WARNING_MESSAGE
+                JOptionPane.ERROR_MESSAGE
             );
             return;
         }
         
-        GestorPerfiles.actualizarBiografia(usuario.getUsername(), biografia);
-        
-        if (fotoSeleccionada != null) {
-            boolean resultado = GestorPerfiles.actualizarAvatar(
-                usuario.getUsername(), 
-                fotoSeleccionada.getAbsolutePath()
+        if (nuevoEmail.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "El correo electrónico no puede estar vacío",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
             );
-            
-            if (resultado) {
-                PerfilUsuario perfil = GestorPerfiles.cargarPerfil(usuario.getUsername());
-                usuario.setRutaFotoPerfil(perfil.getRutaAvatar());
-            }
-        } else if (rutaFotoActual == null) {
-            usuario.setRutaFotoPerfil(null);
-            GestorPerfiles.actualizarAvatar(usuario.getUsername(), null);
+            return;
         }
+        
+        if (!nuevoEmail.contains("@") || !nuevoEmail.contains(".")) {
+            JOptionPane.showMessageDialog(
+                this,
+                "El correo electrónico no es válido",
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+        
+        usuario.setNombreCompleto(nuevoNombre);
+        usuario.setEmail(nuevoEmail);
+        usuario.setBiografia(nuevaBiografia);
         
         gestorUsuarios.actualizarUsuario(usuario);
         
-        boolean estadoAnterior = usuario.isActivo();
-        boolean estadoNuevo = !chkDesactivarCuenta.isSelected();
+        perfilActualizado = true;
         
-        boolean desactivando = estadoAnterior && !estadoNuevo;
-        
-        if (estadoAnterior != estadoNuevo) {
-            usuario.setActivo(estadoNuevo);
-            
-            if (estadoNuevo) {
-                gestorUsuarios.activarUsuario(usuario.getUsername());
-            } else {
-                gestorUsuarios.desactivarUsuario(usuario.getUsername());
-            }
-            
-            String mensaje = estadoNuevo ? 
-                "Tu cuenta ha sido reactivada correctamente." :
-                "Tu cuenta ha sido desactivada. Puedes reactivarla cuando quieras.";
-            
-            JOptionPane.showMessageDialog(
-                this,
-                mensaje,
-                "Estado de Cuenta",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-        }
-        
-        cambiosGuardados = true;
-        
-        if (!desactivando) {
-            JOptionPane.showMessageDialog(
-                this,
-                "¡Perfil actualizado exitosamente!",
-                "Éxito",
-                JOptionPane.INFORMATION_MESSAGE
-            );
-        }
+        JOptionPane.showMessageDialog(
+            this,
+            "Perfil actualizado exitosamente",
+            "Éxito",
+            JOptionPane.INFORMATION_MESSAGE
+        );
         
         dispose();
     }
     
-    private void configurarDialogo() {
-        setSize(600, 650);
-        setResizable(false);
+    private void configurarVentana() {
+        setSize(480, 520);
+        setMinimumSize(new Dimension(480, 520));
         setLocationRelativeTo(getParent());
+        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        setResizable(false);
     }
     
-    public boolean isCambiosGuardados() {
-        return cambiosGuardados;
+    public boolean isPerfilActualizado() {
+        return perfilActualizado;
     }
 }
