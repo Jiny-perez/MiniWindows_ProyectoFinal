@@ -359,6 +359,9 @@ public class VentanaLogin extends JFrame {
         return campo;
     }
     
+    /**
+     * LOGIN con manejo de cuenta desactivada + opción de reactivar.
+     */
     private void iniciarSesion() {
         String username = txtUsername.getText().trim();
         String password = new String(txtPassword.getPassword());
@@ -369,16 +372,49 @@ public class VentanaLogin extends JFrame {
             return;
         }
         
+        // 1) Intento normal (usuario activo)
         Usuario usuario = gestorUsuarios.validarLogin(username, password);
         
         if (usuario != null) {
+            // Usuario activo → entra normal
             gestorINSTA.setUsuarioActual(usuario);
             abrirInstagram(usuario);
-        } else {
-            JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", 
-                "Error", JOptionPane.ERROR_MESSAGE);
-            txtPassword.setText("");
+            return;
         }
+        
+        // 2) Verificar si el usuario existe, la contraseña es correcta
+        //    pero la cuenta está DESACTIVADA
+        Usuario usuarioGuardado = gestorUsuarios.obtenerUsuario(username);
+        if (usuarioGuardado != null 
+                && usuarioGuardado.getPassword().equals(password)
+                && !usuarioGuardado.isActivo()) {
+            
+            int opcion = JOptionPane.showConfirmDialog(
+                this,
+                "Tu cuenta está desactivada.\n¿Deseas reactivarla y volver a Instagram?",
+                "Cuenta desactivada",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            
+            if (opcion == JOptionPane.YES_OPTION) {
+                // Reactivar cuenta
+                usuarioGuardado.setActivo(true);
+                gestorUsuarios.actualizarUsuario(usuarioGuardado);
+                
+                gestorINSTA.setUsuarioActual(usuarioGuardado);
+                abrirInstagram(usuarioGuardado);
+            } else {
+                txtPassword.setText("");
+            }
+            
+            return;
+        }
+        
+        // 3) Si no cae en ninguno de los casos anteriores → credenciales malas
+        JOptionPane.showMessageDialog(this, "Usuario o contraseña incorrectos", 
+            "Error", JOptionPane.ERROR_MESSAGE);
+        txtPassword.setText("");
     }
     
     private void abrirInstagram(Usuario usuario) {

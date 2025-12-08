@@ -80,8 +80,22 @@ public class GestorINSTACompleto {
         return true;
     }
     
+    /**
+     * Timeline que ve el usuario actual.
+     * Aquí filtramos las publicaciones de cuentas DESACTIVADAS.
+     */
     public ArrayList<Publicacion> obtenerTimeline() {
-        return gestorInsta.obtenerTimeline();
+        ArrayList<Publicacion> base = gestorInsta.obtenerTimeline();
+        ArrayList<Publicacion> filtrado = new ArrayList<>();
+        
+        for (Publicacion p : base) {
+            Usuario autor = gestorUsuarios.obtenerUsuario(p.getUsername());
+            // Si el autor no existe o está activo, se muestra.
+            if (autor == null || autor.isActivo()) {
+                filtrado.add(p);
+            }
+        }
+        return filtrado;
     }
     
     public ArrayList<Publicacion> obtenerMisPublicaciones() {
@@ -94,7 +108,7 @@ public class GestorINSTACompleto {
     }
 
     /**
-     * NUEVO: Actualiza una publicación (likes, comentarios, etc.)
+     * Actualiza una publicación (likes, comentarios, etc.)
      * en el autor y en todos los timelines de sus seguidores.
      */
     public void actualizarPublicacion(Publicacion publicacionActualizada) {
@@ -166,7 +180,7 @@ public class GestorINSTACompleto {
         }
     }
     
-    // ================== BÚSQUEDA (IMPORTANTE PARA PanelExplorar) ==================
+    // ================== BÚSQUEDA ==================
     
     public ArrayList<Publicacion> buscarPorHashtag(String hashtag) {
         return gestorInsta.buscarPorHashtag(hashtag);

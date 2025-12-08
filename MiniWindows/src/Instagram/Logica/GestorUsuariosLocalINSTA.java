@@ -37,6 +37,9 @@ public class GestorUsuariosLocalINSTA {
         return true;
     }
     
+    /**
+     * Login normal: solo devuelve usuario si está ACTIVO.
+     */
     public Usuario validarLogin(String username, String password) {
         Usuario usuario = usuarios.get(username);
         
@@ -45,6 +48,30 @@ public class GestorUsuariosLocalINSTA {
         }
         
         return null;
+    }
+
+    /**
+     * Devuelve true si el usuario existe, la contraseña es correcta
+     * y la cuenta está desactivada.
+     */
+    public boolean esUsuarioInactivoConPasswordCorrecta(String username, String password) {
+        Usuario usuario = usuarios.get(username);
+        return usuario != null
+                && usuario.getPassword().equals(password)
+                && !usuario.isActivo();
+    }
+
+    /**
+     * Reactiva una cuenta (si existe y está inactiva).
+     */
+    public boolean reactivarUsuario(String username) {
+        Usuario usuario = usuarios.get(username);
+        if (usuario != null && !usuario.isActivo()) {
+            usuario.setActivo(true);
+            guardarUsuarios();
+            return true;
+        }
+        return false;
     }
     
     public Usuario obtenerUsuario(String username) {
