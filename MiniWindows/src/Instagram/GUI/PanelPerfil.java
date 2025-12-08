@@ -53,25 +53,43 @@ public class PanelPerfil extends JPanel {
         initComponents();
     }
     
-    private void initComponents() {
-        setLayout(new BorderLayout());
-        setBackground(BACKGROUND_COLOR);
-        
-        JPanel panelSuperior = crearPanelSuperior();
-        add(panelSuperior, BorderLayout.NORTH);
-        
-        panelPublicaciones = new JPanel();
-        panelPublicaciones.setLayout(new BoxLayout(panelPublicaciones, BoxLayout.Y_AXIS));
-        panelPublicaciones.setBackground(BACKGROUND_COLOR);
-        panelPublicaciones.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        scrollPane = new JScrollPane(panelPublicaciones);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        
-        add(scrollPane, BorderLayout.CENTER);
-    }
+   private void initComponents() {
+    setLayout(new BorderLayout());
+    setBackground(BACKGROUND_COLOR);
+
+    // panel superior (perfil)
+    JPanel panelSuperior = crearPanelSuperior();
+    add(panelSuperior, BorderLayout.NORTH);
+
+    // Contenedor central con padding
+    JPanel panelCentral = new JPanel(new BorderLayout());
+    panelCentral.setBackground(BACKGROUND_COLOR);
+    panelCentral.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+    // Título fijo (fuera del scroll)
+    JLabel lblTitulo = new JLabel("Publicaciones");
+    lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+    lblTitulo.setForeground(INSTAGRAM_PINK);
+    lblTitulo.setBorder(BorderFactory.createEmptyBorder(0, 6, 12, 0));
+    panelCentral.add(lblTitulo, BorderLayout.NORTH);
+
+    // panelPublicaciones = GRID DIRECTO (0 filas dinámicas, 3 columnas)
+    panelPublicaciones = new JPanel();
+    panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10)); // 3 columnas, gaps 10px
+    panelPublicaciones.setBackground(BACKGROUND_COLOR);
+
+    // JScrollPane con el grid directo como viewport view
+    scrollPane = new JScrollPane(panelPublicaciones,
+            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+            JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    scrollPane.setBorder(null);
+    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+    scrollPane.getViewport().setBackground(BACKGROUND_COLOR);
+    scrollPane.setBackground(BACKGROUND_COLOR);
+
+    panelCentral.add(scrollPane, BorderLayout.CENTER);
+    add(panelCentral, BorderLayout.CENTER);
+}
     
     private JPanel crearPanelSuperior() {
         JPanel panel = new JPanel();
@@ -240,40 +258,56 @@ public class PanelPerfil extends JPanel {
         }
     }
     
-    private void cargarPublicaciones() {
-        panelPublicaciones.removeAll();
-        
-        ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameDelPerfil);
-        
-        if (publicaciones.isEmpty()) {
-            JLabel lblVacio = new JLabel("No hay publicaciones para mostrar");
-            lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-            lblVacio.setForeground(TEXT_SECONDARY);
-            lblVacio.setAlignmentX(Component.CENTER_ALIGNMENT);
-            
-            panelPublicaciones.add(Box.createVerticalGlue());
-            panelPublicaciones.add(lblVacio);
-            panelPublicaciones.add(Box.createVerticalGlue());
-        } else {
-            JLabel lblTitulo = new JLabel("Publicaciones");
-            lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
-            lblTitulo.setForeground(INSTAGRAM_PINK);
-            lblTitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
-            panelPublicaciones.add(lblTitulo);
-            panelPublicaciones.add(Box.createVerticalStrut(16));
-            
-            for (Publicacion publicacion : publicaciones) {
-                TarjetaPublicacion tarjeta = new TarjetaPublicacion(publicacion, gestorINSTA, ventanaPrincipal);
-                panelPublicaciones.add(tarjeta);
-                panelPublicaciones.add(Box.createVerticalStrut(15));
+  private void cargarPublicaciones() {
+    panelPublicaciones.removeAll();
+
+    ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameDelPerfil);
+
+    if (publicaciones == null || publicaciones.isEmpty()) {
+        // si no hay publicaciones, mostramos mensaje centrado ocupando las 3 columnas
+        panelPublicaciones.setLayout(new GridLayout(1, 1));
+        JLabel lblVacio = new JLabel("No hay publicaciones para mostrar", SwingConstants.CENTER);
+        lblVacio.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        lblVacio.setForeground(TEXT_SECONDARY);
+        JPanel p = new JPanel(new BorderLayout());
+        p.setBackground(BACKGROUND_COLOR);
+        p.add(lblVacio, BorderLayout.CENTER);
+        panelPublicaciones.add(p);
+    } else {
+        // aseguramos layout GRID 3 columnas
+        panelPublicaciones.setLayout(new GridLayout(0, 3, 10, 10));
+
+        for (Publicacion publicacion : publicaciones) {
+            TarjetaPublicacion tarjeta = new TarjetaPublicacion(publicacion, gestorINSTA, ventanaPrincipal);
+
+            // Recomendado: que cada tarjeta tenga un tamaño preferido cuadrado (ajusta 240 a lo que prefieras)
+            tarjeta.setPreferredSize(new Dimension(240, 240));
+            tarjeta.setMaximumSize(new Dimension(240, 240));
+            tarjeta.setMinimumSize(new Dimension(240, 240));
+
+            // Asegurarse que la tarjeta pinta su fondo (si tiene transparencia)
+            tarjeta.setOpaque(true);
+            panelPublicaciones.add(tarjeta);
+        }
+
+        // Si la última fila queda incompleta, añadimos panels invisibles para mantener alineación
+        int resto = publicaciones.size() % 3;
+        if (resto != 0) {
+            int faltan = 3 - resto;
+            for (int i = 0; i < faltan; i++) {
+                JPanel filler = new JPanel();
+                filler.setBackground(BACKGROUND_COLOR);
+                panelPublicaciones.add(filler);
             }
         }
-        
-        panelPublicaciones.revalidate();
-        panelPublicaciones.repaint();
-        
-        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
+
+    panelPublicaciones.revalidate();
+    panelPublicaciones.repaint();
+
+    // volver al top del scroll
+    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+}
     
     private void mostrarPerfilNoEncontrado() {
         lblUsername.setText("Usuario no encontrado");
