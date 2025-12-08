@@ -135,6 +135,8 @@ public class DialogCrearPublicacion extends JDialog {
         btnSeleccionarImagen.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnSeleccionarImagen.setForeground(Color.WHITE);
         btnSeleccionarImagen.setBackground(INSTAGRAM_PINK);
+        btnSeleccionarImagen.setOpaque(true);
+        btnSeleccionarImagen.setBorderPainted(false);
         btnSeleccionarImagen.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         btnSeleccionarImagen.setFocusPainted(false);
         btnSeleccionarImagen.setCursor(new Cursor(Cursor.HAND_CURSOR));

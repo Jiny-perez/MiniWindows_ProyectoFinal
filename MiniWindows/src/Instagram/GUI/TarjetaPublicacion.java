@@ -290,6 +290,8 @@ public class TarjetaPublicacion extends JPanel {
         btnPublicar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnPublicar.setForeground(Color.WHITE);
         btnPublicar.setBackground(INSTAGRAM_PINK);
+        btnPublicar.setOpaque(true);
+        btnPublicar.setBorderPainted(false);
         btnPublicar.setBorder(BorderFactory.createEmptyBorder(6, 12, 6, 12));
         btnPublicar.setFocusPainted(false);
         btnPublicar.setCursor(new Cursor(Cursor.HAND_CURSOR));
