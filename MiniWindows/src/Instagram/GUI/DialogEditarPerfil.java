@@ -20,7 +20,7 @@ import java.io.File;
  * @author najma
  */
 public class DialogEditarPerfil extends JDialog {
-    
+   
     private Usuario usuario;
     private GestorUsuariosLocal gestorUsuarios;
     private boolean cambiosGuardados = false;
@@ -53,6 +53,7 @@ public class DialogEditarPerfil extends JDialog {
         setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
         
+        // Header
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BACKGROUND_COLOR);
         header.setBorder(new CompoundBorder(
@@ -67,16 +68,19 @@ public class DialogEditarPerfil extends JDialog {
         header.add(lblTitulo, BorderLayout.WEST);
         add(header, BorderLayout.NORTH);
         
+        // Centro - Contenido
         JPanel centro = new JPanel();
         centro.setLayout(new BoxLayout(centro, BoxLayout.Y_AXIS));
         centro.setBackground(BACKGROUND_COLOR);
         centro.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         
+        // Sección Foto de Perfil
         JPanel panelFoto = crearPanelFoto();
         panelFoto.setAlignmentX(Component.LEFT_ALIGNMENT);
         centro.add(panelFoto);
         centro.add(Box.createVerticalStrut(20));
         
+        // Sección Biografía
         JLabel lblBiografiaTitulo = new JLabel("Biografía");
         lblBiografiaTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblBiografiaTitulo.setForeground(TEXT_PRIMARY);
@@ -85,7 +89,7 @@ public class DialogEditarPerfil extends JDialog {
         centro.add(Box.createVerticalStrut(8));
         
         txtBiografia = new JTextArea(4, 40);
-        txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        txtBiografia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtBiografia.setForeground(TEXT_PRIMARY);
         txtBiografia.setLineWrap(true);
         txtBiografia.setWrapStyleWord(true);
@@ -106,6 +110,7 @@ public class DialogEditarPerfil extends JDialog {
         centro.add(lblCaracteres);
         centro.add(Box.createVerticalStrut(20));
         
+        // Sección Desactivar Cuenta
         JSeparator sep1 = new JSeparator();
         sep1.setMaximumSize(new Dimension(500, 1));
         sep1.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -138,6 +143,7 @@ public class DialogEditarPerfil extends JDialog {
         scrollCentro.getVerticalScrollBar().setUnitIncrement(16);
         add(scrollCentro, BorderLayout.CENTER);
         
+        // Footer - Botones
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footer.setBackground(BACKGROUND_COLOR);
         footer.setBorder(new MatteBorder(1, 0, 0, 0, BORDER_COLOR));
@@ -176,11 +182,13 @@ public class DialogEditarPerfil extends JDialog {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setMaximumSize(new Dimension(600, 180));
         
+        // Preview de foto
         lblFotoPreview = new JLabel();
         lblFotoPreview.setPreferredSize(new Dimension(150, 150));
         lblFotoPreview.setBorder(new LineBorder(BORDER_COLOR, 2));
         lblFotoPreview.setHorizontalAlignment(SwingConstants.CENTER);
         
+        // Panel de botones
         JPanel panelBotones = new JPanel();
         panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
         panelBotones.setBackground(BACKGROUND_COLOR);
@@ -227,15 +235,19 @@ public class DialogEditarPerfil extends JDialog {
     }
     
     private void cargarDatosActuales() {
+        // Cargar perfil
         PerfilUsuario perfil = GestorPerfiles.cargarPerfil(usuario.getUsername());
         
+        // Cargar biografía
         if (perfil.getBiografia() != null && !perfil.getBiografia().isEmpty()) {
             txtBiografia.setText(perfil.getBiografia());
         }
         
+        // Cargar foto de perfil
         rutaFotoActual = usuario.getRutaFotoPerfil();
         mostrarFotoActual();
         
+        // Estado de cuenta
         chkDesactivarCuenta.setSelected(!usuario.isActivo());
     }
     
@@ -299,13 +311,14 @@ public class DialogEditarPerfil extends JDialog {
     private void eliminarFoto() {
         fotoSeleccionada = null;
         rutaFotoActual = null;
-        mostrarFotoActual();
+        mostrarFotoActual(); // Volver al icono por defecto
         btnCambiarFoto.setText("Agregar Foto");
     }
     
     private void guardarCambios() {
         String biografia = txtBiografia.getText().trim();
         
+        // Validar longitud de biografía
         if (biografia.length() > 150) {
             JOptionPane.showMessageDialog(
                 this,
@@ -316,8 +329,10 @@ public class DialogEditarPerfil extends JDialog {
             return;
         }
         
+        // SIEMPRE guardar biografía (incluso si está desactivando)
         GestorPerfiles.actualizarBiografia(usuario.getUsername(), biografia);
         
+        // SIEMPRE guardar foto de perfil (incluso si está desactivando)
         if (fotoSeleccionada != null) {
             boolean resultado = GestorPerfiles.actualizarAvatar(
                 usuario.getUsername(), 
@@ -334,8 +349,10 @@ public class DialogEditarPerfil extends JDialog {
             GestorPerfiles.actualizarAvatar(usuario.getUsername(), null);
         }
         
+        // SIEMPRE actualizar usuario (para guardar ruta de foto en usuarios_insta.dat)
         gestorUsuarios.actualizarUsuario(usuario);
         
+        // Actualizar estado de cuenta (si cambió)
         boolean estadoAnterior = usuario.isActivo();
         boolean estadoNuevo = !chkDesactivarCuenta.isSelected();
         
@@ -364,6 +381,7 @@ public class DialogEditarPerfil extends JDialog {
         
         cambiosGuardados = true;
         
+        // Solo mostrar mensaje de éxito si NO está desactivando
         if (!desactivando) {
             JOptionPane.showMessageDialog(
                 this,

@@ -8,6 +8,7 @@ import GestorArchivos.SistemaArchivos;
 import GestorUsuario.Usuario;
 import ReproductorMusical.GUIReproductorMusica;
 import VisorImagenes.GUIVisorImagenes;
+import Instagram.GUI.VentanaLogin;
 
 import javax.swing.*;
 import java.awt.*;
@@ -111,7 +112,8 @@ public class VentanaPrincipal extends JFrame {
         JButton btnReproductor = crearBotonIcono("/Icons/icon_reproductor_de_musica.png", "Reproductor de Música", true);
         btnReproductor.addActionListener(e -> abrirReproductor());
         
-        JButton btnInsta = crearBotonIcono("/Icons/icon_instagram.png", "Instagram (Próximamente)", false);
+        JButton btnInsta = crearBotonIcono("/Icons/icon_instagram.png", "Instagram", true);
+        btnInsta.addActionListener(e -> abrirInstagram());
         
         panelCentro.add(btnNavegador);
         panelCentro.add(btnEditor);
@@ -326,6 +328,30 @@ public class VentanaPrincipal extends JFrame {
         }
     }
 
+    private void abrirInstagram() {
+        try {
+            // Abrir ventana de LOGIN de Instagram (el usuario debe hacer login en Instagram)
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    VentanaLogin loginInstagram = new VentanaLogin();
+                    loginInstagram.setVisible(true);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Error al iniciar Instagram: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al abrir Instagram: " + e.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
     private void abrirNavegador() {
         NavegadorArchivos navegador = new NavegadorArchivos(this, usuarioActual, sistema);
         navegador.setVisible(true);
@@ -377,7 +403,9 @@ public class VentanaPrincipal extends JFrame {
                         || n.endsWith(".gif") || n.endsWith(".bmp") || n.endsWith(".webp")) {
                     File f = new File(a.getRutaAbsoluta());
                     if (f.exists()) {
-                        new GUIVisorImagenes(f).setVisible(true);
+                        // ABRE EL NUEVO VISOR CON TEMA ROSA
+                        GUIVisorImagenes visor = new GUIVisorImagenes(f);
+                        visor.setVisible(true);
                         return;
                     }
                 }

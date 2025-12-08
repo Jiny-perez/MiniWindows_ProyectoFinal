@@ -1,4 +1,5 @@
 package Main;
+
 import MiniWindows.VentanaInicio;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;

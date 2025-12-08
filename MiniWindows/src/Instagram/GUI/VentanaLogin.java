@@ -40,10 +40,9 @@ public class VentanaLogin extends JFrame {
     private JButton btnRegistrar;
     private JButton btnIrALogin;
     
-    // Theme Rosa de Instagram
-    private static final Color INSTAGRAM_PINK = new Color(242, 80, 129); // #F25081
+    private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     private static final Color INSTAGRAM_PINK_HOVER = new Color(220, 60, 110);
-    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245); // Rosa pastel
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
@@ -87,7 +86,6 @@ public class VentanaLogin extends JFrame {
         ));
         container.setMaximumSize(new Dimension(350, 500));
         
-        // Logo Instagram
         JLabel lblLogo = new JLabel();
         try {
             ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram.icons/icon_insta.png"));
@@ -169,7 +167,6 @@ public class VentanaLogin extends JFrame {
         ));
         container.setMaximumSize(new Dimension(350, 700));
         
-        // Logo
         JLabel lblLogo = new JLabel();
         try {
             ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_insta.png"));
@@ -438,16 +435,13 @@ public class VentanaLogin extends JFrame {
             return;
         }
         
-        // Verificar si el usuario existe y la contraseña es correcta
         if (!gestorUsuarios.validarCredenciales(username, password)) {
             mostrarError("Username o contraseña incorrectos");
             return;
         }
         
-        // Obtener el usuario
         Usuario usuario = gestorUsuarios.obtenerUsuario(username);
         
-        // Si el usuario está desactivado, preguntar si desea reactivar
         if (!usuario.isActivo()) {
             int opcion = JOptionPane.showConfirmDialog(
                 this,
@@ -459,7 +453,7 @@ public class VentanaLogin extends JFrame {
             
             if (opcion == JOptionPane.YES_OPTION) {
                 gestorUsuarios.activarUsuario(username);
-                usuario = gestorUsuarios.obtenerUsuario(username); // Actualizar referencia
+                usuario = gestorUsuarios.obtenerUsuario(username);
                 JOptionPane.showMessageDialog(
                     this,
                     "¡Tu cuenta ha sido reactivada exitosamente!",
@@ -517,10 +511,8 @@ public class VentanaLogin extends JFrame {
         if (gestorUsuarios.registrarUsuario(username, nombreCompleto, genero, edad, password)) {
             Usuario usuario = gestorUsuarios.obtenerUsuario(username);
             
-            // Cerrar la ventana de login primero
             this.setVisible(false);
             
-            // Mostrar mensaje de éxito
             JOptionPane.showMessageDialog(
                 null, // Sin parent para que no dependa de la ventana cerrada
                 "¡Cuenta creada exitosamente! Bienvenido/a a Instagram, " + username + "!",
@@ -528,7 +520,6 @@ public class VentanaLogin extends JFrame {
                 JOptionPane.INFORMATION_MESSAGE
             );
             
-            // Abrir Instagram
             abrirInstagram(usuario);
         } else {
             mostrarError("Error al crear la cuenta. El username puede estar en uso.");
@@ -549,11 +540,9 @@ public class VentanaLogin extends JFrame {
                 VentanaINSTA ventanaINSTA = new VentanaINSTA(usuario, gestorINSTA, gestorUsuarios);
                 System.out.println("✓ VentanaINSTA creada");
                 
-                // Cerrar ventana de login
                 VentanaLogin.this.dispose();
                 System.out.println("✓ VentanaLogin cerrada");
                 
-                // Mostrar ventana principal
                 ventanaINSTA.setVisible(true);
                 System.out.println("✓ VentanaINSTA visible");
                 
@@ -576,7 +565,6 @@ public class VentanaLogin extends JFrame {
                     JOptionPane.ERROR_MESSAGE
                 );
                 
-                // Reabrir ventana de login si hay error
                 VentanaLogin nuevaVentana = new VentanaLogin();
                 nuevaVentana.setVisible(true);
             }
@@ -605,15 +593,9 @@ public class VentanaLogin extends JFrame {
         setTitle("Instagram - Iniciar Sesión");
         setSize(450, 650);
         setMinimumSize(new Dimension(450, 650));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
     }
     
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            VentanaLogin ventana = new VentanaLogin();
-            ventana.setVisible(true);
-        });
-    }
 }

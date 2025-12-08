@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * @author najma
  */
 public class PanelPerfil extends JPanel {
-    
+   
     private GestorINSTA gestorINSTA;
     private GestorUsuariosLocal gestorUsuarios;
     private String usernameVisualizando;
@@ -33,7 +33,8 @@ public class PanelPerfil extends JPanel {
     private JButton btnSeguir;
     private JScrollPane scrollPane;
     
-    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
+    // Theme Rosa de Instagram
+    private static final Color BACKGROUND_COLOR = new Color(255, 240, 245); // Rosa pastel
     private static final Color CARD_COLOR = Color.WHITE;
     private static final Color BORDER_COLOR = new Color(255, 192, 203);
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
@@ -93,22 +94,26 @@ public class PanelPerfil extends JPanel {
         panelSuperior.setBackground(CARD_COLOR);
         panelSuperior.setMaximumSize(new Dimension(800, 160));
         
-
+        // Foto de perfil con icono según género
+        // Foto de perfil con icono según género o foto personalizada
         JLabel fotoPerfil = new JLabel();
         try {
+            // Obtener el usuario para saber su género y foto
             Instagram.Modelo.Usuario usuario = gestorUsuarios.obtenerUsuario(usernameVisualizando);
             
             if (usuario != null && usuario.tieneFotoPersonalizada()) {
+                // Mostrar foto personalizada CIRCULAR
                 ImageIcon avatarIcon = new ImageIcon(usuario.getRutaFotoPerfil());
                 Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                 fotoPerfil.setIcon(crearImagenCircular(img, 150));
             } else if (usuario != null) {
-                String iconoPath = "/Instagram/icons/icon_perfil.png"; // Default
+                // Mostrar icono según género CIRCULAR
+                String iconoPath = "/Instagram.icons/icon_perfil.png"; // Default
                 
                 if (usuario.getGenero() == 'F') {
-                    iconoPath = "/Instagram/icons/icon_usuario_mujer.png";
+                    iconoPath = "/Instagram.icons/icon_usuario_mujer.png";
                 } else if (usuario.getGenero() == 'M') {
-                    iconoPath = "/Instagram/icons/icon_usuario_hombre.png";
+                    iconoPath = "/Instagram.icons/icon_usuario_hombre.png";
                 }
                 
                 ImageIcon avatarIcon = new ImageIcon(getClass().getResource(iconoPath));
@@ -116,8 +121,9 @@ public class PanelPerfil extends JPanel {
                 fotoPerfil.setIcon(crearImagenCircular(img, 150));
             }
         } catch (Exception e) {
+            // Fallback: usar icono genérico CIRCULAR
             try {
-                ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_perfil.png"));
+                ImageIcon avatarIcon = new ImageIcon(getClass().getResource("/Instagram.icons/icon_perfil.png"));
                 Image img = avatarIcon.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
                 fotoPerfil.setIcon(crearImagenCircular(img, 150));
             } catch (Exception e2) {
@@ -140,6 +146,7 @@ public class PanelPerfil extends JPanel {
         panelInfo.add(lblUsername);
         panelInfo.add(Box.createVerticalStrut(10));
         
+        // Obtener y mostrar nombre completo y biografía
         Instagram.Modelo.Usuario usuarioInfo = gestorUsuarios.obtenerUsuario(usernameVisualizando);
         Instagram.Modelo.PerfilUsuario perfilInfo = Instagram.Logica.GestorPerfiles.cargarPerfil(usernameVisualizando);
         
@@ -151,6 +158,7 @@ public class PanelPerfil extends JPanel {
             panelInfo.add(lblNombre);
         }
         
+        // Mostrar biografía si existe
         if (perfilInfo != null && perfilInfo.getBiografia() != null && !perfilInfo.getBiografia().trim().isEmpty()) {
             panelInfo.add(Box.createVerticalStrut(8));
             
@@ -162,10 +170,12 @@ public class PanelPerfil extends JPanel {
             txtBiografia.setWrapStyleWord(true);
             txtBiografia.setEditable(false);
             
+            // Establecer ancho primero para calcular líneas correctamente
             txtBiografia.setSize(new Dimension(400, Short.MAX_VALUE));
             
+            // Calcular altura preferida según el contenido
             int alturaPreferida = txtBiografia.getPreferredSize().height;
-            int alturaNecesaria = Math.min(alturaPreferida + 10, 300);
+            int alturaNecesaria = Math.min(alturaPreferida + 10, 300); // Max 300px
             
             txtBiografia.setPreferredSize(new Dimension(400, alturaNecesaria));
             txtBiografia.setMaximumSize(new Dimension(400, alturaNecesaria));
@@ -175,6 +185,7 @@ public class PanelPerfil extends JPanel {
         
         panelInfo.add(Box.createVerticalStrut(20));
         
+        // Botón editar perfil solo para el usuario actual
         if (usernameVisualizando.equals(gestorINSTA.getUsernameActual())) {
             JButton btnEditarPerfil = new JButton("Editar perfil");
             btnEditarPerfil.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -196,9 +207,11 @@ public class PanelPerfil extends JPanel {
                 );
                 dialog.setVisible(true);
                 
+                // Si se guardaron cambios, actualizar la vista
                 if (dialog.isCambiosGuardados()) {
                     actualizarContenido();
                     
+                    // Si desactivó la cuenta, cerrar sesión
                     if (!usuarioActual.isActivo()) {
                         JOptionPane.showMessageDialog(
                             this,
@@ -219,6 +232,7 @@ public class PanelPerfil extends JPanel {
             panelInfo.add(btnEditarPerfil);
         }
         
+        // Botón seguir solo si no es el usuario actual
         else {
             boolean estaSiguiendo = gestorINSTA.estaSiguiendo(usernameVisualizando);
             
@@ -327,11 +341,13 @@ public class PanelPerfil extends JPanel {
     }
     
     public void actualizarContenido() {
-        int headerIndex = 0;
+        // Actualizar header (foto de perfil y biografía)
+        int headerIndex = 0; // El header es el primer componente
         panelPrincipal.remove(headerIndex);
         panelHeader = crearHeader();
         panelPrincipal.add(panelHeader, headerIndex);
         
+        // Actualizar publicaciones
         panelPublicaciones.removeAll();
         
         ArrayList<Publicacion> publicaciones = gestorINSTA.obtenerPublicacionesDeUsuario(usernameVisualizando);
@@ -356,6 +372,7 @@ public class PanelPerfil extends JPanel {
         
         actualizarEstadisticas();
         
+        // Refrescar ambos paneles
         panelPrincipal.revalidate();
         panelPrincipal.repaint();
         panelPublicaciones.revalidate();
@@ -370,9 +387,10 @@ public class PanelPerfil extends JPanel {
         panelVacio.setBackground(BACKGROUND_COLOR);
         panelVacio.setBorder(BorderFactory.createEmptyBorder(60, 0, 60, 0));
         
+        // Icono de fotos
         JLabel lblIconoFotos = new JLabel();
         try {
-            ImageIcon iconoFotos = new ImageIcon(getClass().getResource("/Instagram/icons/icon_fotos.png"));
+            ImageIcon iconoFotos = new ImageIcon(getClass().getResource("/Instagram.icons/icon_fotos.png"));
             Image img = iconoFotos.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
             lblIconoFotos.setIcon(new ImageIcon(img));
         } catch (Exception e) {
@@ -382,12 +400,12 @@ public class PanelPerfil extends JPanel {
         }
         lblIconoFotos.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblTitulo = new JLabel("Fotos Compartidas");
+        JLabel lblTitulo = new JLabel("Share Photos");
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitulo.setForeground(TEXT_PRIMARY);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel lblMensaje = new JLabel("Cuando compartas fotos, aparecerán en tu perfil");
+        JLabel lblMensaje = new JLabel("When you share photos, they will appear on your profile.");
         lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblMensaje.setForeground(TEXT_SECONDARY);
         lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -405,14 +423,18 @@ public class PanelPerfil extends JPanel {
         BufferedImage buffered = new BufferedImage(diametro, diametro, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = buffered.createGraphics();
         
+        // Activar antialiasing para bordes suaves
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         
+        // Crear clip circular
         Ellipse2D.Double circle = new Ellipse2D.Double(0, 0, diametro, diametro);
         g2.setClip(circle);
         
+        // Dibujar imagen dentro del círculo
         g2.drawImage(img, 0, 0, diametro, diametro, null);
         g2.dispose();
         
         return new ImageIcon(buffered);
     }
 }
+ 
