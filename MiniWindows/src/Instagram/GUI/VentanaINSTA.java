@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
@@ -18,7 +14,7 @@ import javax.swing.border.*;
  * @author najma
  */
 public class VentanaINSTA extends JFrame {
-    
+
     private GestorINSTACompleto gestorINSTA;
     private GestorUsuariosLocalINSTA gestorUsuarios;
     private GestorNotificaciones gestorNotificaciones;
@@ -27,13 +23,15 @@ public class VentanaINSTA extends JFrame {
     private JPanel panelLateral;
     private JPanel panelContenido;
     private CardLayout cardLayout;
-    
     private PanelTimeline panelTimeline;
     private PanelExplorar panelExplorar;
     private PanelPerfil panelPerfil;
     private PanelMensajes panelMensajes;
-    private PanelNotificaciones panelNotificaciones;
+   
+    private JLabel lblBadgeNotificaciones;
+    private JPanel panelCabecera;
     
+    private PanelNotificaciones panelNotificaciones;
     private static final Color INSTAGRAM_PINK = new Color(242, 80, 129);
     private static final Color BACKGROUND_COLOR = new Color(255, 240, 245);
     private static final Color SIDEBAR_COLOR = Color.WHITE;
@@ -41,53 +39,74 @@ public class VentanaINSTA extends JFrame {
     private static final Color TEXT_PRIMARY = new Color(38, 38, 38);
     private static final Color TEXT_SECONDARY = new Color(142, 142, 142);
     private static final Color HOVER_COLOR = new Color(255, 230, 240);
-    
+
     public VentanaINSTA(Usuario usuario, GestorINSTACompleto gestor, GestorUsuariosLocalINSTA gestorUsuariosLocal) {
         this.usuarioActual = usuario;
         this.gestorINSTA = gestor;
         this.gestorUsuarios = gestorUsuariosLocal;
         this.gestorNotificaciones = new GestorNotificaciones();
-        
-        panelNotificaciones = new PanelNotificaciones(gestorINSTA, gestorNotificaciones, this);
         initComponents();
         configurarVentana();
     }
-    
+
     private void initComponents() {
         setLayout(new BorderLayout());
         getContentPane().setBackground(BACKGROUND_COLOR);
-        
+
+        initHeader();
+
         crearPanelLateral();
-        
         cardLayout = new CardLayout();
         panelContenido = new JPanel(cardLayout);
         panelContenido.setBackground(BACKGROUND_COLOR);
-        
+
         panelTimeline = new PanelTimeline(gestorINSTA, this);
         panelExplorar = new PanelExplorar(gestorINSTA, gestorUsuarios, this);
         panelPerfil = new PanelPerfil(gestorINSTA, gestorUsuarios, usuarioActual.getUsername(), this);
         panelMensajes = new PanelMensajes(gestorINSTA, gestorUsuarios, this);
         panelNotificaciones = new PanelNotificaciones(gestorINSTA, gestorNotificaciones, this);
-        
+
         panelContenido.add(panelTimeline, "TIMELINE");
         panelContenido.add(panelExplorar, "EXPLORAR");
         panelContenido.add(panelPerfil, "PERFIL");
         panelContenido.add(panelMensajes, "MENSAJES");
         panelContenido.add(panelNotificaciones, "NOTIFICACIONES");
-        
+
+        add(panelCabecera, BorderLayout.NORTH); // cabecera arriba
         add(panelLateral, BorderLayout.WEST);
         add(panelContenido, BorderLayout.CENTER);
-        
+
         SwingUtilities.invokeLater(() -> mostrarTimeline());
     }
-    
+
+    private void initHeader() {
+        panelCabecera = new JPanel(new BorderLayout());
+        panelCabecera.setBackground(Color.WHITE);
+        panelCabecera.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+
+        JLabel lblTitulo = new JLabel("Instagram");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitulo.setForeground(TEXT_PRIMARY);
+
+        lblBadgeNotificaciones = new JLabel();
+        lblBadgeNotificaciones.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblBadgeNotificaciones.setOpaque(true);
+        lblBadgeNotificaciones.setBackground(INSTAGRAM_PINK);
+        lblBadgeNotificaciones.setForeground(Color.WHITE);
+        lblBadgeNotificaciones.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
+        lblBadgeNotificaciones.setVisible(false); // empieza oculto
+        lblBadgeNotificaciones.setHorizontalAlignment(SwingConstants.CENTER);
+
+        panelCabecera.add(lblTitulo, BorderLayout.WEST);
+        panelCabecera.add(lblBadgeNotificaciones, BorderLayout.EAST);
+    }
+
     private void crearPanelLateral() {
         panelLateral = new JPanel();
         panelLateral.setLayout(new BoxLayout(panelLateral, BoxLayout.Y_AXIS));
         panelLateral.setBackground(SIDEBAR_COLOR);
         panelLateral.setBorder(new MatteBorder(0, 0, 0, 1, BORDER_COLOR));
         panelLateral.setPreferredSize(new Dimension(245, 600));
-        
         JLabel lblLogo = new JLabel();
         try {
             ImageIcon logoIcon = new ImageIcon(getClass().getResource("/Instagram/icons/icon_insta.png"));
@@ -101,34 +120,29 @@ public class VentanaINSTA extends JFrame {
         lblLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
         lblLogo.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 20));
         panelLateral.add(lblLogo);
-        
         panelLateral.add(crearBotonNavegacion("Inicio", "/Instagram/icons/icon_inicio.png", e -> mostrarTimeline()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(crearBotonNavegacion("Explorar", "/Instagram/icons/icon_explorar.png", e -> mostrarExplorar()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(crearBotonNavegacion("Mensajes", "/Instagram/icons/icon_mensajeria.png", e -> mostrarMensajes()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(crearBotonNavegacion("Notificaciones", "/Instagram/icons/icon_notificacion.png", e -> mostrarNotificaciones()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(crearBotonNavegacion("Crear", "/Instagram/icons/icon_crear.png", e -> crearPublicacion()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(crearBotonNavegacion("Perfil", "/Instagram/icons/icon_perfil.png", e -> mostrarPerfil()));
         panelLateral.add(Box.createVerticalStrut(5));
-        
         panelLateral.add(Box.createVerticalGlue());
-        
         panelLateral.add(crearBotonNavegacion("Cerrar Sesión", "/Instagram/icons/icon_cerrar_sesion.png", e -> cerrarSesion()));
         panelLateral.add(Box.createVerticalStrut(20));
     }
-    
+
+    public PanelNotificaciones getPanelNotificaciones() {
+        return panelNotificaciones;
+    }
+
     private JButton crearBotonNavegacion(String texto, String rutaIcono, ActionListener action) {
         JButton btn = new JButton(texto);
-        
         try {
             ImageIcon icono = new ImageIcon(getClass().getResource(rutaIcono));
             Image img = icono.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
@@ -138,7 +152,6 @@ public class VentanaINSTA extends JFrame {
         } catch (Exception e) {
             System.err.println("No se pudo cargar el icono: " + rutaIcono);
         }
-        
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
         btn.setMaximumSize(new Dimension(225, 50));
         btn.setPreferredSize(new Dimension(225, 50));
@@ -149,78 +162,72 @@ public class VentanaINSTA extends JFrame {
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
                 btn.setBackground(HOVER_COLOR);
             }
-            
-            @Override
+
             public void mouseExited(MouseEvent e) {
                 btn.setBackground(SIDEBAR_COLOR);
             }
         });
-        
         btn.addActionListener(action);
-        
         return btn;
     }
-    
+
     public void mostrarTimeline() {
         cardLayout.show(panelContenido, "TIMELINE");
         panelTimeline.actualizarContenido();
     }
-    
+
     public void mostrarExplorar() {
         cardLayout.show(panelContenido, "EXPLORAR");
         panelExplorar.actualizarContenido();
     }
-    
+
     public void mostrarPerfil() {
         cardLayout.show(panelContenido, "PERFIL");
         panelPerfil.actualizarContenido();
     }
-    
+
     public void mostrarMensajes() {
         cardLayout.show(panelContenido, "MENSAJES");
         panelMensajes.actualizarContenido();
     }
-    
+
     public void mostrarNotificaciones() {
         cardLayout.show(panelContenido, "NOTIFICACIONES");
         panelNotificaciones.actualizarContenido();
+        actualizarBadgeNotificaciones(gestorNotificaciones.contarNoLeidas(usuarioActual.getUsername()));
     }
-    
+
     private void crearPublicacion() {
         DialogCrearPublicacion dialog = new DialogCrearPublicacion(this, gestorINSTA);
         dialog.setVisible(true);
-        
         if (dialog.isPublicacionCreada()) {
             mostrarTimeline();
         }
     }
-    
+
     private void cerrarSesion() {
         int opcion = JOptionPane.showConfirmDialog(
-            this,
-            "¿Estás seguro de que deseas cerrar sesión?",
-            "Cerrar Sesión",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
+                this,
+                "¿Estás seguro de que deseas cerrar sesión?",
+                "Cerrar Sesión",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
         );
-        
         if (opcion == JOptionPane.YES_OPTION) {
             gestorINSTA.guardarDatos();
             dispose();
-            
             SwingUtilities.invokeLater(() -> {
                 VentanaLogin ventanaLogin = new VentanaLogin();
                 ventanaLogin.setVisible(true);
             });
         }
     }
-    
+
     private void configurarVentana() {
         setTitle("Instagram - @" + usuarioActual.getUsername());
         setSize(1200, 800);
@@ -228,23 +235,39 @@ public class VentanaINSTA extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
     }
-    
+
     public void mostrarPerfilDeUsuario(String username) {
         PanelPerfil perfilUsuario = new PanelPerfil(gestorINSTA, gestorUsuarios, username, this);
         panelContenido.add(perfilUsuario, "PERFIL_" + username);
         cardLayout.show(panelContenido, "PERFIL_" + username);
         perfilUsuario.actualizarContenido();
     }
-    
+
     public Usuario getUsuarioActual() {
         return usuarioActual;
     }
-    
+
     public GestorINSTACompleto getGestorINSTA() {
         return gestorINSTA;
     }
-    
+
     public GestorNotificaciones getGestorNotificaciones() {
         return gestorNotificaciones;
+    }
+
+    public void actualizarBadgeNotificaciones(final int cantidad) {
+        SwingUtilities.invokeLater(() -> {
+            if (lblBadgeNotificaciones == null) {
+                return;
+            }
+            if (cantidad > 0) {
+                lblBadgeNotificaciones.setText(String.valueOf(cantidad));
+                lblBadgeNotificaciones.setVisible(true);
+            } else {
+                lblBadgeNotificaciones.setVisible(false);
+            }
+            lblBadgeNotificaciones.revalidate();
+            lblBadgeNotificaciones.repaint();
+        });
     }
 }

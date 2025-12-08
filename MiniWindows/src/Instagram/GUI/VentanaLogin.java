@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Instagram.GUI;
 
 import Instagram.Modelo.Usuario;
@@ -9,7 +5,6 @@ import Instagram.Logica.GestorINSTACompleto;
 import Instagram.Logica.GestorUsuariosLocalINSTA;
 import Instagram.Logica.GestorArchivosUsuarioINSTA;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 

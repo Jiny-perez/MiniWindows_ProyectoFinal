@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Instagram.Modelo;
 
 import java.io.Serializable;
@@ -115,7 +111,7 @@ public class Notificacion implements Serializable {
         this.leida = leida;
     }
     
-    @Override
+    
     public String toString() {
         return "Notificacion{" +
                 "id='" + id + '\'' +
