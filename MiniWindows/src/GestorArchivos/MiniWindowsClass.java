@@ -3,6 +3,7 @@ package GestorArchivos;
 import GestorUsuario.GestorUsuarios;
 import GestorUsuario.Usuario;
 import Excepciones.*;
+import java.io.File;
 
 /**
  *
@@ -84,8 +85,8 @@ public class MiniWindowsClass {
     }
 
     public void reiniciarSistema() {
-        java.io.File archivoSistema = new java.io.File("sistema_archivos.sop");
-        java.io.File archivoUsuarios = new java.io.File("usuarios.sop");
+       File archivoSistema = new java.io.File("sistema_archivos.sop");
+        File archivoUsuarios = new java.io.File("usuarios.sop");
 
         if (archivoSistema.exists()) {
             archivoSistema.delete();

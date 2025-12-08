@@ -447,11 +447,13 @@ public class SistemaArchivos implements Serializable {
 
         try {
             Files.copy(archivoOrigen.toPath(), destino.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
-        } catch (IOException e) { }
+        } catch (IOException e) {
+        }
 
         try {
             destino.setLastModified(System.currentTimeMillis());
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     public void copiarCarpetaRecursiva(String rutaFisicaOrigen, String nombreCarpetaDestino)
@@ -507,9 +509,30 @@ public class SistemaArchivos implements Serializable {
     public void guardar() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(ARCHIVO_SISTEMA))) {
             oos.writeObject(this.rutaActualRelativa);
+            oos.writeObject(listadoRelativoCompleto());
         } catch (IOException e) {
-            System.err.println("ERROR: no se pudo guardar archivo de sistema: " + e.getMessage());
         }
+    }
+
+    private ArrayList<String> listadoRelativoCompleto() {
+        ArrayList<String> lista = new ArrayList<>();
+        File base = new File(BASE_FISICO);
+        if (!base.exists()) {
+            return lista;
+        }
+        try {
+            Files.walk(base.toPath())
+                    .forEach(p -> {
+                        String full = p.toFile().getAbsolutePath();
+                        String rel = full.substring(base.getAbsolutePath().length());
+                        if (rel.startsWith(File.separator)) {
+                            rel = rel.substring(1);
+                        }
+                        lista.add(rel.replace(File.separatorChar, '/'));
+                    });
+        } catch (IOException ignored) {
+        }
+        return lista;
     }
 
     public boolean cargar() {
